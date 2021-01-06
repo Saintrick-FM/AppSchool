@@ -1,8 +1,6 @@
 <template>
-  <v-container>
-    <!-- Contenu a afficher comme main-->
-    <h1>{{ msg }}</h1>
-  </v-container>
+  <!-- Contenu a afficher comme main-->
+  <h1>Partie squelette</h1>
 </template>
 
 <script>

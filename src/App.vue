@@ -50,9 +50,10 @@
 
     <v-main>
       <v-container fluid>
-        <Main-Home msg="Bienvenu dans le mainHome" />
-        <login />
-        <router-link :to="{ path: '/about' }">About</router-link>
+        <router-link :to="'/about'">About</router-link>|
+        <router-link :to="'/login'">Login</router-link>|
+        <router-link :to="'/'">MainHome</router-link>
+        <router-view></router-view>
 
         <!-- If using vue-router 
       <router-view></router-view>-->
@@ -62,16 +63,8 @@
 </template>
 
 <script>
-import MainHome from "@/components/MainHome.vue";
-import login from "@/components/Login.vue";
-
 export default {
   name: "App",
-
-  components: {
-    MainHome,
-    login,
-  },
 
   data: () => ({
     //

@@ -5,7 +5,7 @@
     <template v-slot:default="{ hover }">
       <v-card class="mx-auto" max-width="344">
         <v-img src="https://cdn.vuetifyjs.com/images/cards/forest-art.jpg"></v-img>
-        <h1>{{ msg }}</h1>
+        <h1>Bienvenu dans le mainHome</h1>
 
         <v-card-text>
           <h2 class="title primary--text">Magento Forests</h2>
@@ -41,8 +41,5 @@ export default {
   data: () => ({
     overlay: false,
   }),
-  props: {
-    msg: String,
-  },
 };
 </script>
