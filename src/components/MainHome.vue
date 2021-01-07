@@ -1,6 +1,7 @@
 <template>
   <!-- Contenu a afficher comme main-->
-
+  <!-- <v-container> -->
+  <!-- <squelette /> -->
   <v-hover>
     <template v-slot:default="{ hover }">
       <v-card class="mx-auto" max-width="344">
@@ -33,11 +34,14 @@
       </v-card>
     </template>
   </v-hover>
+  <!-- </v-container> -->
 </template>
 
 <script>
+// import squelette from "@/components/Squelette";
 export default {
   name: "MainHome",
+  // components: { squelette },
   data: () => ({
     overlay: false,
   }),

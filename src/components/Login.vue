@@ -1,5 +1,6 @@
 <template>
   <v-container fluid>
+    <squelette></squelette>
     <v-row class="text-center">
       <v-col cols="3" sm="2" md="3"></v-col>
       <v-col cols="12" sm="8" md="6">
@@ -56,7 +57,9 @@
 </template>
 
 <script>
+import squelette from "@/components/Squelette";
 export default {
+  components: { squelette },
   data: () => ({
     title: "Login",
     valid: true,

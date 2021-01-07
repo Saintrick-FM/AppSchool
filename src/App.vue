@@ -42,10 +42,17 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar app>
+    <v-app-bar class="appbar" app>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-
-      <v-toolbar-title>Application</v-toolbar-title>
+      <v-toolbar>
+        <v-toolbar-title>Ecole Saint Martin</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-toolbar-items>
+          <v-btn flat route to="/about">Enseignants</v-btn>
+          <v-btn flat route to="/">Elèves</v-btn>
+          <v-btn flat route to="/login">Personnel</v-btn>
+        </v-toolbar-items>
+      </v-toolbar>
     </v-app-bar>
 
     <v-main>
@@ -73,44 +80,37 @@ export default {
       {
         action: "mdi-ticket",
         items: [{ title: "List Item" }],
-        title: "Attractions",
+        title: "About",
+        route: "/about",
       },
       {
-        action: "mdi-silverware-fork-knife",
+        action: "mdi-login",
         active: true,
         items: [
-          { title: "Breakfast & brunch" },
-          { title: "New American" },
-          { title: "Sushi" },
+          { title: "Administration" },
+          { title: "Students" },
+          { title: "Teachers" },
         ],
-        title: "Dining",
+        title: "login",
       },
       {
-        action: "mdi-school",
+        action: "mdi-home",
         items: [{ title: "List Item" }],
-        title: "Education",
+        title: "Main Home",
+        route: "/",
       },
       {
         action: "mdi-run",
         items: [{ title: "List Item" }],
-        title: "Family",
-      },
-      {
-        action: "mdi-bottle-tonic-plus",
-        items: [{ title: "List Item" }],
-        title: "Health",
-      },
-      {
-        action: "mdi-content-cut",
-        items: [{ title: "List Item" }],
-        title: "Office",
-      },
-      {
-        action: "mdi-tag",
-        items: [{ title: "List Item" }],
-        title: "Promotions",
+        title: "True Login",
+        route: "/login",
       },
     ],
   }),
 };
 </script>
+<style lang="css">
+.appbar {
+  color: #1976d2;
+}
+</style>
