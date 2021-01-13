@@ -1,7 +1,6 @@
 <template>
   <v-app id="inspire">
     <v-navigation-drawer v-model="drawer" app>
-      <!--  -->
       <v-list>
         <v-list-item class="px-2">
           <v-list-item-avatar>
@@ -18,7 +17,7 @@
       </v-list>
       <v-divider></v-divider>
 
-      <!-- Menu de gauche -->
+      <!-- Menu de gauche 
       <v-list nav dense>
         <v-list-group
           v-for="item in items"
@@ -39,7 +38,8 @@
             </v-list-item-content>
           </v-list-item>
         </v-list-group>
-      </v-list>
+      </v-list>-->
+      <RubriqueNav />
     </v-navigation-drawer>
 
     <v-app-bar class="appbar" app>
@@ -49,16 +49,23 @@
         <v-spacer></v-spacer>
         <v-toolbar-items>
           <v-tooltip bottom>
-            <v-btn flat route to="/about" slot="activator">Enseignants</v-btn>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn flat route to="/about" v-bind="attrs" v-on="on"> Enseignants </v-btn>
+            </template>
             <span>Savoir tout à propos des enseignants</span>
           </v-tooltip>
+
           <v-tooltip bottom>
-            <v-btn flat route to="/" slot="activator">Elèves</v-btn>
-            <span>Savoir tout à propos des élèves</span>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn flat route to="/" v-bind="attrs" v-on="on"> Elèves </v-btn>
+            </template>
+            <span>Savoir tout à propos des Elèves</span>
           </v-tooltip>
-          <v-tooltip>
-            <v-btn flat route to="/login" slot="activator">Personnel</v-btn>
-            <span>Savoir tout à propos du personnel</span>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn flat route to="/login" v-bind="attrs" v-on="on"> Personnel </v-btn>
+            </template>
+            <span>Savoir tout à propos des Personnel</span>
           </v-tooltip>
         </v-toolbar-items>
       </v-toolbar>
@@ -79,8 +86,12 @@
 </template>
 
 <script>
+import RubriqueNav from "@/components/RubriqueNav";
 export default {
   name: "App",
+  components: {
+    RubriqueNav,
+  },
 
   data: () => ({
     //
