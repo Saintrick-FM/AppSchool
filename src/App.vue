@@ -48,9 +48,18 @@
         <v-toolbar-title>Ecole Saint Martin</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-toolbar-items>
-          <v-btn flat route to="/about">Enseignants</v-btn>
-          <v-btn flat route to="/">Elèves</v-btn>
-          <v-btn flat route to="/login">Personnel</v-btn>
+          <v-tooltip bottom>
+            <v-btn flat route to="/about" slot="activator">Enseignants</v-btn>
+            <span>Savoir tout à propos des enseignants</span>
+          </v-tooltip>
+          <v-tooltip bottom>
+            <v-btn flat route to="/" slot="activator">Elèves</v-btn>
+            <span>Savoir tout à propos des élèves</span>
+          </v-tooltip>
+          <v-tooltip>
+            <v-btn flat route to="/login" slot="activator">Personnel</v-btn>
+            <span>Savoir tout à propos du personnel</span>
+          </v-tooltip>
         </v-toolbar-items>
       </v-toolbar>
     </v-app-bar>
