@@ -65,7 +65,7 @@
             <template v-slot:activator="{ on, attrs }">
               <v-btn flat route to="/login" v-bind="attrs" v-on="on"> Personnel </v-btn>
             </template>
-            <span>Savoir tout à propos des Personnel</span>
+            <span>Savoir tout à propos du Personnel</span>
           </v-tooltip>
         </v-toolbar-items>
       </v-toolbar>

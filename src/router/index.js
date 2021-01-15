@@ -3,14 +3,15 @@ import VueRouter from 'vue-router'
 import MainHome from '@/components/MainHome.vue'
 import About from '@/views/About.vue'
 import Enseignants from '@/views/Enseignants.vue'
+import home from '@/views/Home.vue'
 import login from '@/components/Login.vue'
 
 Vue.use(VueRouter)
 
 const routes = [{
         path: '/',
-        name: 'MainHome',
-        component: MainHome
+        name: 'home',
+        component: home
     },
     {
         path: '/about',
@@ -26,6 +27,11 @@ const routes = [{
         path: '/enseignants',
         name: 'Enseignants',
         component: Enseignants
+    },
+    {
+        path: '/home',
+        name: 'MainHome',
+        component: MainHome
     },
     {
         path: '*',

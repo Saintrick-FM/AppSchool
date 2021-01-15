@@ -16,13 +16,13 @@
                   <h4>Inscription</h4>
                   <v-fade-transition>
                     <v-overlay v-if="hover" absolute color="#036358">
-                      <v-btn>Cliquez</v-btn>
+                      <v-btn route to="/login">Cliquez</v-btn>
                     </v-overlay>
                   </v-fade-transition>
-                </v-card>
+                </v-card> 
               </template>
             </v-hover>
-          </v-card>
+          </v-card> 
         </v-col>
         <v-col order="12">
           <v-card class="pa-2" outlined tile>
@@ -37,7 +37,7 @@
                   <h4>Finances</h4>
                   <v-fade-transition>
                     <v-overlay v-if="hover" absolute color="#036358">
-                      <v-btn>Cliquez</v-btn>
+                      <v-btn route to="/">Cliquez</v-btn>
                     </v-overlay>
                   </v-fade-transition>
                 </v-card>
