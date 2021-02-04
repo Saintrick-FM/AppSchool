@@ -9,7 +9,7 @@
   >
     <template v-slot:activator="{ on, attrs }">
       <v-text-field
-        v-model="date"
+        v-model="year"
         label="Année scolaire"
         prepend-icon="mdi-calendar"
         readonly
@@ -19,7 +19,7 @@
     </template>
     <v-date-picker
       ref="picker"
-      v-model="date"
+      v-model="year"
       @click:year="saveYear(year)"
       reactive
       no-title
@@ -40,7 +40,7 @@
 export default {
   name: "yearPicker",
   data: () => ({
-    date: null,
+    year: null,
     menu: false,
   }),
   watch: {
@@ -48,9 +48,13 @@ export default {
       val && this.$nextTick(() => (this.$refs.picker.activePicker = "YEAR"));
     },
   },
+
   methods: {
     saveYear(year) {
-      this.$refs.menu.save(year);
+      const yearformat = year.slice(0, 4);
+      const ajout = parseInt(yearformat) + 1;
+      this.$refs.menu.save(yearformat);
+      this.year = yearformat.concat("-", ajout);
 
       // Reset activePicker to type YEAR
       this.$refs.picker.activePicker = "YEAR";

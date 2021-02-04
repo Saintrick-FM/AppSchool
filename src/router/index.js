@@ -4,6 +4,7 @@ import MainHome from '@/components/MainHome.vue'
 import About from '@/views/About.vue'
 import Enseignants from '@/views/Enseignants.vue'
 import home from '@/views/Home.vue'
+import navbar from '@/components/navbarTop.vue'
 import login from '@/components/Login.vue'
 
 Vue.use(VueRouter)
@@ -16,17 +17,26 @@ const routes = [{
     {
         path: '/about',
         name: 'About',
-        component: About
+        components: {
+            default: About,
+            navbarTop: navbar
+        }
     },
     {
         path: '/login',
         name: 'Login',
-        component: login
+        components: {
+            default: login,
+            navbarTop: navbar
+        }
     },
     {
         path: '/enseignants',
         name: 'Enseignants',
-        component: Enseignants
+        components: {
+            default: Enseignants,
+            navbarTop: navbar
+        }
     },
     {
         path: '/home',

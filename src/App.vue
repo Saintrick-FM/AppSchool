@@ -1,6 +1,7 @@
 <template>
   <v-app id="inspire">
-    <v-navigation-drawer v-model="drawer" app>
+    <router-view name="navbarTop"></router-view>
+    <!-- <v-navigation-drawer v-model="drawer" app>
       <v-list>
         <v-list-item class="px-2">
           <v-list-item-avatar>
@@ -17,28 +18,6 @@
       </v-list>
       <v-divider></v-divider>
 
-      <!-- Menu de gauche 
-      <v-list nav dense>
-        <v-list-group
-          v-for="item in items"
-          :key="item.title"
-          v-model="item.active"
-          :prepend-icon="item.action"
-          no-action
-        >
-          <template v-slot:activator>
-            <v-list-item-content>
-              <v-list-item-title v-text="item.title"></v-list-item-title>
-            </v-list-item-content>
-          </template>
-
-          <v-list-item v-for="child in item.items" :key="child.title">
-            <v-list-item-content>
-              <v-list-item-title v-text="child.title"></v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list-group>
-      </v-list>-->
       <RubriqueNav />
     </v-navigation-drawer>
 
@@ -69,29 +48,20 @@
           </v-tooltip>
         </v-toolbar-items>
       </v-toolbar>
-    </v-app-bar>
+    </v-app-bar> -->
 
     <v-main>
       <v-container fluid>
-        <router-link :to="'/about'">About</router-link>|
-        <router-link :to="'/login'">Login</router-link>|
-        <router-link :to="'/'">MainHome</router-link>
         <router-view></router-view>
-
-        <!-- If using vue-router 
-      <router-view></router-view>-->
       </v-container>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import RubriqueNav from "@/components/RubriqueNav";
+//import RubriqueNav from "@/components/RubriqueNav";
 export default {
   name: "App",
-  components: {
-    RubriqueNav,
-  },
 
   data: () => ({
     //
