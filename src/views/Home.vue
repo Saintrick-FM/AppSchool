@@ -63,7 +63,7 @@
             </v-row>
             <v-divider color="#F3E5F5" class="mt-4"></v-divider>
             <v-row style="margin-top: 20px; margin-left: 60px" justify-start>
-              <v-btn color="primary" @click="etape = 4"> Continue </v-btn>
+              <v-btn color="primary" @click="onLogin"> Continue </v-btn>
               <v-btn text @click="etape = 2"> Etape précédente </v-btn>
             </v-row>
           </v-container>
@@ -75,6 +75,7 @@
 
 <script>
 // @ is an alias to /src
+import axios from "axios";
 import yearPicker from "@/components/yearPicker.vue";
 
 export default {
@@ -83,6 +84,7 @@ export default {
     yearPicker,
   },
   data: () => ({
+    User1: null,
     etape: 1,
     valid: false,
     show1: false,
@@ -107,6 +109,15 @@ export default {
     //Login method here
     onLogin() {
       //api call here
+      this.etape = 4;
+      axios
+        .get("http://127.0.0.1:8000/api/users/", {
+          params: { username: "francy", password: "123456" },
+        })
+        .then((res) => console.log(res.data))
+        .catch((err) => console.log(err));
+
+      //api call he
     },
   },
 };
