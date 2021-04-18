@@ -101,23 +101,41 @@ export default {
     ],
   }),
 
+  mounted() {
+    document.title = "login | Saint Martin";
+  },
   methods: {
     //..validate inputs
     validate() {
       this.refs.form.validate();
     },
     //Login method here
-    onLogin() {
-      //api call here
+    async onLogin() {
       this.etape = 4;
-      axios
-        .get("http://127.0.0.1:8000/api/users/", {
-          params: { username: "francy", password: "123456" },
+      axios.defaults.headers.common["Authorization"] = "";
+      localStorage.removeItem("token");
+      const formLogin = {
+        username: this.name,
+        password: this.password,
+      };
+      //api call here
+      await axios
+        .post("api-auth-token/", formLogin)
+        .then((res) => {
+          const token = res.data.token;
+          console.log(token);
+          this.$store.commit("setToken", token);
+          axios.defaults.headers.common["Authorization"] = "Token " + token;
+          localStorage.setItem("token", token);
+          const toPath = this.$route.query.to || "/about";
+          this.$router.push(toPath);
         })
-        .then((res) => console.log(res.data))
         .catch((err) => console.log(err));
-
-      //api call he
+      // .  get("http://127.0.0.1:8000/api/users/", {
+      //   headers: {
+      //     Authorization: "Token 3185c9b90ee41a8e71ba75e24c17200c374e86c1",
+      //   },
+      // })
     },
   },
 };
