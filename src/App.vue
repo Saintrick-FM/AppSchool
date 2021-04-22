@@ -1,7 +1,6 @@
-<template>
-  <v-app id="inspire">
-    <router-view name="navbarTop"></router-view>
-    <!-- <v-navigation-drawer v-model="drawer" app>
+<template lang="">
+  <v-app>
+    <v-navigation-drawer v-model="drawerTop" app>
       <v-list>
         <v-list-item class="px-2">
           <v-list-item-avatar>
@@ -11,8 +10,10 @@
 
         <v-list-item link>
           <v-list-item-content>
-            <v-list-item-title class="title"> Ecole Saint Martin </v-list-item-title>
-            <v-list-item-subtitle>Amour, Travail, Réussite </v-list-item-subtitle>
+            <v-list-item-title class="title">
+              Ecole Saint Martin
+            </v-list-item-title>
+            <v-list-item-subtitle>Amour, Travail, Réus </v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -22,57 +23,50 @@
     </v-navigation-drawer>
 
     <v-app-bar class="appbar" app>
-      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+    
+      <v-app-bar-nav-icon v-if="drawerMethod()" @click="drawerTop= !drawerTop"></v-app-bar-nav-icon>
       <v-toolbar>
         <v-toolbar-title>Ecole Saint Martin</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-toolbar-items>
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn flat route to="/about" v-bind="attrs" v-on="on"> Enseignants </v-btn>
-            </template>
-            <span>Savoir tout à propos des enseignants</span>
-          </v-tooltip>
-
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn flat route to="/" v-bind="attrs" v-on="on"> Elèves </v-btn>
-            </template>
-            <span>Savoir tout à propos des Elèves</span>
-          </v-tooltip>
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn flat route to="/login" v-bind="attrs" v-on="on"> Personnel </v-btn>
-            </template>
-            <span>Savoir tout à propos du Personnel</span>
-          </v-tooltip>
+          <tooltipA />
+          <tooltipB />
+          <tooltipC />
         </v-toolbar-items>
       </v-toolbar>
-    </v-app-bar> -->
-
+    </v-app-bar>
+  
+  
     <v-main>
-      <v-container fluid>
-        <router-view></router-view>
-      </v-container>
+      <router-view></router-view>
     </v-main>
-  </v-app>
+</v-app>
 </template>
-
 <script>
-//import RubriqueNav from "@/components/RubriqueNav";
 import axios from "axios";
+import RubriqueNav from "@/components/RubriqueNav";
+import tooltipA from "@/components/TooltipA.vue";
+import tooltipB from "@/components/TooltipB.vue";
+import tooltipC from "@/components/TooltipC.vue";
 export default {
-  name: "App",
-
+  name: "NavBarTop",
+  components: {
+    RubriqueNav,
+    tooltipA,
+    tooltipB,
+    tooltipC,
+  },
   data: () => ({
     //
+    drawerTop: false,
+
     drawer: null,
     items: [
       {
         action: "mdi-ticket",
         items: [{ title: "List Item" }],
-        title: "About",
-        route: "/about",
+        title: "Finances",
+        route: "/finances",
       },
       {
         action: "mdi-login",
@@ -98,7 +92,6 @@ export default {
       },
     ],
   }),
-
   beforeCreate() {
     this.$store.commit("initializeStore");
     const token = this.$store.state.token;
@@ -108,7 +101,21 @@ export default {
       axios.defaults.headers.common["Authorization"] = "";
     }
   },
-};
+  
+  methods:{
+    
+    drawerMethod(){
+    this.$store.commit("initializeStore");
+    const token = this.$store.state.token;
+    if (token) {
+      return true
+    }else{
+       return false
+    }
+  },
+
+}
+}
 </script>
 <style lang="css">
 .appbar {

@@ -1,47 +1,38 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import MainHome from '@/components/MainHome.vue'
-import About from '@/views/About.vue'
+import Finances from '@/views/Finances.vue'
 import Enseignants from '@/views/Enseignants.vue'
-import home from '@/views/Home.vue'
-import navbar from '@/components/navbarTop.vue'
-import login from '@/components/Login.vue'
+import Connexion from '@/views/Connexion.vue'
+import Login from '@/components/Login.vue'
 
 Vue.use(VueRouter)
 
 const routes = [{
         path: '/',
-        name: 'home',
-        component: home
+        name: 'Connexion',
+        component: Connexion
     },
     {
-        path: '/about',
-        name: 'About',
-        components: {
-            default: About,
-            navbarTop: navbar
-        }
+        path: '/finances',
+        name: 'Finances',
+        component: Finances
+            // navbarTop: navbar
+        
     },
     {
         path: '/login',
         name: 'Login',
-        components: {
-            default: login,
-            navbarTop: navbar
-        }
+        component: Login
     },
     {
         path: '/enseignants',
         name: 'Enseignants',
-        components: {
-            default: Enseignants,
-            navbarTop: navbar
-        }
+        components: Enseignants
     },
     {
-        path: '/home',
-        name: 'MainHome',
-        component: MainHome
+        path: '/Connexion',
+        name: 'Connexion',
+        component: Connexion
     },
     {
         path: '*',

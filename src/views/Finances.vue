@@ -1,8 +1,8 @@
 <template>
-  <v-container fluid>
+  <div app>
     <Squelette />
     <h1>This is an about page</h1>
-  </v-container>
+  </div>
 </template>
 <script>
 // @ is an alias to /src

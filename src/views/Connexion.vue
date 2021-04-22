@@ -127,7 +127,7 @@ export default {
           this.$store.commit("setToken", token);
           axios.defaults.headers.common["Authorization"] = "Token " + token;
           localStorage.setItem("token", token);
-          const toPath = this.$route.query.to || "/about";
+          const toPath = this.$route.query.to || "/finances";
           this.$router.push(toPath);
         })
         .catch((err) => console.log(err));

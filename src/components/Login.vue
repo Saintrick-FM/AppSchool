@@ -59,6 +59,7 @@
 <script>
 import squelette from "@/components/Squelette";
 export default {
+  name: 'Login',
   components: { squelette },
   data: () => ({
     title: "Login",

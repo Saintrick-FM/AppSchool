@@ -19,10 +19,10 @@
                       <v-btn route to="/login">Cliquez</v-btn>
                     </v-overlay>
                   </v-fade-transition>
-                </v-card> 
+                </v-card>
               </template>
             </v-hover>
-          </v-card> 
+          </v-card>
         </v-col>
         <v-col order="12">
           <v-card class="pa-2" outlined tile>
@@ -46,50 +46,51 @@
           </v-card>
         </v-col>
       </v-row>
+
       <v-row no gutters style="padding-bottom: 110px">
         <v-col>
-          <router-link to="/" >
-          <button class="learn-more">
-            <v-avatar color="#b18597" outlined class="mb-4 mr-11 mt-n6 ml-n9">
+          <router-link to="/">
+            <button class="learn-more">
+              <v-avatar color="#b18597" outlined class="mb-4 mr-11 mt-n6 ml-n9">
                 <v-icon dark class="mb-4">
                   mdi-account-circle
                 </v-icon>
-            </v-avatar>
-            About
-          </button>  
+              </v-avatar>
+              About
+            </button>
           </router-link>
         </v-col>
         <v-col order="12" id="col-right">
           <button id="btn-right" class="learn-more">
-            <v-avatar color="#b18597" outlined  class="mb-4 mr-11 mt-n6 ml-n9">
-                <v-icon dark class="mb-4">
-                  mdi-account-circle
-                </v-icon>
+            <v-avatar color="#b18597" outlined class="mb-4 mr-11 mt-n6 ml-n9">
+              <v-icon dark class="mb-4">
+                mdi-account-circle
+              </v-icon>
             </v-avatar>
             Classes
-          </button>  
+          </button>
         </v-col>
       </v-row>
       <v-row no gutters>
         <v-col>
           <button class="learn-more">
             <v-avatar color="#b18597" outlined class="mb-4 mr-11 mt-n6 ml-n9">
-                <v-icon dark class="mb-4">
-                  mdi-account-circle
-                </v-icon>
+              <v-icon dark class="mb-4">
+                mdi-account-circle
+              </v-icon>
             </v-avatar>
             Classes
-          </button>  
+          </button>
         </v-col>
         <v-col order="12" id="col-right">
           <button id="btn-right" class="learn-more">
-            <v-avatar color="#b18597" outlined  class="mb-4 mr-11 mt-n6 ml-n9">
-                <v-icon dark class="mb-4">
-                  mdi-account-circle
-                </v-icon>
+            <v-avatar color="#b18597" outlined class="mb-4 mr-11 mt-n6 ml-n9">
+              <v-icon dark class="mb-4">
+                mdi-account-circle
+              </v-icon>
             </v-avatar>
             Classes
-          </button>  
+          </button>
         </v-col>
       </v-row>
     </v-container>
@@ -105,14 +106,15 @@ export default {
 * {
   box-sizing: border-box;
 }
-#btn-right{
-width: 47%;
+#btn-right {
+  width: 47%;
 }
-#col-right{
-margin-right: 12px;
+#col-right {
+  margin-right: 12px;
 }
 /* line 10, ../../Vue_Js/Projet_initial_Vue2_Electron_Vuetify/app-school3/saas/button.scss */
-*::before, *::after {
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -153,13 +155,14 @@ button.learn-more {
   border: 2px solid #b18597;
   border-radius: 0.75em;
   transform-style: preserve-3d;
-  transition: transform 150ms cubic-bezier(0, 0, 0.58, 1), background 150ms cubic-bezier(0, 0, 0.58, 1);
+  transition: transform 150ms cubic-bezier(0, 0, 0.58, 1),
+    background 150ms cubic-bezier(0, 0, 0.58, 1);
 }
 
 /* line 48, ../../Vue_Js/Projet_initial_Vue2_Electron_Vuetify/app-school3/saas/button.scss */
 button.learn-more::before {
   position: absolute;
-  content: '';
+  content: "";
   width: 100%;
   height: 100%;
   top: 0;
@@ -170,7 +173,8 @@ button.learn-more::before {
   border-radius: inherit;
   box-shadow: 0 0 0 2px #b18597, 0 0.625em 0 0 #ffe3e2;
   transform: translate3d(0, 0.75em, -1em);
-  transition: transform 150ms cubic-bezier(0, 0, 0.58, 1), box-shadow 150ms cubic-bezier(0, 0, 0.58, 1);
+  transition: transform 150ms cubic-bezier(0, 0, 0.58, 1),
+    box-shadow 150ms cubic-bezier(0, 0, 0.58, 1);
 }
 
 /* line 63, ../../Vue_Js/Projet_initial_Vue2_Electron_Vuetify/app-school3/saas/button.scss */
@@ -199,4 +203,3 @@ button.learn-more:active::before {
 
 /*# sourceMappingURL=button.css.map */
 </style>
-
