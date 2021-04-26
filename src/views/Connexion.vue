@@ -5,8 +5,31 @@
       <small>cliquez pour selectionner</small>
     </v-stepper-step>
 
-    <v-stepper-content step="1">
-      <year-picker />
+    <v-stepper-content step="1" editable edit-icon="edit">
+      <!-- <year-picker /> -->
+      <v-menu offset-y>
+        <template v-slot:activator="{ on, attrs }">
+          <v-text-field
+            :value="annee_choisi"
+            label="Année scolaire"
+            prepend-icon="mdi-date_range"
+            readonly
+            v-bind="attrs"
+            v-on="on"
+          ></v-text-field>
+        </template>
+
+        <v-list>
+          <v-list-item v-for="(item, id) in annee_scolaire" :key="id">
+            <v-checkbox
+              :label="item.annee"
+              v-model="annee_choisi"
+              :value="item.annee"
+            ></v-checkbox>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+
       <!-- <v-card color="grey lighten-1" class="mb-12" height="200px"> </v-card> -->
       <v-btn color="primary" @click="etape = 2"> Continue </v-btn>
       <v-btn text> Cancel </v-btn>
@@ -30,11 +53,16 @@
     </v-stepper-content>
 
     <v-stepper-step :complete="etape > 3" step="3">
-      Select an ad format and name ad unit
+      Entrez vos Identifiants d'utilisateur
     </v-stepper-step>
 
     <v-stepper-content step="3">
-      <v-card elevation="11" color="grey lighten-1" class="mb-12" height="200px">
+      <v-card
+        elevation="11"
+        color="grey lighten-1"
+        class="mb-12"
+        height="200px"
+      >
         <v-form v-model="valid">
           <v-container>
             <h2 class="purple--text text-uppercase">Identifiants</h2>
@@ -63,7 +91,9 @@
             </v-row>
             <v-divider color="#F3E5F5" class="mt-4"></v-divider>
             <v-row style="margin-top: 20px; margin-left: 60px" justify-start>
-              <v-btn color="primary" @click="onLogin"> Continue </v-btn>
+              <v-btn color="primary" :loading="loading" @click="onLogin">
+                Continue
+              </v-btn>
               <v-btn text @click="etape = 2"> Etape précédente </v-btn>
             </v-row>
           </v-container>
@@ -76,12 +106,11 @@
 <script>
 // @ is an alias to /src
 import axios from "axios";
-import yearPicker from "@/components/yearPicker.vue";
 
 export default {
   name: "Home",
   components: {
-    yearPicker,
+    // yearPicker,
   },
   data: () => ({
     User1: null,
@@ -89,6 +118,13 @@ export default {
     valid: false,
     show1: false,
     show2: false,
+    loading: false,
+    annee_choisi: "",
+    annee_scolaire: [
+      { id: "1", annee: "2019-2020" },
+      { id: "2", annee: "2020-2021" },
+      { id: "3", annee: "2021-2022" },
+    ],
     name: "",
     nameRules: [
       (v) => !!v || "Le nom est obligatoire",
@@ -97,7 +133,7 @@ export default {
     password: "",
     passwordRules: [
       (v) => !!v || "Password is required",
-      (v) => (v && v.length >= 8) || "Password must be less than 8 characters",
+      (v) => (v && v.length >= 6) || "Password must be less than 6 characters",
     ],
   }),
 
@@ -111,7 +147,13 @@ export default {
     },
     //Login method here
     async onLogin() {
-      this.etape = 4;
+      this.loading = true;
+      this.$store.commit("setAnneeScolaire", this.annee_choisi);
+      localStorage.setItem("année scolaire", this.annee_choisi);
+      console.log(
+        "l'année choisie du component connexion est :" + this.annee_choisi
+      );
+
       axios.defaults.headers.common["Authorization"] = "";
       localStorage.removeItem("token");
       const formLogin = {
@@ -127,15 +169,14 @@ export default {
           this.$store.commit("setToken", token);
           axios.defaults.headers.common["Authorization"] = "Token " + token;
           localStorage.setItem("token", token);
+
           const toPath = this.$route.query.to || "/finances";
+          (this.loading = false), (this.etape = 4);
           this.$router.push(toPath);
         })
         .catch((err) => console.log(err));
-      // .  get("http://127.0.0.1:8000/api/users/", {
-      //   headers: {
-      //     Authorization: "Token 3185c9b90ee41a8e71ba75e24c17200c374e86c1",
-      //   },
-      // })
+      this.loading = false;
+      this.etape = 3;
     },
   },
 };

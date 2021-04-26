@@ -2,120 +2,106 @@
   <v-app>
     <v-navigation-drawer v-model="drawerTop" app>
       <v-list>
-        <v-list-item class="px-2">
-          <v-list-item-avatar>
-            <v-img src="@/assets/logo.svg"></v-img>
-          </v-list-item-avatar>
-        </v-list-item>
-
         <v-list-item link>
           <v-list-item-content>
+            <v-list-item-avatar class="px-2">
+              <v-img src="@/assets/logo.svg"></v-img>
+            </v-list-item-avatar>
             <v-list-item-title class="title">
               Ecole Saint Martin
             </v-list-item-title>
-            <v-list-item-subtitle>Amour, Travail, Réus </v-list-item-subtitle>
+            <v-list-item-subtitle
+              >Amour, Travail, Réussite
+            </v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
       </v-list>
-      <v-divider></v-divider>
-
-      <RubriqueNav />
+      <v-divider /> <RubriqueNav v-if="checkToken()" />
     </v-navigation-drawer>
-
-    <v-app-bar class="appbar" app>
-    
-      <v-app-bar-nav-icon v-if="drawerMethod()" @click="drawerTop= !drawerTop"></v-app-bar-nav-icon>
+    <navbar-haut v-on:emitDrawer="initialise" />
+    <!--<v-app-bar class="appbar" app>
+      <v-app-bar-nav-icon @click="drawerTop = !drawerTop"></v-app-bar-nav-icon>
       <v-toolbar>
         <v-toolbar-title>Ecole Saint Martin</v-toolbar-title>
         <v-spacer></v-spacer>
+        <v-toolbar-subtitle @initializeAnneeScolaire="initialiseAnnee($event)">
+          📅 Année scolaire: {{ annee_scolaire }}
+        </v-toolbar-subtitle>
+        <v-spacer></v-spacer>
         <v-toolbar-items>
-          <tooltipA />
-          <tooltipB />
-          <tooltipC />
+          <tooltipA /> <tooltipB /> <tooltipC />
         </v-toolbar-items>
       </v-toolbar>
-    </v-app-bar>
-  
-  
-    <v-main>
-      <router-view></router-view>
-    </v-main>
-</v-app>
+    </v-app-bar>-->
+    <v-main> <router-view></router-view> </v-main>
+  </v-app>
 </template>
 <script>
 import axios from "axios";
 import RubriqueNav from "@/components/RubriqueNav";
-import tooltipA from "@/components/TooltipA.vue";
-import tooltipB from "@/components/TooltipB.vue";
-import tooltipC from "@/components/TooltipC.vue";
+import NavbarHaut from "@/components/NavbarHaut";
+
 export default {
-  name: "NavBarTop",
+  name: "App",
   components: {
     RubriqueNav,
-    tooltipA,
-    tooltipB,
-    tooltipC,
+    NavbarHaut,
   },
   data: () => ({
     //
-    drawerTop: false,
-
-    drawer: null,
-    items: [
-      {
-        action: "mdi-ticket",
-        items: [{ title: "List Item" }],
-        title: "Finances",
-        route: "/finances",
-      },
-      {
-        action: "mdi-login",
-        active: true,
-        items: [
-          { title: "Administration" },
-          { title: "Students" },
-          { title: "Teachers" },
-        ],
-        title: "login",
-      },
-      {
-        action: "mdi-home",
-        items: [{ title: "List Item" }],
-        title: "Main Home",
-        route: "/",
-      },
-      {
-        action: "mdi-run",
-        items: [{ title: "List Item" }],
-        title: "True Login",
-        route: "/login",
-      },
-    ],
+    drawerTop: null,
+    annee_scolaire: "",
   }),
   beforeCreate() {
-    this.$store.commit("initializeStore");
-    const token = this.$store.state.token;
-    if (token) {
-      axios.defaults.headers.common["Authorization"] = "Token " + token;
-    } else {
+    const checkToken = this.checkToken;
+    this.checkAnneeScolaire;
+    if (checkToken == false) {
       axios.defaults.headers.common["Authorization"] = "";
+    } else {
+      this.drawerTop = false;
+      axios.defaults.headers.common["Authorization"] = "Token " + checkToken;
     }
   },
-  
-  methods:{
-    
-    drawerMethod(){
-    this.$store.commit("initializeStore");
-    const token = this.$store.state.token;
-    if (token) {
-      return true
-    }else{
-       return false
-    }
-  },
+  // created() {
 
-}
-}
+  // bus.$on("initializeAnneeScolaire", (data) => {
+  //   this.annee_scolaire = data;
+  //   console.log(
+  //     "l'année passée au component connexion est :" + this.annee_scolaire
+  //   );
+  //  });
+  //},
+
+  methods: {
+    checkToken() {
+      this.$store.commit("initializeStore");
+      const token = this.$store.state.token;
+      if (token) {
+        //this.drawerTop = "token";
+        return token;
+      } else {
+        // this.drawer = false;
+        return false;
+      }
+    },
+    initialise() {
+      this.drawerTop = !this.drawerTop;
+    },
+
+    checkAnneeScolaire() {
+      const annee = this.$store.state.annee_scolaire;
+      if (annee) {
+        this.annee_scolaire = annee;
+        console.log(
+          "anneé checkée pour this.annee_scolaire =" + this.annee_scolaire
+        );
+        return annee;
+      } else {
+        return false;
+      }
+    },
+  },
+};
 </script>
 <style lang="css">
 .appbar {

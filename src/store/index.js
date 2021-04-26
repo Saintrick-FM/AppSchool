@@ -6,6 +6,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
     state: {
         isAuthenticated: false,
+        annee_scolaire: '',
         token: '',
     },
     mutations: {
@@ -17,6 +18,20 @@ export default new Vuex.Store({
                 state.isAuthenticated = false,
                     state.token = ''
             }
+
+            if (localStorage.getItem('année scolaire')) {
+                state.annee_scolaire = localStorage.getItem('année scolaire')
+
+            } else {
+                const year = '1995-1996'
+                state.annee_scolaire = year
+            }
+        },
+        setAnneeScolaire(state, annee) {
+            state.annee_scolaire = annee
+        },
+        removeAnneeScolaire(state) {
+            state.annee_scolaire = ''
         },
         setToken(state, token) {
             state.token = token,
