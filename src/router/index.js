@@ -4,7 +4,7 @@ import Finances from '@/views/Finances.vue'
 import Enseignants from '@/views/Enseignants.vue'
 import Connexion from '@/views/Connexion.vue'
 import Login from '@/components/Login.vue'
-
+import LogoutAlert from '@/components/LogoutAlert.vue'
 Vue.use(VueRouter)
 
 const routes = [{
@@ -17,7 +17,7 @@ const routes = [{
         name: 'Finances',
         component: Finances
             // navbarTop: navbar
-        
+
     },
     {
         path: '/login',
@@ -30,9 +30,11 @@ const routes = [{
         components: Enseignants
     },
     {
-        path: '/Connexion',
-        name: 'Connexion',
-        component: Connexion
+        path: '/deconnexion',
+        name: 'LogoutAlert',
+        component: LogoutAlert
+            // navbarTop: navbar
+
     },
     {
         path: '*',

@@ -18,21 +18,8 @@
       </v-list>
       <v-divider /> <RubriqueNav v-if="checkToken()" />
     </v-navigation-drawer>
-    <navbar-haut v-on:emitDrawer="initialise" />
-    <!--<v-app-bar class="appbar" app>
-      <v-app-bar-nav-icon @click="drawerTop = !drawerTop"></v-app-bar-nav-icon>
-      <v-toolbar>
-        <v-toolbar-title>Ecole Saint Martin</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-toolbar-subtitle @initializeAnneeScolaire="initialiseAnnee($event)">
-          📅 Année scolaire: {{ annee_scolaire }}
-        </v-toolbar-subtitle>
-        <v-spacer></v-spacer>
-        <v-toolbar-items>
-          <tooltipA /> <tooltipB /> <tooltipC />
-        </v-toolbar-items>
-      </v-toolbar>
-    </v-app-bar>-->
+    <NavbarHaut v-on:emitDrawer="initialise" v-if="checkToken()" />
+
     <v-main> <router-view></router-view> </v-main>
   </v-app>
 </template>

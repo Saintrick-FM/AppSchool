@@ -5,15 +5,17 @@
       <v-toolbar>
         <v-toolbar-title>Ecole Saint Martin</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-toolbar-subtitle>
+
+        <v-toolbar-title width="30%" lighten-4>
           📅 Année scolaire: {{ annee_scolaire }}
-        </v-toolbar-subtitle>
+        </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-toolbar-items>
-          <tooltipA /> <tooltipB /> <tooltipC />
+          <tooltipA /> <tooltipB /> <tooltipC @AlertLogout="EmitAlert" />
         </v-toolbar-items>
       </v-toolbar>
     </v-app-bar>
+    <LogoutAlert v-if="Alert == true" />
   </div>
 </template>
 
@@ -21,22 +23,33 @@
 import tooltipA from "@/components/TooltipA.vue";
 import tooltipB from "@/components/TooltipB.vue";
 import tooltipC from "@/components/TooltipC.vue";
+import LogoutAlert from "@/components/LogoutAlert";
 export default {
-  name: "App",
+  name: "NavbarHaut",
   components: {
     tooltipA,
     tooltipB,
     tooltipC,
+    LogoutAlert,
   },
   data() {
     return {
       drawerTop: null,
       annee_scolaire: "",
+      Alert: false,
     };
   },
   methods: {
     emitDrawer() {
       this.$emit("emitDrawer");
+    },
+    EmitAlert() {
+      this.$store.commit("setAlertLogout", true);
+      this.Alert = this.$store.state.AlertLogout;
+      // this.$store.commit("removeToken");
+      // localStorage.setItem("token", "");
+      // const toPath = this.$route.query.to || "/connexion";
+      // this.$router.push(toPath);
     },
   },
   beforeMount() {

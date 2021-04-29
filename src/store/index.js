@@ -8,6 +8,7 @@ export default new Vuex.Store({
         isAuthenticated: false,
         annee_scolaire: '',
         token: '',
+        AlertLogout: null
     },
     mutations: {
         initializeStore(state) {
@@ -40,6 +41,12 @@ export default new Vuex.Store({
         removeToken(state) {
             state.token = '',
                 state.isAuthenticated = false
+        },
+        setAlertLogout(state, alert) {
+            state.AlertLogout = alert
+        },
+        removeAlertLogout(state) {
+            state.AlertLogout = false
         },
 
     },
