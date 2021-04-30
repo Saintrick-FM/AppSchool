@@ -7,19 +7,21 @@
   >
     <template v-slot:top>
       <v-toolbar flat>
-        <v-toolbar-title>My CRUD</v-toolbar-title>
+        <v-toolbar-title>Eleves par classes</v-toolbar-title>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
 
         <v-dialog v-model="dialog" max-width="500px">
           <template v-slot:activator="{ on, attrs }">
             <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-              New Item
+              Nouvel élève
             </v-btn>
           </template>
           <v-card>
             <v-card-title>
-              <span class="headline">{{ formTitle }}</span>
+              <span class="headline"
+                >Nom(s) et prénoms(s)<!-- {{ formTitle }} --></span
+              >
             </v-card-title>
 
             <v-card-text>
@@ -111,7 +113,7 @@
 import axios from "axios";
 import { mapGetters } from "vuex";
 export default {
-  name: "Finances",
+  name: "Students",
   data: () => ({
     dialog: false,
     dialogDelete: false,

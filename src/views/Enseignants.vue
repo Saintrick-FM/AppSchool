@@ -10,26 +10,37 @@
       <v-tabs-slider></v-tabs-slider>
 
       <v-tab href="#tab-1">
-        Recents
-        <v-icon>mdi-phone</v-icon>
+        Matières enseignées
+        <v-icon>mdi-class</v-icon>
       </v-tab>
 
       <v-tab href="#tab-2">
-        Favorites
-        <v-icon>mdi-heart</v-icon>
+        Enseignants
+        <v-icon>mdi-teach</v-icon>
       </v-tab>
 
       <v-tab href="#tab-3">
-        Nearby
+        Présences
         <v-icon>mdi-account-box</v-icon>
       </v-tab>
     </v-tabs>
 
     <v-tabs-items v-model="tab">
-      <v-tab-item v-for="i in 3" :key="i" :value="'tab-' + i">
+      <v-tab-item :value="'tab-1'">
         <v-card flat>
-          -------------------------
-          <action />
+          <matieres />
+        </v-card>
+      </v-tab-item>
+
+      <v-tab-item :value="'tab-2'">
+        <v-card flat>
+          <teachers />
+        </v-card>
+      </v-tab-item>
+
+      <v-tab-item :value="'tab-3'">
+        <v-card flat>
+          <presences-enseignants />
         </v-card>
       </v-tab-item>
     </v-tabs-items>
@@ -37,12 +48,16 @@
 </template>
 
 <script>
-import Action from "@/components/Actions.vue";
+import Matieres from "@/components/Matieres.vue";
+import Teachers from "@/components/Teachers.vue";
+import PresencesEnseignants from "@/components/PresencesEnseignants.vue";
 
 export default {
   name: "Enseignants",
   components: {
-    Action,
+    Teachers,
+    PresencesEnseignants,
+    Matieres,
   },
   data() {
     return {
