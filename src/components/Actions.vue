@@ -10,6 +10,7 @@
         <v-toolbar-title>My CRUD</v-toolbar-title>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
+
         <v-dialog v-model="dialog" max-width="500px">
           <template v-slot:activator="{ on, attrs }">
             <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
@@ -97,6 +98,7 @@
         mdi-delete
       </v-icon>
     </template>
+
     <template v-slot:no-data>
       <v-btn color="primary" @click="initialize">
         Reset
@@ -106,6 +108,8 @@
 </template>
 
 <script>
+import axios from "axios";
+import { mapGetters } from "vuex";
 export default {
   name: "Finances",
   data: () => ({
@@ -146,6 +150,7 @@ export default {
     formTitle() {
       return this.editedIndex === -1 ? "New Item" : "Edit Item";
     },
+    ...mapGetters(["allEleves"]),
   },
 
   watch: {
@@ -159,9 +164,34 @@ export default {
 
   created() {
     this.initialize();
+    this.initialiseEleves();
   },
 
   methods: {
+    initialiseEleves() {
+      const token = "Token " + this.$store.state.token;
+      console.log("token récupéré =>" + token);
+
+      var config = {
+        method: "get",
+        url: "api/inscriptions/",
+        headers: {
+          Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
+        },
+      };
+
+      axios(config)
+        .then((response) => {
+          // const result = JSON.stringify(response.data); # ceci vient de postman
+          // console.log("résultat du stringify =>" + result);
+          console.log("😃😃😃" + response.data);
+          this.$store.commit("initializeEleve", response.data);
+          // this.eleves = response.data;
+        })
+        .catch(function(error) {
+          console.log("😢😢😢" + error);
+        });
+    },
     initialize() {
       this.desserts = [
         {

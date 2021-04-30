@@ -6,7 +6,7 @@
         <v-toolbar-title>Ecole Saint Martin</v-toolbar-title>
         <v-spacer></v-spacer>
 
-        <v-toolbar-title width="30%" lighten-4>
+        <v-toolbar-title>
           📅 Année scolaire: {{ annee_scolaire }}
         </v-toolbar-title>
         <v-spacer></v-spacer>

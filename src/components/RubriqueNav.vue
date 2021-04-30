@@ -37,14 +37,16 @@
           </button>
         </v-col>
         <v-col order="12" id="col-right">
-          <button id="btn-right" class="learn-more">
-            <v-avatar color="#b18597" outlined class="mb-4 mr-11 mt-n6 ml-n9">
-              <v-icon dark class="mb-4">
-                mdi-account-circle
-              </v-icon>
-            </v-avatar>
-            Classes
-          </button>
+          <router-link to="/enseignants">
+            <button id="btn-right" class="learn-more">
+              <v-avatar color="#b18597" outlined class="mb-4 mr-11 mt-n6 ml-n9">
+                <v-icon dark class="mb-4">
+                  mdi-account-circle
+                </v-icon>
+              </v-avatar>
+              Profs
+            </button>
+          </router-link>
         </v-col>
       </v-row>
     </v-container>

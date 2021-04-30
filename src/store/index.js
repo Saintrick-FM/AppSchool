@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import axios from 'axios'
 
 Vue.use(Vuex)
 
@@ -8,7 +9,8 @@ export default new Vuex.Store({
         isAuthenticated: false,
         annee_scolaire: '',
         token: '',
-        AlertLogout: null
+        AlertLogout: null,
+        eleves: null
     },
     mutations: {
         initializeStore(state) {
@@ -28,6 +30,10 @@ export default new Vuex.Store({
                 state.annee_scolaire = year
             }
         },
+
+        initializeEleve(state, eleves) {
+            state.eleves = eleves
+        },
         setAnneeScolaire(state, annee) {
             state.annee_scolaire = annee
         },
@@ -42,6 +48,7 @@ export default new Vuex.Store({
             state.token = '',
                 state.isAuthenticated = false
         },
+
         setAlertLogout(state, alert) {
             state.AlertLogout = alert
         },
@@ -50,6 +57,17 @@ export default new Vuex.Store({
         },
 
     },
-    actions: {},
-    modules: {}
+    actions: {
+        async setEleves({ commit }) {
+            const eleves = await axios.get('api/inscriptions/inscriptions/')
+            console.log(eleves)
+            commit('initialiseEleves', eleves)
+        }
+    },
+    getters: {
+        allEleves: state => {
+            return state.eleves
+        },
+    },
+    modules: {},
 })

@@ -20,7 +20,11 @@
     </v-navigation-drawer>
     <NavbarHaut v-on:emitDrawer="initialise" v-if="checkToken()" />
 
-    <v-main> <router-view></router-view> </v-main>
+    <v-main>
+      <transition name="fade" mode="out-in">
+        <router-view />
+      </transition>
+    </v-main>
   </v-app>
 </template>
 <script>
@@ -49,15 +53,6 @@ export default {
       axios.defaults.headers.common["Authorization"] = "Token " + checkToken;
     }
   },
-  // created() {
-
-  // bus.$on("initializeAnneeScolaire", (data) => {
-  //   this.annee_scolaire = data;
-  //   console.log(
-  //     "l'année passée au component connexion est :" + this.annee_scolaire
-  //   );
-  //  });
-  //},
 
   methods: {
     checkToken() {
@@ -93,5 +88,16 @@ export default {
 <style lang="css">
 .appbar {
   color: #1976d2;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition-duration: 0.3s;
+  transition-property: opacity;
+  transition-timing-function: ease;
+}
+
+.fade-enter,
+.fade-leave-active {
+  opacity: 0;
 }
 </style>

@@ -16,7 +16,6 @@ const routes = [{
         path: '/finances',
         name: 'Finances',
         component: Finances
-            // navbarTop: navbar
 
     },
     {
@@ -27,7 +26,7 @@ const routes = [{
     {
         path: '/enseignants',
         name: 'Enseignants',
-        components: Enseignants
+        component: Enseignants
     },
     {
         path: '/deconnexion',
