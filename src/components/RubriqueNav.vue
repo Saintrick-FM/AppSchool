@@ -1,7 +1,7 @@
 <template lang="">
   <div>
     <v-container class="grey lighten-5">
-      <v-row no gutters style="padding-bottom: 110px">
+      <v-row no gutters style="padding-bottom: 110px;">
         <v-col>
           <router-link to="/">
             <button class="learn-more">
@@ -10,7 +10,7 @@
                   mdi-account-circle
                 </v-icon>
               </v-avatar>
-              About
+              <span style="margin-left:-29px">Inscriptions</span>
             </button>
           </router-link>
         </v-col>
@@ -21,20 +21,22 @@
                 mdi-account-circle
               </v-icon>
             </v-avatar>
-            Classes
+            <span style="margin-left:-7px">Classes</span>
           </button>
         </v-col>
       </v-row>
       <v-row no gutters>
         <v-col>
-          <button class="learn-more">
-            <v-avatar color="#b18597" outlined class="mb-4 mr-11 mt-n6 ml-n9">
-              <v-icon dark class="mb-4">
-                mdi-account-circle
-              </v-icon>
-            </v-avatar>
-            Notes
-          </button>
+          <router-link to="/pedagogie">
+            <button class="learn-more">
+              <v-avatar color="#b18597" outlined class="mb-4 mr-11 mt-n6 ml-n9">
+                <v-icon dark class="mb-4">
+                  mdi-account-circle
+                </v-icon>
+              </v-avatar>
+              <span style="margin-left:-20px">Pédagogie</span>
+            </button>
+          </router-link>
         </v-col>
         <v-col order="12" id="col-right">
           <router-link to="/enseignants">

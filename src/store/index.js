@@ -16,20 +16,30 @@ export default new Vuex.Store({
     mutations: {
         initializeStore(state) {
             if (localStorage.getItem('token')) {
-                state.isAuthenticated = true,
-                    state.token = localStorage.getItem('token')
+                state.isAuthenticated = true;
+                state.token = localStorage.getItem('token');
             } else {
-                state.isAuthenticated = false,
-                    state.token = ''
+                state.isAuthenticated = false;
+                state.token = '';
+                state.matieres = null;
+                localStorage.setItem('Matieres', null)
             }
 
             if (localStorage.getItem('année scolaire')) {
                 state.annee_scolaire = localStorage.getItem('année scolaire')
 
             } else {
-                const year = '1995-1996'
+                const annee = new Date()
+                const year = annee.getFullYear() + '-' + (annee.getFullYear() + 1)
                 state.annee_scolaire = year
             }
+
+            if (localStorage.getItem('Matieres')) {
+                state.matieres = localStorage.getItem('Matieres')
+            } else {
+                state.matiere = null
+            }
+
         },
 
         initializeEleve(state, eleves) {
@@ -72,7 +82,6 @@ export default new Vuex.Store({
         // },
         async actionInitialiseMatiere({ commit }) {
             const token = "Token " + this.state.token;
-            console.log("token récupéré =>" + token);
 
             var config = {
                 method: "get",
@@ -84,10 +93,10 @@ export default new Vuex.Store({
 
             await axios(config)
                 .then((response) => {
-                    // const result = JSON.stringify(response.data); # ceci vient de postman
-                    // console.log("résultat du stringify =>" + result);
-                    console.log("😃😃😃" + response.data);
-                    commit("initializeMatieres", response.data);
+                    const result = JSON.stringify(response.data); // ceci vient de postman
+                    console.log("😃😃😃" + result);
+                    localStorage.setItem('Matieres', result)
+                    commit("initializeMatieres", result);
                     // this.eleves = response.data;
                 })
                 .catch(function(error) {

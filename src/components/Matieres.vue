@@ -7,14 +7,14 @@
   >
     <template v-slot:top>
       <v-toolbar flat>
-        <v-toolbar-title>Eleves par classes</v-toolbar-title>
+        <v-toolbar-title>Matières enseignées</v-toolbar-title>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
 
         <v-dialog v-model="dialog" max-width="500px">
           <template v-slot:activator="{ on, attrs }">
             <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-              Nouvel élève
+              Nouvelle matière
             </v-btn>
           </template>
           <v-card>

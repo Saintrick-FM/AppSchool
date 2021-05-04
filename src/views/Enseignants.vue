@@ -11,7 +11,7 @@
 
       <v-tab href="#tab-1">
         Matières enseignées
-        <v-icon>mdi-class</v-icon>
+        <v-icon>mdi-hammer-wrench</v-icon>
       </v-tab>
 
       <v-tab href="#tab-2">
@@ -40,7 +40,7 @@
 
       <v-tab-item :value="'tab-3'">
         <v-card flat>
-          <presences-enseignants />
+          <PresencesEnseignants />
         </v-card>
       </v-tab-item>
     </v-tabs-items>
@@ -56,8 +56,8 @@ export default {
   name: "Enseignants",
   components: {
     Teachers,
-    PresencesEnseignants,
     Matieres,
+    PresencesEnseignants,
   },
   data() {
     return {

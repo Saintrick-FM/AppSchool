@@ -7,14 +7,14 @@
   >
     <template v-slot:top>
       <v-toolbar flat>
-        <v-toolbar-title>Eleves par classes</v-toolbar-title>
+        <v-toolbar-title>Présences enseignants</v-toolbar-title>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
 
         <v-dialog v-model="dialog" max-width="500px">
           <template v-slot:activator="{ on, attrs }">
             <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-              Nouvel élève
+              Recherche
             </v-btn>
           </template>
           <v-card>
@@ -110,13 +110,13 @@
 </template>
 
 <script>
-import axios from "axios";
 import { mapGetters } from "vuex";
 export default {
   name: "PresencesEnseignants",
   data: () => ({
     dialog: false,
     dialogDelete: false,
+    MyHeaders: [],
     headers: [
       {
         text: "Dessert (100g serving)",
@@ -166,34 +166,21 @@ export default {
 
   created() {
     this.initialize();
-    this.initialiseEleves();
+    // this.initialiseMatiere();
+    // this.thisElementIn();
   },
 
   methods: {
-    initialiseEleves() {
-      const token = "Token " + this.$store.state.token;
-      console.log("token récupéré =>" + token);
-
-      var config = {
-        method: "get",
-        url: "api/inscriptions/",
-        headers: {
-          Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
-        },
-      };
-
-      axios(config)
-        .then((response) => {
-          // const result = JSON.stringify(response.data); # ceci vient de postman
-          // console.log("résultat du stringify =>" + result);
-          console.log("😃😃😃" + response.data);
-          this.$store.commit("initializeEleve", response.data);
-          // this.eleves = response.data;
-        })
-        .catch(function(error) {
-          console.log("😢😢😢" + error);
-        });
-    },
+    // initialiseMatiere() {
+    //   this.$store.dispatch("actionInitialiseMatiere");
+    // },
+    // thisElementIn() {
+    //   let element_in = [];
+    //   for (const key in this.allMatieres) {
+    //     element_in.push(key + ":" + this.allMatieres[key]);
+    //     console.log(element_in);
+    //   }
+    // },
     initialize() {
       this.desserts = [
         {
