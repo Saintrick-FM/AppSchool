@@ -1,27 +1,25 @@
 <template>
   <v-data-table
-    :headers="headers"
-    :items="desserts"
+    :headers="MyHeaders"
+    :items="matieres"
     sort-by="calories"
     class="elevation-1"
   >
     <template v-slot:top>
       <v-toolbar flat>
-        <v-toolbar-title>Présences enseignants</v-toolbar-title>
+        <v-toolbar-title>Assiduité des enseignants</v-toolbar-title>
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
 
         <v-dialog v-model="dialog" max-width="500px">
           <template v-slot:activator="{ on, attrs }">
             <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-              Recherche
+              Recherchez un enseignant
             </v-btn>
           </template>
           <v-card>
             <v-card-title>
-              <span class="headline"
-                >Nom(s) et prénoms(s)<!-- {{ formTitle }} --></span
-              >
+              <span class="headline">{{ formTitle }}</span>
             </v-card-title>
 
             <v-card-text>
@@ -29,32 +27,33 @@
                 <v-row>
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field
-                      v-model="editedItem.name"
-                      label="Dessert name"
+                      v-model="editedItem.nomMatiere"
+                      label="Intitulé"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field
-                      v-model="editedItem.calories"
-                      label="Calories"
+                      v-model="editedItem.pluriProf"
+                      label="Pluri-prof"
+                      placeholder="Taper oui ou non"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field
-                      v-model="editedItem.fat"
-                      label="Fat (g)"
+                      v-model="editedItem.seanceParSemaine"
+                      label="Nbre d'Heures/semaine"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field
-                      v-model="editedItem.carbs"
-                      label="Carbs (g)"
+                      v-model="editedItem.coefficient"
+                      label="coefficient"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field
-                      v-model="editedItem.protein"
-                      label="Protein (g)"
+                      v-model="editedItem.classAssocie"
+                      label="Enseignée en :"
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -75,7 +74,8 @@
         <v-dialog v-model="dialogDelete" max-width="500px">
           <v-card>
             <v-card-title class="headline"
-              >Are you sure you want to delete this item?</v-card-title
+              >Etes-vous sûr de bien vouloir supprimer cette matière
+              ?</v-card-title
             >
             <v-card-actions>
               <v-spacer></v-spacer>
@@ -102,7 +102,7 @@
     </template>
 
     <template v-slot:no-data>
-      <v-btn color="primary" @click="initialize">
+      <v-btn color="primary" @click="initialiseMatiere">
         Reset
       </v-btn>
     </template>
@@ -110,49 +110,47 @@
 </template>
 
 <script>
+import axios from "axios";
 import { mapGetters } from "vuex";
 export default {
   name: "PresencesEnseignants",
   data: () => ({
     dialog: false,
     dialogDelete: false,
-    MyHeaders: [],
-    headers: [
-      {
-        text: "Dessert (100g serving)",
-        align: "start",
-        sortable: false,
-        value: "name",
-      },
-      { text: "Calories", value: "calories" },
-      { text: "Fat (g)", value: "fat" },
-      { text: "Carbs (g)", value: "carbs" },
-      { text: "Protein (g)", value: "protein" },
+    MyHeaders: [
+      { text: "Intitulé", value: "nomMatiere", sortable: false },
+      { text: "Pluri-profs", value: "pluriProf" },
+      { text: "Heures/semaine", value: "seanceParSemaine" },
+      { text: "coefficient", value: "coefficient" },
+      { text: "Classes", value: "classAssocie" },
       { text: "Actions", value: "actions", sortable: false },
     ],
-    desserts: [],
+
+    matieres: [],
     editedIndex: -1,
     editedItem: {
-      name: "",
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0,
+      nomMatiere: "",
+      pluriProf: "",
+      seanceParSemaine: null,
+      coefficient: null,
+      classAssocie: "",
     },
     defaultItem: {
-      name: "",
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0,
+      nomMatiere: "",
+      pluriProf: "",
+      seanceParSemaine: null,
+      coefficient: null,
+      classAssocie: "",
     },
   }),
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "New Item" : "Edit Item";
+      return this.editedIndex === -1
+        ? "Nouvelle Matière"
+        : "Modification Matière";
     },
-    ...mapGetters(["allEleves"]),
+    ...mapGetters(["allMatieres"]),
   },
 
   watch: {
@@ -164,112 +162,64 @@ export default {
     },
   },
 
-  created() {
-    this.initialize();
-    // this.initialiseMatiere();
-    // this.thisElementIn();
-  },
+  /*created() {
+    this.initialiseMatiere();
+  },*/
 
   methods: {
-    // initialiseMatiere() {
-    //   this.$store.dispatch("actionInitialiseMatiere");
-    // },
-    // thisElementIn() {
-    //   let element_in = [];
-    //   for (const key in this.allMatieres) {
-    //     element_in.push(key + ":" + this.allMatieres[key]);
-    //     console.log(element_in);
-    //   }
-    // },
-    initialize() {
-      this.desserts = [
-        {
-          name: "Frozen Yogurt",
-          calories: 159,
-          fat: 6.0,
-          carbs: 24,
-          protein: 4.0,
+    async initialiseMatiere() {
+      //   this.$store.dispatch("actionInitialiseMatiere");
+      const token = "Token " + this.$store.state.token;
+      var config = {
+        method: "get",
+        url: "api/ecole/matiere/",
+        headers: {
+          Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
         },
-        {
-          name: "Ice cream sandwich",
-          calories: 237,
-          fat: 9.0,
-          carbs: 37,
-          protein: 4.3,
-        },
-        {
-          name: "Eclair",
-          calories: 262,
-          fat: 16.0,
-          carbs: 23,
-          protein: 6.0,
-        },
-        {
-          name: "Cupcake",
-          calories: 305,
-          fat: 3.7,
-          carbs: 67,
-          protein: 4.3,
-        },
-        {
-          name: "Gingerbread",
-          calories: 356,
-          fat: 16.0,
-          carbs: 49,
-          protein: 3.9,
-        },
-        {
-          name: "Jelly bean",
-          calories: 375,
-          fat: 0.0,
-          carbs: 94,
-          protein: 0.0,
-        },
-        {
-          name: "Lollipop",
-          calories: 392,
-          fat: 0.2,
-          carbs: 98,
-          protein: 0,
-        },
-        {
-          name: "Honeycomb",
-          calories: 408,
-          fat: 3.2,
-          carbs: 87,
-          protein: 6.5,
-        },
-        {
-          name: "Donut",
-          calories: 452,
-          fat: 25.0,
-          carbs: 51,
-          protein: 4.9,
-        },
-        {
-          name: "KitKat",
-          calories: 518,
-          fat: 26.0,
-          carbs: 65,
-          protein: 7,
-        },
-      ];
+      };
+      await axios(config)
+        .then((response) => {
+          const result = response.data;
+          console.log(result);
+          let element = [];
+          for (const key in result) {
+            element.push(result[key]);
+          }
+
+          localStorage.setItem("Matieres", element);
+          this.$store.state.matieres = element;
+
+          this.matieres = element;
+          console.log("😃😃😃 this.matieres => " + this.matieres);
+        })
+        .catch(function(error) {
+          console.log("😢😢😢" + error);
+        });
     },
 
+    /* {"url":"http://127.0.0.1:8000/api/ecole/matiere/Python/",
+              "code_matiere":"Py",
+              "enseigne_en_groupe":false,
+              "matiere_de_base":true,
+              "seance_par_semaine":10,
+              "coefficient":4,
+              "groupe_matiere":"MATIERE_SCIENTIFIQUES",
+              "classe_associe":["http://127.0.0.1:8000/api/ecole/classe/3e/"]}*/
+
     editItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
+      this.editedIndex = this.matieres.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
 
     deleteItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
+      this.editedIndex = this.matieres.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
     deleteItemConfirm() {
-      this.desserts.splice(this.editedIndex, 1);
+      this.matieres.splice(this.editedIndex, 1);
       this.closeDelete();
     },
 
@@ -291,9 +241,9 @@ export default {
 
     save() {
       if (this.editedIndex > -1) {
-        Object.assign(this.desserts[this.editedIndex], this.editedItem);
+        Object.assign(this.matieres[this.editedIndex], this.editedItem);
       } else {
-        this.desserts.push(this.editedItem);
+        this.matieres.push(this.editedItem);
       }
       this.close();
     },

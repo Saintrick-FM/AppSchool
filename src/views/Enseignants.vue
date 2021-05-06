@@ -20,9 +20,14 @@
       </v-tab>
 
       <v-tab href="#tab-3">
-        Présences
+        Assiduité des profs
         <v-icon>mdi-account-box</v-icon>
       </v-tab>
+
+      <!-- <v-tab href="#tab-4">
+        Test code
+        <v-icon>mdi-account-box</v-icon>
+      </v-tab> -->
     </v-tabs>
 
     <v-tabs-items v-model="tab">
@@ -43,6 +48,12 @@
           <PresencesEnseignants />
         </v-card>
       </v-tab-item>
+
+      <!-- <v-tab-item :value="'tab-4'">
+        <v-card flat>
+          <TestCode />
+        </v-card>
+      </v-tab-item> -->
     </v-tabs-items>
   </v-card>
 </template>
@@ -51,6 +62,7 @@
 import Matieres from "@/components/Matieres.vue";
 import Teachers from "@/components/Teachers.vue";
 import PresencesEnseignants from "@/components/PresencesEnseignants.vue";
+//import TestCode from "@/components/TestCode.vue";
 
 export default {
   name: "Enseignants",
@@ -58,6 +70,7 @@ export default {
     Teachers,
     Matieres,
     PresencesEnseignants,
+    //  TestCode,
   },
   data() {
     return {

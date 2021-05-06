@@ -43,7 +43,7 @@ export default {
     drawerTop: null,
     annee_scolaire: "",
   }),
-  beforeCreate() {
+  create() {
     const checkToken = this.checkToken;
     this.checkAnneeScolaire;
     if (checkToken == false) {
