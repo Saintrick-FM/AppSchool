@@ -170,7 +170,7 @@ export default {
           // axios.defaults.headers.common["Authorization"] = "Token " + token;
           localStorage.setItem("token", token);
           //recupérartion des Matieres
-          this.$store.dispatch("actionInitialiseMatiere");
+          //this.$store.dispatch("actionInitialiseMatiere");
 
           const toPath = this.$route.query.to || "/finances";
           (this.loading = false), (this.etape = 4);

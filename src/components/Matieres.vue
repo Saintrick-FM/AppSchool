@@ -170,31 +170,34 @@ export default {
     async initialiseMatiere() {
       //   this.$store.dispatch("actionInitialiseMatiere");
       const token = "Token " + this.$store.state.token;
-      var config = {
-        method: "get",
-        url: "api/ecole/matiere/",
-        headers: {
-          Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
-        },
-      };
-      await axios(config)
-        .then((response) => {
-          const result = response.data;
-          console.log(result);
-          let element = [];
-          for (const key in result) {
-            element.push(result[key]);
-          }
 
-          localStorage.setItem("Matieres", element);
-          this.$store.state.matieres = element;
+      if (this.$store.state.isAuthenticated) {
+        var config = {
+          method: "get",
+          url: "api/ecole/matiere/",
+          headers: {
+            Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
+          },
+        };
+        await axios(config)
+          .then((response) => {
+            const result = response.data;
+            console.log(result);
+            let element = [];
+            for (const key in result) {
+              element.push(result[key]);
+            }
 
-          this.matieres = element;
-          console.log("😃😃😃 this.matieres => " + this.matieres);
-        })
-        .catch(function(error) {
-          console.log("😢😢😢" + error);
-        });
+            localStorage.setItem("Matieres", element);
+            this.$store.state.matieres = element;
+
+            this.matieres = element;
+            console.log("😃😃😃 this.matieres => " + this.matieres);
+          })
+          .catch(function(error) {
+            console.log("😢😢😢" + error);
+          });
+      }
     },
 
     /* {"url":"http://127.0.0.1:8000/api/ecole/matiere/Python/",
@@ -244,6 +247,19 @@ export default {
         Object.assign(this.matieres[this.editedIndex], this.editedItem);
       } else {
         this.matieres.push(this.editedItem);
+        let dernier = this.matieres.length - 1;
+        console.log([this.matieres[dernier]["classAssocie"]]);
+        let objet = {
+          nomMatiere: this.matieres[dernier]["nomMatiere"],
+          pluriProf: this.matieres[dernier]["pluriProf"],
+          seanceParSemaine: parseInt(
+            this.matieres[dernier]["seanceParSemaine"]
+          ),
+          coefficient: parseInt(this.matieres[dernier]["coefficient"]),
+          classAssocie: [this.matieres[dernier]["classAssocie"]],
+        };
+
+        this.$store.dispatch("actionCreateMatiere", objet);
       }
       this.close();
     },
