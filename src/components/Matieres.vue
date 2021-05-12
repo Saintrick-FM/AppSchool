@@ -71,18 +71,22 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
-        <v-dialog v-model="dialogDelete" max-width="500px">
+
+        <v-dialog v-model="dialogDelete" max-width="530px">
           <v-card>
             <v-card-title class="headline"
-              >Etes-vous sûr de bien vouloir supprimer cette matière
-              ?</v-card-title
+              >Etes-vous sûr de vouloir supprimer matière ?</v-card-title
             >
             <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn color="blue darken-1" text @click="closeDelete"
                 >Cancel</v-btn
               >
-              <v-btn color="blue darken-1" text @click="deleteItemConfirm"
+              <v-btn
+                :loading="loader"
+                color="blue darken-1"
+                text
+                @click="deleteItemConfirm"
                 >OK</v-btn
               >
               <v-spacer></v-spacer>
@@ -93,11 +97,13 @@
     </template>
 
     <template v-slot:item.actions="{ item }">
+      <!-- <span @click="editItem(item)">ed</span> ||
+      <span style="color:red" @click="deleteItem(item)">dl</span> -->
       <v-icon small class="mr-2" @click="editItem(item)">
         mdi-pencil
       </v-icon>
       <v-icon small @click="deleteItem(item)">
-        mdi-delete
+        dl mdi-delete
       </v-icon>
     </template>
 
@@ -117,12 +123,13 @@ export default {
   data: () => ({
     dialog: false,
     dialogDelete: false,
+    loader: false,
     MyHeaders: [
-      { text: "Intitulé", value: "nomMatiere", sortable: false },
+      { text: "Intitulé", value: "nomMatiere", sortable: true },
       { text: "Pluri-profs", value: "pluriProf" },
-      { text: "Heures/semaine", value: "seanceParSemaine" },
-      { text: "coefficient", value: "coefficient" },
-      { text: "Classes", value: "classAssocie" },
+      { text: "Heures/semaine", value: "seanceParSemaine", sortable: true },
+      { text: "coefficient", value: "coefficient", sortable: true },
+      { text: "Classes", value: "classAssocie", sortable: true },
       { text: "Actions", value: "actions", sortable: false },
     ],
 
@@ -131,15 +138,15 @@ export default {
     editedItem: {
       nomMatiere: "",
       pluriProf: "",
-      seanceParSemaine: null,
-      coefficient: null,
+      seanceParSemaine: undefined,
+      coefficient: undefined,
       classAssocie: "",
     },
     defaultItem: {
       nomMatiere: "",
       pluriProf: "",
-      seanceParSemaine: null,
-      coefficient: null,
+      seanceParSemaine: undefined,
+      coefficient: undefined,
       classAssocie: "",
     },
   }),
@@ -190,7 +197,6 @@ export default {
 
             localStorage.setItem("Matieres", element);
             this.$store.state.matieres = element;
-
             this.matieres = element;
             console.log("😃😃😃 this.matieres => " + this.matieres);
           })
@@ -217,12 +223,31 @@ export default {
 
     deleteItem(item) {
       this.editedIndex = this.matieres.indexOf(item);
+
+      console.log("position de l'élément choisi => " + this.editedIndex);
+      console.log(
+        "id de l'élément choisi => " +
+          this.matieres[this.editedIndex].id +
+          "\n intitulé de l'élément choisi => " +
+          this.matieres[this.editedIndex].nomMatiere
+      );
       this.editedItem = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
     deleteItemConfirm() {
+      this.loader = true;
+      this.$store.dispatch(
+        "actionRemoveMatiere",
+        this.matieres[this.editedIndex].id
+      );
+      console.log(
+        "index de l'élément confirmé pour la suppression =>" +
+          this.matieres[this.editedIndex].id
+      );
       this.matieres.splice(this.editedIndex, 1);
+      this.loader = false;
+
       this.closeDelete();
     },
 
@@ -235,6 +260,7 @@ export default {
     },
 
     closeDelete() {
+      this.loader = false;
       this.dialogDelete = false;
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
@@ -244,11 +270,27 @@ export default {
 
     save() {
       if (this.editedIndex > -1) {
+        let index = this.editedIndex;
+        console.log("contenu de editedIndex => " + index);
+        let courseToUpdate = parseInt(this.$store.state.matieres[index]["id"]);
+        //let old = this.matieres[this.editedIndex];
+        let donnees = [];
+        donnees.push(courseToUpdate, this.editedItem);
+        console.log(
+          "type pk =>" +
+            typeof donnees[0] +
+            "\n type objet modifié du save =>" +
+            typeof donnees[1]
+        );
+        this.$store.dispatch("actionUpdateMatiere", donnees);
         Object.assign(this.matieres[this.editedIndex], this.editedItem);
       } else {
         this.matieres.push(this.editedItem);
         let dernier = this.matieres.length - 1;
-        console.log([this.matieres[dernier]["classAssocie"]]);
+        console.log(
+          "classe Associée de l'objet créé =>" +
+            [this.matieres[dernier]["classAssocie"]]
+        );
         let objet = {
           nomMatiere: this.matieres[dernier]["nomMatiere"],
           pluriProf: this.matieres[dernier]["pluriProf"],

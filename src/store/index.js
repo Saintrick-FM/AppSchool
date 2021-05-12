@@ -12,7 +12,7 @@ export default new Vuex.Store({
         AlertLogout: null,
         eleves: null,
         matieres: null,
-        elements: []
+        elements: [],
     },
     mutations: {
         initializeStore(state) {
@@ -52,6 +52,13 @@ export default new Vuex.Store({
             state.matieres = matiere
         },
 
+        updateMatieres() {
+            console.log('😿 attention il faut gerer le state.matieres du updateMatiere')
+        },
+        deleteMatiere(index) {
+            const deleted = this.state.matieres.splice(index, 1);
+            console.log(deleted)
+        },
         setAnneeScolaire(state, annee) {
             state.annee_scolaire = annee
         },
@@ -152,12 +159,57 @@ export default new Vuex.Store({
                     commit("createMatieres", dataSend);
                 })
                 .catch(function(error) {
-                    console.log('dataSend in catch action =>' + body)
+                    console.log('dataSend in catch action =>' + JSON.stringify(body))
                     console.log("😢😢😢" + error);
                 });
 
+        },
+
+        async actionUpdateMatiere({ commit }, donnees) {
+            const token = "Token " + this.state.token;
+            console.log(
+                "id du cours à updater =>" +
+                donnees[0] +
+                "\n objet modifié du save =>" +
+                JSON.stringify(donnees[1])
+            );
+
+            var body = donnees[1];
+            console.log(typeof body)
+            await axios
+                .put(`api/ecole/matiere/${donnees[0]}/`, body, {
+                    headers: {
+                        'Authorization': token,
+                    }
+                })
+                .then((response) => {
+                    console.log("😍😍😍 new data sent =>" + JSON.stringify(donnees[1]) + '\n' + response);
+                    commit("updateMatieres" /*donnees[1]*/ );
+                })
+                .catch(function(error) {
+                    console.log("😢😢😢" + JSON.stringify(donnees[1]) + '\nerrors' + error);
+                });
+        },
+
+        actionRemoveMatiere({ commit }, index) {
+            var token = 'Token ' + this.state.token
+            var config = {
+                method: 'delete',
+                url: `api/ecole/matiere/${index}`,
+                headers: {
+                    'Authorization': token
+                }
+            }
+            axios(config)
+                .then((resp) => {
+                    console.log('😍😍😍 element with id ' + index + ' deleted\n' + resp);
+                    commit('deleteMatiere', index)
+                })
+                .catch((err) => { console.log(err) })
+
         }
     },
+
     getters: {
         allEleves: state => {
             return state.eleves
