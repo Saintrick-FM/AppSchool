@@ -13,6 +13,7 @@ export default new Vuex.Store({
         eleves: null,
         matieres: null,
         elements: [],
+        alertErreur: '',
     },
     mutations: {
         initializeStore(state) {
@@ -51,9 +52,18 @@ export default new Vuex.Store({
         createMatieres(state, matiere) {
             state.matieres = matiere
         },
+        setErreurUpdate(state) {
+            state.alertErreur = 'Forbiden'
+        },
 
-        updateMatieres() {
-            console.log('😿 attention il faut gerer le state.matieres du updateMatiere')
+        updateMatieres(state, noError) {
+            if (noError) {
+                state.alertErreur = noError
+                console.log('😿 attention il faut gerer le state.matieres du updateMatiere')
+            } else {
+                state.alertErreur = 'Fobiden'
+            }
+
         },
         deleteMatiere(index) {
             const deleted = this.state.matieres.splice(index, 1);
@@ -155,17 +165,19 @@ export default new Vuex.Store({
                     }
                 })
                 .then((response) => {
+                    let noError = 'ok'
                     console.log("😃😃😃" + response);
-                    commit("createMatieres", dataSend);
+                    commit("createMatieres", dataSend, noError);
                 })
                 .catch(function(error) {
                     console.log('dataSend in catch action =>' + JSON.stringify(body))
                     console.log("😢😢😢" + error);
+                    commit('setErreurUpdate')
                 });
 
         },
 
-        async actionUpdateMatiere({ commit }, donnees) {
+        actionUpdateMatiere({ commit }, donnees) {
             const token = "Token " + this.state.token;
             console.log(
                 "id du cours à updater =>" +
@@ -176,18 +188,28 @@ export default new Vuex.Store({
 
             var body = donnees[1];
             console.log(typeof body)
-            await axios
+            axios
                 .put(`api/ecole/matiere/${donnees[0]}/`, body, {
                     headers: {
                         'Authorization': token,
                     }
                 })
                 .then((response) => {
+                    let noError = 'ok'
                     console.log("😍😍😍 new data sent =>" + JSON.stringify(donnees[1]) + '\n' + response);
-                    commit("updateMatieres" /*donnees[1]*/ );
+                    commit("updateMatieres", noError);
+
                 })
                 .catch(function(error) {
+
                     console.log("😢😢😢" + JSON.stringify(donnees[1]) + '\nerrors' + error);
+                    if (error == "Error: Request failed with status code 403") {
+                        console.log('forbiden')
+                        commit('setErreurMessage')
+                    } else {
+                        console.log('oups pas forbiden')
+                    }
+
                 });
         },
 
@@ -204,6 +226,7 @@ export default new Vuex.Store({
                 .then((resp) => {
                     console.log('😍😍😍 element with id ' + index + ' deleted\n' + resp);
                     commit('deleteMatiere', index)
+
                 })
                 .catch((err) => { console.log(err) })
 
