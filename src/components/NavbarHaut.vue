@@ -11,7 +11,7 @@
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-toolbar-items>
-          <tooltipA /> <tooltipB /> <tooltipC @AlertLogout="EmitAlert" />
+          <tooltipA /> <tooltipB /> <tooltipC @click="EmitAlert" />
         </v-toolbar-items>
       </v-toolbar>
     </v-app-bar>
@@ -44,11 +44,9 @@ export default {
       this.$emit("emitDrawer");
     },
     EmitAlert() {
-      this.$store.commit("setAlertLogout", true);
-      this.Alert = this.$store.state.AlertLogout;
-      // this.$store.commit("removeToken");
-      // localStorage.setItem("token", "");
-      // const toPath = this.$route.query.to || "/connexion";
+      this.Alert = true;
+      //this.$store.commit("setAlertLogout", true);
+      // const toPath = this.$route.query.to || "/deconnexion";
       // this.$router.push(toPath);
     },
   },

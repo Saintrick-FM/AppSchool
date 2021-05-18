@@ -204,13 +204,17 @@ export default {
           const token = res.data.token;
           console.log(token);
           this.$store.commit("setToken", token);
+          this.$store.commit("setAuthStatut", this.name);
+
           // axios.defaults.headers.common["Authorization"] = "Token " + token;
           localStorage.setItem("token", token);
           //recupérartion des Matieres
           //this.$store.dispatch("actionInitialiseMatiere");
 
+          this.etape = 4;
+          this.loading = false;
           const toPath = this.$route.query.to || "/finances";
-          (this.loading = false), (this.etape = 4);
+
           this.$router.push(toPath);
         })
         .catch((err) => {

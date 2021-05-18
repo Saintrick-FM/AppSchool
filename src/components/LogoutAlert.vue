@@ -48,6 +48,8 @@ export default {
       this.$store.commit("removeToken");
       this.$store.commit("removeAnneeScolaire");
       localStorage.removeItem("token");
+      localStorage.removeItem("nameAuth");
+
       const toPath = this.$route.query.to || "/connexion";
       this.$router.push(toPath);
       this.dialog = this.$store.state.AlertLogout;

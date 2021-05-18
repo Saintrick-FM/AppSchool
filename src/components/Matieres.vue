@@ -367,13 +367,13 @@ export default {
             typeof donnees[1]
         );
         this.$store.dispatch("actionUpdateMatiere", donnees);
-        if (this.$store.state.alertErreur == "ok") {
+        if (this.$store.state.authStatut == "abel") {
           console.log(
             "if de matiere. state.alertErreur => " +
               this.$store.state.alertErreur
           );
           Object.assign(this.matieres[this.editedIndex], this.editedItem);
-        } else if (this.$store.state.alertErreur == "Forbiden") {
+        } else if (this.$store.state.authStatut == "secretaire") {
           console.log("else if de matieres");
           this.message_erreur =
             "Désolé seuls les directeurs sont autorisés à modifier une matière";
@@ -387,28 +387,26 @@ export default {
 
         //creer une matière
       } else {
-        let dernier = this.matieres.length - 1;
         console.log(
-          "classe Associée de l'objet créé =>" +
-            [this.matieres[dernier]["classAssocie"]]
+          "classe Associée de l'objet créé =>" + this.editedItem.classAssocie
         );
-        let objet = {
-          nomMatiere: this.matieres[dernier]["nomMatiere"],
-          pluriProf: this.matieres[dernier]["pluriProf"],
-          seanceParSemaine: parseInt(
-            this.matieres[dernier]["seanceParSemaine"]
-          ),
-          coefficient: parseInt(this.matieres[dernier]["coefficient"]),
-          classAssocie: [this.matieres[dernier]["classAssocie"]],
-        };
+        // let objet = {
+        //   nomMatiere: this.matieres[dernier]["nomMatiere"],
+        //   pluriProf: this.matieres[dernier]["pluriProf"],
+        //   seanceParSemaine: parseInt(
+        //     this.matieres[dernier]["seanceParSemaine"]
+        //   ),
+        //   coefficient: parseInt(this.matieres[dernier]["coefficient"]),
+        //   classAssocie: [this.matieres[dernier]["classAssocie"]],
+        // };
 
-        this.$store.dispatch("actionCreateMatiere", objet);
-        if (this.$store.state.alertErreur == "ok") {
+        this.$store.dispatch("actionCreateMatiere", this.editedItem);
+        if (this.$store.state.authStatut == "abel") {
           this.matieres.push(this.editedItem);
-        } else if (this.$store.state.alertErreur == "Forbiden") {
+        } else if (this.$store.state.authStatut == "secretaire") {
           console.log("else if de matieres");
           this.message_erreur =
-            "Désolé seuls les directeurs sont autorisés à modifier une matière";
+            "Désolé seuls les directeurs sont autorisés à créer une matière";
           this.erreur = true;
         } else {
           this.message_erreur =

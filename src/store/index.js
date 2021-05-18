@@ -7,6 +7,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
     state: {
         isAuthenticated: false,
+        authStatut: '',
         annee_scolaire: '',
         token: '',
         AlertLogout: null,
@@ -54,6 +55,9 @@ export default new Vuex.Store({
         },
         setErreurUpdate(state) {
             state.alertErreur = 'Forbiden'
+        },
+        setAuthStatut(state, name) {
+            state.authStatut = name
         },
 
         updateMatieres(state, noError) {
