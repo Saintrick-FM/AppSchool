@@ -44,12 +44,23 @@ export default {
       this.dialog = false;
     },
     confirmLogout() {
+      //this.$store.commit("removeAlertLogout");
       localStorage.setItem("token", null);
-      this.$store.commit("initializeStore");
+      localStorage.setItem("Matieres", null);
+      localStorage.setItem("id Classes", null);
+      localStorage.setItem("Id_classes", null);
+      localStorage.setItem("année scolaire", null);
+      localStorage.setItem("authStatut", null);
+      localStorage.setItem("annee_scolaire", null);
+      localStorage.setItem("token", null);
+      localStorage.setItem("token", null);
+      this.$store.state.token = "";
+
+      this.dialog = false;
       const toPath = this.$route.query.to || "/connexion";
       this.$router.push(toPath);
-      this.dialog = this.$store.state.AlertLogout;
-      this.$emit("Deconnexion");
+
+      //     this.$emit("Deconnexion");
     },
   },
 };

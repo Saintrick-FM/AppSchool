@@ -16,9 +16,9 @@
           </v-list-item-content>
         </v-list-item>
       </v-list>
-      <v-divider /> <RubriqueNav v-if="checkedToken != false" />
+      <v-divider /> <RubriqueNav v-if="checkedToken" />
     </v-navigation-drawer>
-    <NavbarHaut v-on:emitDrawer="initialise" v-if="checkedToken != false" />
+    <NavbarHaut v-on:emitDrawer="initialise" v-if="checkedToken" />
 
     <v-main>
       <transition name="fade" mode="out-in">
@@ -43,7 +43,7 @@ export default {
     drawerTop: null,
     annee_scolaire: "",
   }),
-  create() {
+  beforeCreate() {
     const checkToken = this.checkToken;
     this.checkAnneeScolaire;
     if (checkToken == false) {
@@ -55,17 +55,17 @@ export default {
   },
   computed: {
     checkedToken: function() {
-      return this.$store.state.token;
+      return localStorage.getItem("token");
     },
   },
 
   methods: {
     checkToken() {
-      this.$store.commit("initializeStore");
-      const token = this.$store.state.token;
+      //this.$store.commit("initializeStore");
+      const token = localStorage.getItem("token");
       if (token) {
         //this.drawerTop = "token";
-        this.checkedToken = true;
+        //this.checkedToken = true;
 
         return token;
       } else if (token == null) {

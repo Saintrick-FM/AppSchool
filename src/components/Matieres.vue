@@ -245,7 +245,7 @@ export default {
             localStorage.setItem("Matieres", element);
             this.$store.state.matieres = element;
             this.matieres = element;
-            console.log("😃😃😃 this.matieres => " + this.matieres);
+            console.log("😃😃😃 this.matieres => " + element);
           })
           .catch(function(error) {
             console.log("😢😢😢" + error);
