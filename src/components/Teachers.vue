@@ -1,7 +1,7 @@
 <template>
   <v-data-table
-    :headers="headers"
-    :items="desserts"
+    :headers="MyHeaders"
+    :items="enseignants"
     sort-by="calories"
     class="elevation-1"
   >
@@ -11,7 +11,7 @@
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
 
-        <v-dialog v-model="dialog" max-width="500px">
+        <v-dialog v-model="dialog" max-width="1000px">
           <template v-slot:activator="{ on, attrs }">
             <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
               Nouvel enseignant
@@ -19,9 +19,7 @@
           </template>
           <v-card>
             <v-card-title>
-              <span class="headline"
-                >Nom(s) et prénoms(s)<!-- {{ formTitle }} --></span
-              >
+              <span class="headline">{{ formTitle }} </span>
             </v-card-title>
 
             <v-card-text>
@@ -29,32 +27,106 @@
                 <v-row>
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field
-                      v-model="editedItem.name"
-                      label="Dessert name"
+                      v-model="editedItem.nom"
+                      label="Noms"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field
-                      v-model="editedItem.calories"
-                      label="Calories"
+                      v-model="editedItem.civilite"
+                      label="civilite"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field
-                      v-model="editedItem.fat"
-                      label="Fat (g)"
+                      v-model="editedItem.civilite"
+                      label="civilite"
                     ></v-text-field>
                   </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.date_naissance"
+                      label="date_naissance"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.lieu_naissance"
+                      label="lieu_naissance"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.situationSociale"
+                      label="situationSociale"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.nationalite"
+                      label="nationalite"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.adresse"
+                      label="Adresse"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.telephone"
+                      label="telephone"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.email"
+                      label="email"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.modePaiement"
+                      label="Mode de Paiement"
+                    ></v-text-field>
+                  </v-col>
+
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.telephone"
+                      label="Téléphone"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.numeroCompteBancaire"
+                      label="Compte Bancaire"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.numeroCnss"
+                      label="Numere CNSS"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.enseigneAu"
+                      label="Enseigne au ?"
+                    ></v-text-field>
+                  </v-col>
+
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field
                       v-model="editedItem.carbs"
-                      label="Carbs (g)"
+                      label="Cours dispensé"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field
                       v-model="editedItem.protein"
-                      label="Protein (g)"
+                      label="Classes occupées"
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -110,48 +182,63 @@
 </template>
 
 <script>
+import axios from "axios";
 import { mapGetters } from "vuex";
 export default {
   name: "Teachers",
   data: () => ({
+    erreur: false,
+    message_erreur: "",
     dialog: false,
     dialogDelete: false,
-    headers: [
-      {
-        text: "Dessert (100g serving)",
-        align: "start",
-        sortable: false,
-        value: "name",
-      },
-      { text: "Calories", value: "calories" },
-      { text: "Fat (g)", value: "fat" },
-      { text: "Carbs (g)", value: "carbs" },
-      { text: "Protein (g)", value: "protein" },
+    loader: false,
+    MyHeaders: [
+      { text: "Nom", value: "nom", sortable: true },
+      { text: "Téléphone", value: "telephone" },
+      { text: "Adresse", value: "adresse", sortable: true },
+      { text: "Cours", value: "matiereEnseigne", sortable: true },
+      { text: "Classes", value: "classesOccupees", sortable: true },
+      { text: "Admis le", value: "dateEmbauche", sortable: true },
       { text: "Actions", value: "actions", sortable: false },
     ],
-    desserts: [],
+
+    enseignants: [],
     editedIndex: -1,
     editedItem: {
-      name: "",
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0,
+      nom: undefined,
+      civilite: undefined,
+      date_naissance: undefined,
+      lieu_naissance: undefined,
+      situationSociale: undefined,
+      nationalite: undefined,
+      adresse: undefined,
+      telephone: undefined,
+      email: undefined,
+      dateEmbauche: undefined,
+      modePaiement: undefined,
+      intituleCompte: undefined,
+      numeroCompteBancaire: undefined,
+      numeroCnss: undefined,
+      enseigneAu: undefined,
+      classesOccupees: [],
     },
     defaultItem: {
-      name: "",
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0,
+      nom: undefined,
+      adresse: undefined,
+      telephone: undefined,
+      email: undefined,
+      dateEmbauche: undefined,
+      classesOccupees: [],
     },
   }),
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "New Item" : "Edit Item";
+      return this.editedIndex === -1
+        ? "Nouvel(le) Enseignant(e)"
+        : "Modification d'un(e) enseignant(e)";
     },
-    ...mapGetters(["allEleves"]),
+    ...mapGetters(["allTeachers"]),
   },
 
   watch: {
@@ -163,125 +250,90 @@ export default {
     },
   },
 
-  created() {
-    this.initialize();
-    //this.initialiseEleves();
+  // created() {
+  //   this.initialiseProf();
+  // },
+  beforeMount() {
+    this.initialiseProf();
   },
 
   methods: {
-    // initialiseEleves() {
-    //   const token = "Token " + this.$store.state.token;
-    //   console.log("token récupéré =>" + token);
+    CloseAlert() {
+      this.message_erreur = "";
+      this.erreur = false;
+    },
+    async initialiseProf() {
+      //   this.$store.dispatch("actionInitialiseMatiere");
+      const token = "Token " + localStorage.getItem("token");
 
-    //   var config = {
-    //     method: "get",
-    //     url: "api/inscriptions/",
-    //     headers: {
-    //       Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
-    //     },
-    //   };
+      if (localStorage.getItem("token") != null) {
+        var config = {
+          method: "get",
+          url: "api/ecole/enseignants/",
+          headers: {
+            Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
+          },
+        };
+        await axios(config)
+          .then((response) => {
+            const result = response.data;
 
-    //   axios(config)
-    //     .then((response) => {
-    //       // const result = JSON.stringify(response.data); # ceci vient de postman
-    //       // console.log("résultat du stringify =>" + result);
-    //       console.log("😃😃😃" + response.data);
-    //       this.$store.commit("initializeEleve", response.data);
-    //       // this.eleves = response.data;
-    //     })
-    //     .catch(function(error) {
-    //       console.log("😢😢😢" + error);
-    //     });
-    // },
-    initialize() {
-      this.desserts = [
-        {
-          name: "Frozen Yogurt",
-          calories: 159,
-          fat: 6.0,
-          carbs: 24,
-          protein: 4.0,
-        },
-        {
-          name: "Ice cream sandwich",
-          calories: 237,
-          fat: 9.0,
-          carbs: 37,
-          protein: 4.3,
-        },
-        {
-          name: "Eclair",
-          calories: 262,
-          fat: 16.0,
-          carbs: 23,
-          protein: 6.0,
-        },
-        {
-          name: "Cupcake",
-          calories: 305,
-          fat: 3.7,
-          carbs: 67,
-          protein: 4.3,
-        },
-        {
-          name: "Gingerbread",
-          calories: 356,
-          fat: 16.0,
-          carbs: 49,
-          protein: 3.9,
-        },
-        {
-          name: "Jelly bean",
-          calories: 375,
-          fat: 0.0,
-          carbs: 94,
-          protein: 0.0,
-        },
-        {
-          name: "Lollipop",
-          calories: 392,
-          fat: 0.2,
-          carbs: 98,
-          protein: 0,
-        },
-        {
-          name: "Honeycomb",
-          calories: 408,
-          fat: 3.2,
-          carbs: 87,
-          protein: 6.5,
-        },
-        {
-          name: "Donut",
-          calories: 452,
-          fat: 25.0,
-          carbs: 51,
-          protein: 4.9,
-        },
-        {
-          name: "KitKat",
-          calories: 518,
-          fat: 26.0,
-          carbs: 65,
-          protein: 7,
-        },
-      ];
+            console.log(result);
+            localStorage.setItem("Profs", result);
+
+            let element = [];
+            for (const key in result) {
+              element.push(result[key]);
+            }
+
+            this.$store.state.enseignants = element;
+            this.enseignants = element;
+            console.log(
+              "😃😃😃 this.profs => " +
+                element +
+                "this.response.data = " +
+                response.data
+            );
+          })
+          .catch(function(error) {
+            console.log("😢😢😢" + error);
+          });
+      }
     },
 
     editItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
+      this.editedIndex = this.enseignants.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
 
     deleteItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
+      this.editedIndex = this.enseignants.indexOf(item);
+
+      console.log("position de l'élément choisi => " + this.editedIndex);
+      console.log(
+        "id de l'élément choisi => " +
+          this.enseignants[this.editedIndex].id +
+          "\n intitulé de l'élément choisi => " +
+          this.enseignants[this.editedIndex].nomMatiere
+      );
       this.editedItem = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
     deleteItemConfirm() {
-      this.desserts.splice(this.editedIndex, 1);
+      this.loader = true;
+      this.$store.dispatch(
+        "actionRemoveMatiere",
+        this.enseignants[this.editedIndex].id
+      );
+      console.log(
+        "index de l'élément confirmé pour la suppression =>" +
+          this.enseignants[this.editedIndex].id
+      );
+      this.enseignants.splice(this.editedIndex, 1);
+      this.loader = false;
+
       this.closeDelete();
     },
 
@@ -294,6 +346,7 @@ export default {
     },
 
     closeDelete() {
+      this.loader = false;
       this.dialogDelete = false;
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
@@ -303,9 +356,57 @@ export default {
 
     save() {
       if (this.editedIndex > -1) {
-        Object.assign(this.desserts[this.editedIndex], this.editedItem);
+        let index = this.editedIndex;
+        console.log("contenu de editedIndex => " + index);
+        let courseToUpdate = this.editedItem.id;
+        //let old = this.enseignants[this.editedIndex];
+        let donnees = [];
+        donnees.push(courseToUpdate, this.editedItem);
+        console.log(
+          "type pk =>" +
+            donnees[0] +
+            "\n type objet modifié du save =>" +
+            typeof donnees[1]
+        );
+        this.$store.dispatch("actionUpdateEnseignant", donnees);
+        if (this.$store.state.authStatut == "abel") {
+          console.log(
+            "if de matiere. state.alertErreur => " +
+              this.$store.state.alertErreur
+          );
+          Object.assign(this.enseignants[this.editedIndex], this.editedItem);
+        } else if (this.$store.state.authStatut == "secretaire") {
+          console.log("else if de enseignants");
+          this.message_erreur =
+            "Désolé seuls les directeurs sont autorisés à modifier une matière";
+          this.erreur = true;
+        } else {
+          console.log(
+            "else de teachers state.alertErreur => " +
+              this.$store.state.alertErreur
+          );
+        }
+
+        //creer une matière
       } else {
-        this.desserts.push(this.editedItem);
+        console.log(
+          "classe Associée de l'objet créé =>" + this.editedItem.classAssocie
+        );
+
+        this.$store.dispatch("actionCreateEnseignant", this.editedItem);
+        if (this.$store.state.authStatut == "abel") {
+          this.enseignants.push(this.editedItem);
+        } else if (this.$store.state.authStatut == "secretaire") {
+          console.log("else if de enseignants");
+          this.message_erreur =
+            "Désolé seuls les directeurs sont autorisés à créer un enseignant";
+          this.erreur = true;
+        } else {
+          this.message_erreur =
+            "Désolé une erreur s'est produite au niveau du serveur";
+          console.log("else de enseignants");
+          this.erreur = true;
+        }
       }
       this.close();
     },

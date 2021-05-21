@@ -186,7 +186,6 @@ export default {
     async onLogin() {
       this.loading = true;
       this.$store.commit("setAnneeScolaire", this.annee_choisi);
-      localStorage.setItem("année scolaire", this.annee_choisi);
       console.log(
         "l'année choisie du component connexion est :" + this.annee_choisi
       );

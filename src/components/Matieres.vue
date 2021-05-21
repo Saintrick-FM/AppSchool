@@ -223,9 +223,9 @@ export default {
     },
     async initialiseMatiere() {
       //   this.$store.dispatch("actionInitialiseMatiere");
-      const token = "Token " + this.$store.state.token;
+      const token = "Token " + localStorage.getItem("token");
 
-      if (this.$store.state.isAuthenticated) {
+      if (localStorage.getItem("token") != null) {
         var config = {
           method: "get",
           url: "api/ecole/matiere/",
@@ -236,16 +236,23 @@ export default {
         await axios(config)
           .then((response) => {
             const result = response.data;
+            console.log("coucou");
             console.log(result);
+            localStorage.setItem("Matieres", result);
+            console.log("coucou 2");
             let element = [];
             for (const key in result) {
               element.push(result[key]);
             }
 
-            localStorage.setItem("Matieres", element);
             this.$store.state.matieres = element;
             this.matieres = element;
-            console.log("😃😃😃 this.matieres => " + element);
+            console.log(
+              "😃😃😃 this.matieres => " +
+                element +
+                "this.response.data = " +
+                response.data
+            );
           })
           .catch(function(error) {
             console.log("😢😢😢" + error);
