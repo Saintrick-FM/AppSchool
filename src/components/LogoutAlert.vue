@@ -44,12 +44,8 @@ export default {
       this.dialog = false;
     },
     confirmLogout() {
-      this.$store.commit("removeAlertLogout");
-      this.$store.commit("removeToken");
-      this.$store.commit("removeAnneeScolaire");
-      localStorage.removeItem("token");
-      localStorage.removeItem("nameAuth");
-
+      localStorage.setItem("token", null);
+      this.$store.commit("initializeStore");
       const toPath = this.$route.query.to || "/connexion";
       this.$router.push(toPath);
       this.dialog = this.$store.state.AlertLogout;

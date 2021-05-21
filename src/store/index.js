@@ -1,18 +1,21 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+//import teachers from './modules/teachers'
 import axios from 'axios'
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
     state: {
-        isAuthenticated: false,
+        isAuthenticated: undefined,
         authStatut: '',
         annee_scolaire: '',
         token: '',
         AlertLogout: null,
         eleves: null,
         matieres: null,
+        classes: null,
+        identifiants_classes: [],
         elements: [],
         alertErreur: '',
     },
@@ -21,11 +24,17 @@ export default new Vuex.Store({
             if (localStorage.getItem('token')) {
                 state.isAuthenticated = true;
                 state.token = localStorage.getItem('token');
-            } else {
+            } else if (localStorage.getItem('token') == null) {
                 state.isAuthenticated = false;
-                state.token = '';
+                state.token = null;
                 state.matieres = null;
+                state.classes = null;
+                state.authStatut = '';
+                state.identifiants_classes = [],
+                    localStorage.setItem("nameAuth", null);
                 localStorage.setItem('Matieres', null)
+                localStorage.setItem('Classes', null)
+                    // localStorage.setItem('id_Classes', null)
             }
 
             if (localStorage.getItem('année scolaire')) {
@@ -35,6 +44,7 @@ export default new Vuex.Store({
                 const annee = new Date()
                 const year = annee.getFullYear() + '-' + (annee.getFullYear() + 1)
                 state.annee_scolaire = year
+                localStorage.setItem('annee_scolaire', year)
             }
 
             if (localStorage.getItem('Matieres')) {
@@ -60,13 +70,15 @@ export default new Vuex.Store({
             state.authStatut = name
         },
 
-        updateMatieres(state, noError) {
-            if (noError) {
-                state.alertErreur = noError
-                console.log('😿 attention il faut gerer le state.matieres du updateMatiere')
-            } else {
-                state.alertErreur = 'Fobiden'
+        updateMatieres(state, newMatiere) {
+            console.log('😷😷😷 attention j\'essaie de gérer le state.matieres du updateMatiere')
+            let id = []
+            for (const iterator of this.state.matieres) {
+                id.push(iterator.id)
             }
+            console.log(' Le tableau des id =>' + id + '\n La matiere avec l\'id ' +
+                newMatiere[0] + ' est à la ' + id.indexOf(newMatiere[0]) + ' eme place')
+            state.matieres[id.indexOf(newMatiere[0])] = newMatiere[1]
 
         },
         deleteMatiere(index) {
@@ -199,9 +211,9 @@ export default new Vuex.Store({
                     }
                 })
                 .then((response) => {
-                    let noError = 'ok'
+                    let newMatiere = [donnees[0], donnees[1]]
                     console.log("😍😍😍 new data sent =>" + JSON.stringify(donnees[1]) + '\n' + response);
-                    commit("updateMatieres", noError);
+                    commit("updateMatieres", newMatiere);
 
                 })
                 .catch(function(error) {
@@ -245,5 +257,7 @@ export default new Vuex.Store({
             return state.matieres
         },
     },
-    modules: {},
+    modules: {
+        //      teachers,
+    },
 })

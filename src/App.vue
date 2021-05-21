@@ -16,9 +16,9 @@
           </v-list-item-content>
         </v-list-item>
       </v-list>
-      <v-divider /> <RubriqueNav v-if="checkToken()" />
+      <v-divider /> <RubriqueNav v-if="checkedToken != false" />
     </v-navigation-drawer>
-    <NavbarHaut v-on:emitDrawer="initialise" v-if="checkToken()" />
+    <NavbarHaut v-on:emitDrawer="initialise" v-if="checkedToken != false" />
 
     <v-main>
       <transition name="fade" mode="out-in">
@@ -53,6 +53,11 @@ export default {
       axios.defaults.headers.common["Authorization"] = "Token " + checkToken;
     }
   },
+  computed: {
+    checkedToken: function() {
+      return this.$store.state.token;
+    },
+  },
 
   methods: {
     checkToken() {
@@ -60,7 +65,13 @@ export default {
       const token = this.$store.state.token;
       if (token) {
         //this.drawerTop = "token";
+        this.checkedToken = true;
+
         return token;
+      } else if (token == null) {
+        console.log("token==null");
+        // this.drawer = false;
+        return false;
       } else {
         // this.drawer = false;
         return false;

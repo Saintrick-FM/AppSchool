@@ -280,7 +280,8 @@ export default {
 
             console.log("identifiants classes =>" + this.identifiants_classes);
             localStorage.setItem("Classes", element);
-            this.$store.state.matieres = element;
+            //  localStorage.setItem("Id_classes", this.identifiants_classes);
+            //  this.$store.state.classes = element;
             this.classes = element;
             console.log("😃😃😃 this.classes => " + this.classes);
           })
