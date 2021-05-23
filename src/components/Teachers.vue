@@ -11,138 +11,232 @@
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
 
-        <v-dialog v-model="dialog" max-width="1000px">
+        <v-dialog
+          v-model="dialog"
+          fullscreen
+          hide-overlay
+          transition="dialog-top-transition"
+        >
           <template v-slot:activator="{ on, attrs }">
             <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
               Nouvel enseignant
             </v-btn>
           </template>
-          <v-card>
-            <v-card-title>
-              <span class="headline">{{ formTitle }} </span>
-            </v-card-title>
+          <!-- ----------------------------------------------------------------------------- -->
+          <v-card align-content-space-around>
+            <v-toolbar dark color="primary">
+              <v-btn icon dark @click="dialog = false">
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+              <v-toolbar-title>Settings</v-toolbar-title>
 
-            <v-card-text>
-              <v-container>
-                <v-row>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.nom"
-                      label="Noms"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.civilite"
-                      label="civilite"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.civilite"
-                      label="civilite"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.date_naissance"
-                      label="date_naissance"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.lieu_naissance"
-                      label="lieu_naissance"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.situationSociale"
-                      label="situationSociale"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.nationalite"
-                      label="nationalite"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.adresse"
-                      label="Adresse"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.telephone"
-                      label="telephone"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.email"
-                      label="email"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.modePaiement"
-                      label="Mode de Paiement"
-                    ></v-text-field>
-                  </v-col>
-
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.telephone"
-                      label="Téléphone"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.numeroCompteBancaire"
-                      label="Compte Bancaire"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.numeroCnss"
-                      label="Numere CNSS"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.enseigneAu"
-                      label="Enseigne au ?"
-                    ></v-text-field>
-                  </v-col>
-
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.carbs"
-                      label="Cours dispensé"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.protein"
-                      label="Classes occupées"
-                    ></v-text-field>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card-text>
-
-            <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="close">
-                Cancel
-              </v-btn>
-              <v-btn color="blue darken-1" text @click="save">
-                Save
-              </v-btn>
-            </v-card-actions>
+              <v-card-title>
+                <span class="headline">{{ formTitle }} </span>
+              </v-card-title>
+              <v-spacer></v-spacer>
+              <v-toolbar-items>
+                <v-btn dark text @click="dialog = false">
+                  Save
+                </v-btn>
+              </v-toolbar-items>
+            </v-toolbar>
+
+            <v-row>
+              <v-card style="margin-top: 30px" width="58%">
+                <v-card-title>
+                  <span class="headline" style="margin-left: 100px"
+                    >Informations générales</span
+                  >
+                </v-card-title>
+                <v-card-text>
+                  <v-container>
+                    <v-row>
+                      <v-col cols="12" sm="6" md="5">
+                        <v-text-field
+                          v-model="editedItem.nom"
+                          :rules="nameRules"
+                          label="Noms"
+                          hint="example of persistent helper text"
+                          persistent-hint
+                          required
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" sm="6" md="3">
+                        <v-text-field
+                          v-model="editedItem.civilite"
+                          label="Civilite"
+                          required
+                        ></v-text-field>
+                      </v-col>
+
+                      <v-col cols="12" sm="6" md="4">
+                        <v-text-field
+                          v-model="editedItem.date_naissance"
+                          label="Date de naissance"
+                          hint="Exemple: 11-Mai-1995"
+                          persistent-hint
+                          required
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" sm="6" md="4">
+                        <v-text-field
+                          v-model="editedItem.lieu_naissance"
+                          label="Lieu de naissance"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" sm="6" md="4">
+                        <v-autocomplete
+                          :items="[
+                            'Célibataire',
+                            'Marié(e)',
+                            'Fiancé(e)',
+                            'Veuf(ve)',
+                            'Divorcé(e)',
+                          ]"
+                          label="Statut sociale"
+                          v-model="editedItem.situationSociale"
+                          required
+                        ></v-autocomplete>
+                      </v-col>
+                      <v-col cols="12" sm="6" md="4">
+                        <v-text-field
+                          v-model="editedItem.nationalite"
+                          label="nationalite"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" sm="6" md="4">
+                        <v-text-field
+                          v-model="editedItem.adresse"
+                          label="Adresse"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" sm="6" md="4">
+                        <v-text-field
+                          v-model="editedItem.telephone"
+                          label="Téléphone"
+                          :rules="telephoneRules"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" sm="6" md="4">
+                        <v-text-field
+                          v-model="editedItem.email"
+                          label="Email"
+                        ></v-text-field>
+                      </v-col>
+
+                      <v-col md="4">
+                        <v-autocomplete
+                          :items="[
+                            'A la maternelle',
+                            'Au Prescolaire',
+                            'Au Primaire',
+                            'Au Collège',
+                            'Au Lycée',
+                          ]"
+                          v-model="editedItem.enseigneAu"
+                          label="Enseigne"
+                          required
+                        ></v-autocomplete>
+                      </v-col>
+
+                      <v-col cols="12" sm="6" md="4">
+                        <v-select
+                          v-model="editedItem.matiereEnseigne"
+                          :items="matieres"
+                          label="Cours dispensé*"
+                          required
+                          multiple
+                        ></v-select>
+                      </v-col>
+                      <v-col cols="12" sm="6" md="4">
+                        <v-select
+                          :items="classes"
+                          required
+                          multiple
+                          v-model="editedItem.classesOccupees"
+                          label="Classes occupées*"
+                        ></v-select>
+                      </v-col>
+                    </v-row>
+                  </v-container>
+                  <small>*indicates required field</small>
+                </v-card-text>
+              </v-card>
+
+              <v-spacer></v-spacer>
+              <v-card width="40%" style=" margin-top: 30px">
+                <v-card-title>
+                  <span class="headline" style="margin-left: 100px"
+                    >Informations professionnelles</span
+                  >
+                </v-card-title>
+                <v-list three-line subheader>
+                  <!-- <v-subheader>User Controls</v-subheader> -->
+                  <v-list-item>
+                    <v-list-item-content>
+                      <v-list-item-title>Content filtering</v-list-item-title>
+                      <v-list-item-subtitle
+                        >Set the content filtering level to restrict apps that
+                        can be downloaded</v-list-item-subtitle
+                      >
+                    </v-list-item-content>
+                  </v-list-item>
+
+                  <v-list-item>
+                    <v-list-item-content>
+                      <v-list-item-title>Password</v-list-item-title>
+                      <v-list-item-subtitle
+                        >Require password for purchase or use password to
+                        restrict purchase</v-list-item-subtitle
+                      >
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-list>
+                <v-col cols="12" sm="6" md="4">
+                  <v-autocomplete
+                    v-model="editedItem.modePaiement"
+                    label="Mode de Paiement"
+                    :items="['Manuel', 'Virement bancaire']"
+                  ></v-autocomplete>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <v-text-field
+                    v-model="editedItem.numeroCompteBancaire"
+                    label="Compte Bancaire"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <v-text-field
+                    v-model="editedItem.numeroCnss"
+                    label="Numere CNSS"
+                  ></v-text-field>
+                </v-col>
+              </v-card>
+
+              <v-divider></v-divider>
+
+              <v-card-actions
+                align-content-space-between
+                style="margin-left:360px"
+              >
+                <v-spacer></v-spacer>
+                <v-btn color="blue darken-1" text @click="dialog = false">
+                  Close
+                </v-btn>
+                <v-btn
+                  color="blue darken-1"
+                  style="margin-left:250px"
+                  text
+                  @click="dialog = false"
+                >
+                  Save
+                </v-btn>
+              </v-card-actions>
+            </v-row>
           </v-card>
+
+          <!-- ---------------------------------------- -->
         </v-dialog>
         <v-dialog v-model="dialogDelete" max-width="500px">
           <v-card>
@@ -203,6 +297,20 @@ export default {
     ],
 
     enseignants: [],
+    matieres: [],
+    classes: undefined,
+    nameRules: [
+      (v) => !!v || "Le nom est obligatoire",
+      (v) => v.length > 6 || "Le nom doit avoir plus de 6 caractères",
+    ],
+
+    telephoneRules: [
+      (v) => !!v || "Le numéro de téléphone est obligatoire",
+      // (v) =>
+      //   parseInt(v) == true || "Le numéro ne doit contenir que des chiffres",
+      (v) =>
+        v.length == 9 || "Le numéro doit contenir strictement 9 caractères",
+    ],
     editedIndex: -1,
     editedItem: {
       nom: undefined,
@@ -238,7 +346,7 @@ export default {
         ? "Nouvel(le) Enseignant(e)"
         : "Modification d'un(e) enseignant(e)";
     },
-    ...mapGetters(["allTeachers"]),
+    ...mapGetters(["allMatieres"]),
   },
 
   watch: {
@@ -250,11 +358,19 @@ export default {
     },
   },
 
-  // created() {
-  //   this.initialiseProf();
-  // },
   beforeMount() {
     this.initialiseProf();
+    let mat = this.allMatieres;
+
+    mat.forEach((element) => {
+      this.matieres.push(element.nomMatiere);
+    });
+    let id_classes = [localStorage.getItem("Id_classes")];
+    let classe = [];
+    id_classes.forEach((element) => {
+      classe.push(element);
+    });
+    this.classes = classe;
   },
 
   methods: {
@@ -265,7 +381,6 @@ export default {
     async initialiseProf() {
       //   this.$store.dispatch("actionInitialiseMatiere");
       const token = "Token " + localStorage.getItem("token");
-
       if (localStorage.getItem("token") != null) {
         var config = {
           method: "get",

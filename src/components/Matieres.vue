@@ -211,10 +211,11 @@ export default {
 
   created() {
     this.initialiseMatiere();
-  },
-  beforeMount() {
     this.initialiseClasse();
   },
+  // beforeMount() {
+  //   this.initialiseClasse();
+  // },
 
   methods: {
     CloseAlert() {
@@ -236,10 +237,10 @@ export default {
         await axios(config)
           .then((response) => {
             const result = response.data;
-            console.log("coucou");
+
             console.log(result);
             localStorage.setItem("Matieres", result);
-            console.log("coucou 2");
+
             let element = [];
             for (const key in result) {
               element.push(result[key]);
@@ -261,9 +262,9 @@ export default {
     },
     async initialiseClasse() {
       //   this.$store.dispatch("actionInitialiseMatiere");
-      const token = "Token " + this.$store.state.token;
+      const token = "Token " + localStorage.getItem("token");
 
-      if (this.$store.state.isAuthenticated) {
+      if (localStorage.getItem("token")) {
         var config = {
           method: "get",
           url: "api/ecole/classe/",
@@ -287,8 +288,8 @@ export default {
 
             console.log("identifiants classes =>" + this.identifiants_classes);
             localStorage.setItem("Classes", element);
-            //  localStorage.setItem("Id_classes", this.identifiants_classes);
-            //  this.$store.state.classes = element;
+            localStorage.setItem("Id_classes", this.identifiants_classes);
+            this.$store.state.classes = element;
             this.classes = element;
             console.log("😃😃😃 this.classes => " + this.classes);
           })

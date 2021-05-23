@@ -165,7 +165,7 @@ export default {
     ],
     password: "",
     passwordRules: [
-      (v) => !!v || "Password is required",
+      (v) => !!v || "Le mot de passe est obligatoire",
       (v) => (v && v.length >= 6) || "Password must be less than 6 characters",
     ],
   }),
