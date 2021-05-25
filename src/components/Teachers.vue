@@ -150,13 +150,13 @@
                         ></v-select>
                       </v-col>
                       <v-col cols="12" sm="6" md="4">
-                        <v-select
+                        <v-autocomplete
                           :items="classes"
                           required
                           multiple
                           v-model="editedItem.classesOccupees"
                           label="Classes occupées*"
-                        ></v-select>
+                        ></v-autocomplete>
                       </v-col>
                     </v-row>
                   </v-container>
@@ -268,7 +268,7 @@
     </template>
 
     <template v-slot:no-data>
-      <v-btn color="primary" @click="initialize">
+      <v-btn color="primary" @click="initialiseProf">
         Reset
       </v-btn>
     </template>
@@ -359,18 +359,26 @@ export default {
   },
 
   beforeMount() {
-    this.initialiseProf();
     let mat = this.allMatieres;
 
     mat.forEach((element) => {
       this.matieres.push(element.nomMatiere);
     });
     let id_classes = [localStorage.getItem("Id_classes")];
-    let classe = [];
+    let classe = undefined;
+    console.log(
+      "id_classes du localstorage " +
+        typeof id_classes +
+        "\nid_classes de vuex " +
+        this.$store.state.identifiants_classes
+    );
     id_classes.forEach((element) => {
-      classe.push(element);
+      classe = element.split(",");
+      console.log(classe);
     });
+
     this.classes = classe;
+    this.initialiseProf();
   },
 
   methods: {
