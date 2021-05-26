@@ -58,9 +58,13 @@ export default {
 
       this.dialog = false;
       const toPath = this.$route.query.to || "/connexion";
-      this.$router.push(toPath);
 
-      //     this.$emit("Deconnexion");
+      this.$router.push(toPath);
+      setTimeout(() => {
+        this.$router.go(0);
+      }, 2000);
+
+      // this.$emit("Deconnexion");
     },
   },
 };

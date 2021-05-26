@@ -159,6 +159,7 @@ export default {
 
   created() {
     this.initialize();
+    console.log("connectééée avant eventBus");
   },
 
   methods: {

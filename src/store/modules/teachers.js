@@ -81,25 +81,34 @@ const state = {
             "5e"
         ]
     }],
+    errorCreateProf: undefined
 };
 const actions = {
-    actionInitialiseTeachers({ commit }) {
-        let config = {
-            url: 'api/ecole/enseignant',
-            method: 'get',
-            headers: {
-                Authorization: `Token ${this.$store.state.token}`
-            }
-        }
-        axios(config)
-            .then(resp => {
-                console.log(resp.data);
-                commit('InitialiseTeachers')
+
+    async actionCreateEnseignant({ commit }, profCreate) {
+        const token = "Token " + localStorage.getItem('token');
+        console.log('données reçues' + profCreate)
+
+        let body = profCreate; //attention ne jamais oublié d'assigner les valeurs recues dans body car axios l'exige
+        await axios
+            .post('api/ecole/enseignants/', body, {
+                headers: {
+                    'Authorization': token,
+                }
             })
-            .catch(err => {
-                console.log(err)
+            .then((response) => {
+
+                console.log("😃😃😃" + response);
+                commit("createProf", profCreate);
             })
-    }
+            .catch(function(error) {
+                console.log('profCreate in catch action =>' + JSON.stringify(body))
+                console.log("😢😢😢" + error);
+                commit('setErreurCreate')
+            });
+
+
+    },
 };
 const mutations = {
 
@@ -107,11 +116,15 @@ const mutations = {
         state.teachers = teachers
         localStorage.setItem("Matieres", teachers);
     },
+    createProf(state, Prof) {
+        state.teachers = Prof
+
+    },
 
     updateTeachers(state, newProf) {
         console.log('🐶  attention j\'essaie de gérer le state.matieres du updateMatiere')
         let id = []
-        for (const iterator of this.state.matieres) {
+        for (const iterator of this.state.teachers) {
             id.push(iterator.id)
         }
         console.log(' Le tableau des id =>' + id + '\n Le prof avec l\'id ' +
@@ -123,6 +136,9 @@ const mutations = {
         const deleted = this.state.teachers.splice(index, 1);
         console.log('enseignant supprimé =>' + deleted)
     },
+    setErreurCreate(state) {
+        state.errorCreateProf = true
+    }
 
 
 };

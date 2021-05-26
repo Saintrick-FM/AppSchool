@@ -1,5 +1,5 @@
 <template lang="">
-  <div>
+  <div v-if="checkedToken">
     <v-container class="grey lighten-5">
       <v-row no gutters style="padding-bottom: 110px;">
         <v-col>
@@ -57,6 +57,18 @@
 <script>
 export default {
   name: "RubriqueNav",
+  computed: {
+    checkedToken: function() {
+      let token = localStorage.getItem("token");
+      if (token == "null") {
+        console.log("false");
+        return false;
+      } else {
+        console.log("true");
+        return true;
+      }
+    },
+  },
 };
 </script>
 <style lang="css">

@@ -137,6 +137,7 @@
 <script>
 // @ is an alias to /src
 import axios from "axios";
+// import EventBus from "@/components/eventBus.js";
 
 export default {
   name: "Home",
@@ -172,6 +173,10 @@ export default {
 
   mounted() {
     document.title = "login | Saint Martin";
+  },
+
+  created() {
+    console.log("déconnectééée");
   },
 
   methods: {
@@ -213,6 +218,11 @@ export default {
           const toPath = this.$route.query.to || "/finances";
 
           this.$router.push(toPath);
+          setTimeout(() => {
+            this.$router.go(0);
+          }, 2000);
+
+          // this.$forceUpdate();
         })
         .catch((err) => {
           console.log("erreur => " + err);

@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-//import teachers from './modules/teachers'
+import teachers from './modules/teachers'
 import axios from 'axios'
 
 Vue.use(Vuex)
@@ -18,6 +18,7 @@ export default new Vuex.Store({
         identifiants_classes: [],
         elements: [],
         alertErreur: '',
+
     },
     mutations: {
         initializeStore(state) {
@@ -169,6 +170,8 @@ export default new Vuex.Store({
                 });
         },*/
 
+
+
         async actionCreateMatiere({ commit }, dataSend) {
             const token = "Token " + this.state.token;
             console.log('données reçues' + dataSend)
@@ -258,6 +261,6 @@ export default new Vuex.Store({
         },
     },
     modules: {
-        //      teachers,
+        teachers,
     },
 })
