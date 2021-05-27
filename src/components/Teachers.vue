@@ -136,13 +136,7 @@
 
                         <v-col md="4">
                           <v-autocomplete
-                            :items="[
-                              'A la maternelle',
-                              'Au Prescolaire',
-                              'Au Primaire',
-                              'Au Collège',
-                              'Au Lycée',
-                            ]"
+                            :items="['Maternelle', 'Primaire', 'College']"
                             v-model="editedItem.enseigneAu"
                             label="Enseigne"
                             :rules="[(v) => !!v || 'Ce champ est requis']"
@@ -502,6 +496,7 @@ export default {
         let courseToUpdate = this.editedItem.id;
         //let old = this.enseignants[this.editedIndex];
         let donnees = [];
+
         donnees.push(courseToUpdate, this.editedItem);
         console.log(
           "type pk =>" +
@@ -529,12 +524,60 @@ export default {
         }
 
         //creer un prof
+        /*
+        {
+    "situationSociale": [
+        "\"Fiancé(e)\" is not a valid choice."
+    ],
+    "dateEmbauche": [
+        "This field is required."
+    ],
+    "enseigneAu": [
+        "\"Au Collège\" is not a valid choice."
+    ],
+    "matiereEnseigne": [
+        "Incorrect type. Expected pk value, received str."
+    ]
+}
+        */
       } else {
         if (this.$refs.form.validate()) {
-          this.$store.dispatch("actionCreateEnseignant", this.editedItem);
+          console.log(
+            "matière selectionnée " + this.editedItem.matiereEnseigne
+          );
+          console.log("matières " + JSON.stringify(this.allMatieres));
+          let matieres_ids = [];
+          // ici je renvois une liste des ids des matieres choisies pour le prof dans le formulaire
+          if (this.editedItem.matiereEnseigne.length > 1) {
+            this.editedItem.matiereEnseigne.forEach((matiere) => {
+              matieres_ids.push(
+                this.allMatieres.find((x) => x.nomMatiere == matiere).id
+              );
+            });
+            console.log(
+              "liste des ids des matières sélectionnées " + matieres_ids
+            );
+            this.editedItem.matiereEnseigne = matieres_ids;
+            this.$store.dispatch("actionCreateEnseignant", this.editedItem);
+            this.enseignants.push(this.editedItem);
+            this.close();
+          } else {
+            let matiere_position = this.allMatieres.findIndex(
+              (x) => x.nomMatiere == this.editedItem.matiereEnseigne
+            );
+            console.log(matiere_position);
+            let id_matiere = this.allMatieres[matiere_position].id;
 
-          this.enseignants.push(this.editedItem);
-          this.close();
+            console.log("l'id de la matière selectionnée est " + id_matiere);
+
+            this.editedItem.matiereEnseigne = [id_matiere];
+            console.log(this.editedItem);
+
+            this.$store.dispatch("actionCreateEnseignant", this.editedItem);
+
+            this.enseignants.push(this.editedItem);
+            this.close();
+          }
         } else {
           this.dialog = true;
         }

@@ -87,7 +87,7 @@ const actions = {
 
     async actionCreateEnseignant({ commit }, profCreate) {
         const token = "Token " + localStorage.getItem('token');
-        console.log('données reçues' + profCreate)
+        console.log('id de la matière du prof =>' + profCreate.matiereEnseigne)
 
         let body = profCreate; //attention ne jamais oublié d'assigner les valeurs recues dans body car axios l'exige
         await axios

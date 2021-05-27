@@ -220,7 +220,7 @@ export default {
           this.$router.push(toPath);
           setTimeout(() => {
             this.$router.go(0);
-          }, 2000);
+          }, 1250);
 
           // this.$forceUpdate();
         })
