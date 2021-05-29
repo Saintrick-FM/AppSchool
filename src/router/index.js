@@ -1,12 +1,17 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Finances from '@/views/Finances.vue'
+
 import Matieres from '@/components/Matieres.vue'
 import PresencesEnseignants from '@/components/PresencesEnseignants.vue'
-import Teachers from '@/components/Teachers.vue'
-import Enseignants from '@/views/Enseignants.vue'
 import Login from '@/components/Login.vue'
 import Students from '@/components/Students.vue'
+import Teachers from '@/components/Teachers.vue'
+
+import Enseignants from '@/views/Enseignants.vue'
+import Eleves from '@/views/Eleves.vue'
+import Finances from '@/views/Finances.vue'
+
+
 
 Vue.use(VueRouter)
 
@@ -31,6 +36,11 @@ const routes = [{
     {
         path: '/eleves',
         name: 'eleves',
+        component: Eleves
+    },
+    {
+        path: '/students',
+        name: 'students',
         component: Students
     },
     {

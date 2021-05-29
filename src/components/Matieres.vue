@@ -301,15 +301,6 @@ export default {
       }
     },
 
-    /* {"url":"http://127.0.0.1:8000/api/ecole/matiere/Python/",
-              "code_matiere":"Py",
-              "enseigne_en_groupe":false,
-              "matiere_de_base":true,
-              "seance_par_semaine":10,
-              "coefficient":4,
-              "groupe_matiere":"MATIERE_SCIENTIFIQUES",
-              "classe_associe":["http://127.0.0.1:8000/api/ecole/classe/3e/"]}*/
-
     editItem(item) {
       this.editedIndex = this.matieres.indexOf(item);
       this.editedItem = Object.assign({}, item);
@@ -367,7 +358,7 @@ export default {
       if (this.editedIndex > -1) {
         let index = this.editedIndex;
         console.log("contenu de editedIndex => " + index);
-        let courseToUpdate = this.editedItem.id;
+        let courseToUpdate = this.editedItem.nomMatiere;
         //let old = this.matieres[this.editedIndex];
         let donnees = [];
         donnees.push(courseToUpdate, this.editedItem);
@@ -378,13 +369,13 @@ export default {
             typeof donnees[1]
         );
         this.$store.dispatch("actionUpdateMatiere", donnees);
-        if (this.$store.state.authStatut == "abel") {
+        if (localStorage.getItem("authStatut") == "DG") {
           console.log(
             "if de matiere. state.alertErreur => " +
               this.$store.state.alertErreur
           );
           Object.assign(this.matieres[this.editedIndex], this.editedItem);
-        } else if (this.$store.state.authStatut == "secretaire") {
+        } else if (localStorage.getItem("authStatut") == "secretaire") {
           console.log("else if de matieres");
           this.message_erreur =
             "Désolé seuls les directeurs sont autorisés à modifier une matière";
@@ -401,18 +392,9 @@ export default {
         console.log(
           "classe Associée de l'objet créé =>" + this.editedItem.classAssocie
         );
-        // let objet = {
-        //   nomMatiere: this.matieres[dernier]["nomMatiere"],
-        //   pluriProf: this.matieres[dernier]["pluriProf"],
-        //   seanceParSemaine: parseInt(
-        //     this.matieres[dernier]["seanceParSemaine"]
-        //   ),
-        //   coefficient: parseInt(this.matieres[dernier]["coefficient"]),
-        //   classAssocie: [this.matieres[dernier]["classAssocie"]],
-        // };
 
         this.$store.dispatch("actionCreateMatiere", this.editedItem);
-        if (this.$store.state.authStatut == "abel") {
+        if (this.$store.state.authStatut == "DG") {
           this.matieres.push(this.editedItem);
         } else if (this.$store.state.authStatut == "secretaire") {
           console.log("else if de matieres");

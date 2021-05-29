@@ -207,10 +207,11 @@ export default {
         .then((res) => {
           const token = res.data.token;
           console.log(token);
-          this.$store.commit("setAuthStatut", this.name);
 
           // axios.defaults.headers.common["Authorization"] = "Token " + token;
           localStorage.setItem("token", token);
+          localStorage.setItem("authStatut", this.name);
+          localStorage.setItem("année scolaire", this.annee_choisi);
           this.$store.commit("initializeStore");
 
           this.etape = 4;
@@ -220,7 +221,7 @@ export default {
           this.$router.push(toPath);
           setTimeout(() => {
             this.$router.go(0);
-          }, 1250);
+          }, 500);
 
           // this.$forceUpdate();
         })

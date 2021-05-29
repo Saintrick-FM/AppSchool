@@ -46,12 +46,14 @@ export default {
     confirmLogout() {
       //this.$store.commit("removeAlertLogout");
       localStorage.setItem("token", null);
+      localStorage.setItem("Classes", null);
+      localStorage.setItem("Profs", null);
       localStorage.setItem("Matieres", null);
-      localStorage.setItem("id Classes", null);
+      localStorage.removeItem("id Classes");
       localStorage.setItem("Id_classes", null);
-      localStorage.setItem("année scolaire", null);
+      localStorage.removeItem("année scolaire");
       localStorage.setItem("authStatut", null);
-      localStorage.setItem("annee_scolaire", null);
+      localStorage.setItem("année scolaire", null);
       localStorage.setItem("token", null);
       localStorage.setItem("token", null);
       this.$store.state.token = "";
@@ -62,7 +64,7 @@ export default {
       this.$router.push(toPath);
       setTimeout(() => {
         this.$router.go(0);
-      }, 1250);
+      }, 500);
 
       // this.$emit("Deconnexion");
     },

@@ -10,15 +10,15 @@
       ></v-text-field>
     </v-card-title>
     <v-data-table
-      :headers="MyHeaders"
-      :items="enseignants"
       :search="search"
+      :headers="MyHeaders"
+      :items="eleves"
       sort-by="calories"
       class="elevation-1"
     >
       <template v-slot:top>
         <v-toolbar flat>
-          <v-toolbar-title>Liste Enseignants</v-toolbar-title>
+          <v-toolbar-title>Tous les élèves de l'établissement</v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <v-spacer></v-spacer>
 
@@ -26,11 +26,11 @@
             v-model="dialog"
             fullscreen
             hide-overlay
-            transition="dialog-top-transition"
+            transition="dialog-bottom-transition"
           >
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-                Nouvel enseignant
+                Nouvel Eleve
               </v-btn>
             </template>
             <!-- ----------------------------------------------------------------------------- -->
@@ -48,7 +48,7 @@
                   </v-card-title>
                   <v-spacer></v-spacer>
                   <v-toolbar-items>
-                    <v-btn dark text @click="SaveProf">
+                    <v-btn dark text @click="SaveEleve">
                       Save
                     </v-btn>
                   </v-toolbar-items>
@@ -247,7 +247,7 @@
                       color="blue darken-1"
                       style="margin-left:250px"
                       text
-                      @click="SaveProf"
+                      @click="SaveEleve"
                     >
                       Save
                     </v-btn>
@@ -261,7 +261,7 @@
           <v-dialog v-model="dialogDelete" max-width="550px">
             <v-card>
               <v-card-title class="headline"
-                >Voulez-vous vraiment supprimer l'enseignant
+                >Voulez-vous vraiment supprimer l'élève
 
                 <span style="color: red; margin: 3px 0px 0px 100px "
                   >{{ profActuel }} ?</span
@@ -292,7 +292,7 @@
       </template>
 
       <template v-slot:no-data>
-        <v-btn color="primary" @click="initialiseProf">
+        <v-btn color="primary" @click="initializeEleve">
           Reactualiser
         </v-btn>
       </template>
@@ -304,7 +304,7 @@
 import axios from "axios";
 import { mapGetters } from "vuex";
 export default {
-  name: "Teachers",
+  name: "Eleves",
   data: () => ({
     search: "",
     erreur: false,
@@ -312,18 +312,17 @@ export default {
     dialog: false,
     dialogDelete: false,
     loader: false,
-    profActuel: "",
     MyHeaders: [
       { text: "Nom", value: "nom", sortable: true },
-      { text: "Téléphone", value: "telephone" },
+      { text: "Sexe", value: "sexe" },
       { text: "Adresse", value: "adresse", sortable: true },
-      { text: "Cours", value: "matiereEnseigne", sortable: true },
-      { text: "Classes", value: "classesOccupees", sortable: true },
-      { text: "Admis le", value: "dateEmbauche", sortable: true },
+      { text: "Ecole d' origine", value: "ecoleDorigine", sortable: true },
+      { text: "Classe", value: "classe", sortable: true },
+      { text: "Tel du Tuteur", value: "telTuteur", sortable: true },
       { text: "Actions", value: "actions", sortable: false },
     ],
 
-    enseignants: [],
+    eleves: [],
     matieres: [],
     classes: undefined,
     nameRules: [
@@ -346,38 +345,48 @@ export default {
     ],
     editedIndex: -1,
     editedItem: {
-      nom: undefined,
-      civilite: undefined,
-      date_naissance: undefined,
-      lieu_naissance: undefined,
-      situationSociale: undefined,
-      nationalite: undefined,
-      adresse: undefined,
-      telephone: undefined,
-      email: undefined,
-      dateEmbauche: undefined,
-      modePaiement: undefined,
-      intituleCompte: undefined,
-      numeroCompteBancaire: undefined,
-      numeroCnss: undefined,
-      enseigneAu: undefined,
-      classesOccupees: [],
+      nom: "",
+      sexe: null,
+      naissance: "",
+      lieuNaiss: "",
+      nationalite: "",
+      etatSanitaire: null,
+      ecoleDorigine: "",
+      nomMaman: "",
+      telMaman: "",
+      nomPapa: "",
+      telPapa: "",
+      tuteur: "",
+      telTuteur: "",
+      emailTuteur: "",
+      redoublant: null,
+      classe: null,
     },
     defaultItem: {
-      nom: undefined,
-      adresse: undefined,
-      telephone: undefined,
-      email: undefined,
-      dateEmbauche: undefined,
-      classesOccupees: [],
+      nom: "",
+      sexe: null,
+      naissance: "",
+      lieuNaiss: "",
+      nationalite: "",
+      etatSanitaire: null,
+      ecoleDorigine: "",
+      nomMaman: "",
+      telMaman: "",
+      nomPapa: "",
+      telPapa: "",
+      tuteur: "",
+      telTuteur: "",
+      emailTuteur: "",
+      redoublant: null,
+      classe: null,
     },
   }),
 
   computed: {
     formTitle() {
       return this.editedIndex === -1
-        ? "Nouvel(le) Enseignant(e)"
-        : "Modification d'un(e) enseignant(e)";
+        ? "Nouvel(le) élève"
+        : "Modification d'un(e) élève";
     },
     ...mapGetters(["allTeachers", "allMatieres"]),
   },
@@ -394,8 +403,8 @@ export default {
   beforeMount() {
     let mat = this.allMatieres;
 
-    mat.forEach((element) => {
-      this.matieres.push(element.nomMatiere);
+    mat.forEach((eleves) => {
+      this.matieres.push(eleves.nomMatiere);
     });
     let id_classes = [localStorage.getItem("Id_classes")];
     let classe = undefined;
@@ -405,13 +414,13 @@ export default {
         "\nid_classes de vuex " +
         this.$store.state.identifiants_classes
     );
-    id_classes.forEach((element) => {
-      classe = element.split(",");
+    id_classes.forEach((eleves) => {
+      classe = eleves.split(",");
       console.log(classe);
     });
 
     this.classes = classe;
-    this.initialiseProf();
+    this.initializeEleve();
   },
 
   methods: {
@@ -419,13 +428,13 @@ export default {
       this.message_erreur = "";
       this.erreur = false;
     },
-    async initialiseProf() {
+    async initializeEleve() {
       //   this.$store.dispatch("actionInitialiseMatiere");
       const token = "Token " + localStorage.getItem("token");
       if (localStorage.getItem("token") != null) {
         var config = {
           method: "get",
-          url: "api/ecole/enseignants/",
+          url: "api/inscriptions/",
           headers: {
             Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
           },
@@ -435,27 +444,27 @@ export default {
             const result = response.data;
 
             console.log(result);
-            localStorage.setItem("Profs", result);
+            localStorage.setItem("Elèves", result);
 
-            let element = [];
+            let eleves = [];
             for (const key in result) {
-              element.push(result[key]);
+              eleves.push(result[key]);
             }
             // let profs_cours_id=[]
-            // this.allMatieres.matiereEnseigne.forEach(element => {
+            // this.allMatieres.matiereEnseigne.forEach(eleves => {
             // this.allMatieres.find((x) => x.nomMatiere == matiere).id
             // });
 
-            element.forEach((prof) => {
+            eleves.forEach((prof) => {
               prof.dateEmbauche = String(prof.dateEmbauche).slice(0, 10);
             });
 
-            this.$store.state.enseignants = element;
+            this.$store.state.eleves = eleves;
 
-            this.enseignants = element;
+            this.eleves = eleves;
             console.log(
               "😃😃😃 this.profs => " +
-                JSON.stringify(element) +
+                JSON.stringify(eleves) +
                 "this.response.data = " +
                 response.data
             );
@@ -467,23 +476,22 @@ export default {
     },
 
     editItem(item) {
-      this.editedIndex = this.enseignants.indexOf(item);
+      this.editedIndex = this.eleves.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
 
     deleteItem(item) {
-      this.editedIndex = this.enseignants.indexOf(item);
+      this.editedIndex = this.eleves.indexOf(item);
 
       console.log("position de l'élément choisi => " + this.editedIndex);
       console.log(
         "id de l'élément choisi => " +
-          this.enseignants[this.editedIndex].id +
+          this.eleves[this.editedIndex].id +
           "\n intitulé de l'élément choisi => " +
-          this.enseignants[this.editedIndex].nomMatiere
+          this.eleves[this.editedIndex].nomMatiere
       );
       this.editedItem = Object.assign({}, item);
-      this.profActuel = item.nom;
       this.dialogDelete = true;
     },
 
@@ -491,14 +499,13 @@ export default {
       this.loader = true;
       this.$store.dispatch(
         "actionRemoveEnseignant",
-        this.enseignants[this.editedIndex].enseignant_numero
+        this.eleves[this.editedIndex].enseignant_numero
       );
-
       console.log(
         "index du prof à supprimé confirmé pour la suppression =>" +
-          this.enseignants[this.editedIndex].enseignant_numero
+          this.eleves[this.editedIndex].enseignant_numero
       );
-      this.enseignants.splice(this.editedIndex, 1);
+      this.eleves.splice(this.editedIndex, 1);
       this.loader = false;
 
       this.closeDelete();
@@ -520,7 +527,7 @@ export default {
         this.editedIndex = -1;
       });
     },
-    SaveProf() {
+    SaveEleve() {
       if (this.editedIndex > -1) {
         //update du prof
         let index = this.editedIndex;
@@ -536,7 +543,7 @@ export default {
             typeof donnees[1]
         );
         this.$store.dispatch("actionUpdateEnseignant", donnees);
-        Object.assign(this.enseignants[this.editedIndex], this.editedItem);
+        Object.assign(this.eleves[this.editedIndex], this.editedItem);
         this.close();
 
         //creer un prof
@@ -557,7 +564,7 @@ export default {
              );
              this.editedItem.matiereEnseigne = matieres_ids;*/
           this.$store.dispatch("actionCreateEnseignant", this.editedItem);
-          this.enseignants.push(this.editedItem);
+          this.eleves.push(this.editedItem);
           this.close();
         } else {
           /* let matiere_position = this.allMatieres.findIndex(
@@ -579,7 +586,8 @@ export default {
         let index = this.editedIndex;
         console.log("contenu de editedIndex => " + index);
         let profToUpdate = this.editedItem.id;
-        //let old = this.enseignants[this.editedIndex];
+        //let old = this.eleves
+        [this.editedIndex];
         let donnees = [];
         donnees.push(profToUpdate, this.editedItem);
         console.log(
@@ -594,9 +602,9 @@ export default {
             "if de matiere. state.alertErreur => " +
               this.$store.state.alertErreur
           );
-          Object.assign(this.enseignants[this.editedIndex], this.editedItem);
+          Object.assign(this.eleves[this.editedIndex], this.editedItem);
         } else if (this.$store.state.authStatut == "secretaire") {
-          console.log("else if de enseignants");
+          console.log("else if de eleves");
           this.message_erreur =
             "Désolé seuls les directeurs sont autorisés à modifier une matière";
           this.erreur = true;
@@ -615,16 +623,16 @@ export default {
 
         this.$store.dispatch("actionCreateEnseignant", this.editedItem);
         if (this.$store.state.authStatut == "abel") {
-          this.enseignants.push(this.editedItem);
+          this.eleves.push(this.editedItem);
         } else if (this.$store.state.authStatut == "secretaire") {
-          console.log("else if de enseignants");
+          console.log("else if de eleves");
           this.message_erreur =
             "Désolé seuls les directeurs sont autorisés à créer un enseignant";
           this.erreur = true;
         } else {
           this.message_erreur =
             "Désolé une erreur s'est produite au niveau du serveur";
-          console.log("else de enseignants");
+          console.log("else de eleves");
           this.erreur = true;
         }
       }

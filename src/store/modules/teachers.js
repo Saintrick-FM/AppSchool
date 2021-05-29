@@ -109,6 +109,61 @@ const actions = {
 
 
     },
+
+    actionUpdateEnseignant({ commit }, donnees) {
+        const token = "Token " + localStorage.getItem('token');
+        console.log(
+            "id du cours à updater =>" +
+            donnees[0] +
+            "\n objet modifié du save =>" +
+            JSON.stringify(donnees[1])
+        );
+
+        var body = donnees[1];
+        console.log(typeof body)
+        axios
+            .put(`api/ecole/enseignants/${donnees[0]}/`, body, {
+                headers: {
+                    'Authorization': token,
+                }
+            })
+            .then((response) => {
+                let newProf = [donnees[0], donnees[1]]
+                console.log("😍😍😍 new data sent =>" + JSON.stringify(donnees[1]) + '\n' + response);
+                commit("updateMatieres", newProf);
+
+            })
+            .catch(function(error) {
+
+                console.log("😢😢😢" + JSON.stringify(donnees[1]) + '\nerrors' + error);
+                if (error == "Error: Request failed with status code 403") {
+                    console.log('forbiden')
+                    commit('setErreurMessage')
+                } else {
+                    console.log('oups pas forbiden')
+                }
+
+            });
+    },
+
+    actionRemoveEnseignant({ commit }, index) {
+        var token = 'Token ' + localStorage.getItem('token')
+        var config = {
+            method: 'delete',
+            url: `api/ecole/enseignants/${index}`,
+            headers: {
+                'Authorization': token
+            }
+        }
+        axios(config)
+            .then((resp) => {
+                console.log('😍😍😍 enseignant with id ' + index + ' deleted\n' + resp);
+                commit('deleteTeacher', index)
+
+            })
+            .catch((err) => { console.log(err) })
+
+    }
 };
 const mutations = {
 

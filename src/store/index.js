@@ -25,6 +25,7 @@ export default new Vuex.Store({
             if (localStorage.getItem('token')) {
                 state.isAuthenticated = true;
                 state.token = localStorage.getItem('token');
+                state.authStatut = localStorage.getItem('authStatut')
             } else if (localStorage.getItem('token') == null) {
                 state.isAuthenticated = false;
                 state.token = null;
@@ -173,7 +174,7 @@ export default new Vuex.Store({
 
 
         async actionCreateMatiere({ commit }, dataSend) {
-            const token = "Token " + this.state.token;
+            const token = "Token " + localStorage.getItem('token');
             console.log('données reçues' + dataSend)
 
             let body = dataSend; //attention ne jamais oublié d'assigner les valeurs recues dans body car axios l'exige
@@ -197,7 +198,7 @@ export default new Vuex.Store({
         },
 
         actionUpdateMatiere({ commit }, donnees) {
-            const token = "Token " + this.state.token;
+            const token = "Token " + localStorage.getItem('token');
             console.log(
                 "id du cours à updater =>" +
                 donnees[0] +
@@ -233,7 +234,7 @@ export default new Vuex.Store({
         },
 
         actionRemoveMatiere({ commit }, index) {
-            var token = 'Token ' + this.state.token
+            var token = 'Token ' + localStorage.getItem('token')
             var config = {
                 method: 'delete',
                 url: `api/ecole/matiere/${index}`,

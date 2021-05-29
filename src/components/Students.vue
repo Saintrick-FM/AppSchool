@@ -1,158 +1,113 @@
 <template>
-  <v-data-table
-    :headers="headers"
-    :items="desserts"
-    sort-by="calories"
-    class="elevation-1"
+  <v-data-iterator
+    content-class="class"
+    content-props="props"
+    content-tag="div"
+    custom-filter="filter"
+    custom-sort="sort"
+    dark
+    light
+    disable-initial-sort
+    expand="Function"
+    hide-actions
+    item-key="id"
+    :items="enseignants"
+    loading
+    must-sort
+    next-icon="chevron_right"
+    prev-icon="chevron_left"
+    no-data-text="No data available"
+    no-results-text="No matching records found"
+    pagination.sync="Object"
+    rows-per-page-items="[5,10,25]"
+    rows-per-page-text="Items per page:"
+    search="search"
+    select-all="select-all"
+    total-items="0"
+    value="value"
+    input="event"
+    update:pagination="event"
   >
-    <template v-slot:top>
-      <v-toolbar flat>
-        <v-toolbar-title>Eleves par classes</v-toolbar-title>
-        <v-divider class="mx-4" inset vertical></v-divider>
-        <v-spacer></v-spacer>
-
-        <v-dialog v-model="dialog" max-width="500px">
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
-              Nouvel élève
-            </v-btn>
-          </template>
-          <v-card>
-            <v-card-title>
-              <span class="headline"
-                >Nom(s) et prénoms(s)<!-- {{ formTitle }} --></span
-              >
-            </v-card-title>
-
-            <v-card-text>
-              <v-container>
-                <v-row>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.name"
-                      label="Dessert name"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.calories"
-                      label="Calories"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.fat"
-                      label="Fat (g)"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.carbs"
-                      label="Carbs (g)"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.protein"
-                      label="Protein (g)"
-                    ></v-text-field>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card-text>
-
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="close">
-                Cancel
-              </v-btn>
-              <v-btn color="blue darken-1" text @click="save">
-                Save
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-        <v-dialog v-model="dialogDelete" max-width="500px">
-          <v-card>
-            <v-card-title class="headline"
-              >Are you sure you want to delete this item?</v-card-title
-            >
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="closeDelete"
-                >Cancel</v-btn
-              >
-              <v-btn color="blue darken-1" text @click="deleteItemConfirm"
-                >OK</v-btn
-              >
-              <v-spacer></v-spacer>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </v-toolbar>
-    </template>
-
-    <template v-slot:item.actions="{ item }">
-      <v-icon small class="mr-2" @click="editItem(item)">
-        mdi-pencil
-      </v-icon>
-      <v-icon small @click="deleteItem(item)">
-        mdi-delete
-      </v-icon>
-    </template>
-
-    <template v-slot:no-data>
-      <v-btn color="primary" @click="initialize">
-        Reset
-      </v-btn>
-    </template>
-  </v-data-table>
+  </v-data-iterator>
 </template>
-
 <script>
 import axios from "axios";
 import { mapGetters } from "vuex";
 export default {
-  name: "Students",
+  name: "Eleves",
   data: () => ({
+    erreur: false,
+    message_erreur: "",
     dialog: false,
     dialogDelete: false,
-    headers: [
-      {
-        text: "Dessert (100g serving)",
-        align: "start",
-        sortable: false,
-        value: "name",
-      },
-      { text: "Calories", value: "calories" },
-      { text: "Fat (g)", value: "fat" },
-      { text: "Carbs (g)", value: "carbs" },
-      { text: "Protein (g)", value: "protein" },
+    loader: false,
+    MyHeaders: [
+      { text: "Nom", value: "nom", sortable: true },
+      { text: "Téléphone", value: "telephone" },
+      { text: "Adresse", value: "adresse", sortable: true },
+      { text: "Cours", value: "matiereEnseigne", sortable: true },
+      { text: "Classes", value: "classesOccupees", sortable: true },
+      { text: "Admis le", value: "dateEmbauche", sortable: true },
       { text: "Actions", value: "actions", sortable: false },
     ],
-    desserts: [],
+
+    enseignants: [],
+    matieres: [],
+    classes: undefined,
+    nameRules: [
+      (v) => !!v || "Le nom est obligatoire",
+      (v) => v.length > 6 || "Le nom doit avoir plus de 6 caractères",
+    ],
+    emailRules: [
+      //(v) => !!v || "L'e-mail est obligatoire",
+      (v) =>
+        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) ||
+        "E-mail must be valid",
+    ],
+
+    telephoneRules: [
+      (v) => !!v || "Le numéro de téléphone est obligatoire",
+      // (v) =>
+      //   parseInt(v) == true || "Le numéro ne doit contenir que des chiffres",
+      (v) =>
+        v.length == 9 || "Le numéro doit contenir strictement 9 caractères",
+    ],
     editedIndex: -1,
     editedItem: {
-      name: "",
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0,
+      nom: undefined,
+      civilite: undefined,
+      date_naissance: undefined,
+      lieu_naissance: undefined,
+      situationSociale: undefined,
+      nationalite: undefined,
+      adresse: undefined,
+      telephone: undefined,
+      email: undefined,
+      dateEmbauche: undefined,
+      modePaiement: undefined,
+      intituleCompte: undefined,
+      numeroCompteBancaire: undefined,
+      numeroCnss: undefined,
+      enseigneAu: undefined,
+      classesOccupees: [],
     },
     defaultItem: {
-      name: "",
-      calories: 0,
-      fat: 0,
-      carbs: 0,
-      protein: 0,
+      nom: undefined,
+      adresse: undefined,
+      telephone: undefined,
+      email: undefined,
+      dateEmbauche: undefined,
+      classesOccupees: [],
     },
   }),
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "New Item" : "Edit Item";
+      return this.editedIndex === -1
+        ? "Nouvel(le) Enseignant(e)"
+        : "Modification d'un(e) enseignant(e)";
     },
-    ...mapGetters(["allEleves"]),
+    ...mapGetters(["allTeachers", "allMatieres"]),
   },
 
   watch: {
@@ -164,125 +119,114 @@ export default {
     },
   },
 
-  created() {
-    this.initialize();
-    this.initialiseEleves();
+  beforeMount() {
+    let mat = this.allMatieres;
+
+    mat.forEach((element) => {
+      this.matieres.push(element.nomMatiere);
+    });
+    let id_classes = [localStorage.getItem("Id_classes")];
+    let classe = undefined;
+    console.log(
+      "id_classes du localstorage " +
+        typeof id_classes +
+        "\nid_classes de vuex " +
+        this.$store.state.identifiants_classes
+    );
+    id_classes.forEach((element) => {
+      classe = element.split(",");
+      console.log(classe);
+    });
+
+    this.classes = classe;
+    this.initialiseProf();
   },
 
   methods: {
-    initialiseEleves() {
-      const token = "Token " + this.$store.state.token;
-      console.log("token récupéré =>" + token);
-
-      var config = {
-        method: "get",
-        url: "api/inscriptions/",
-        headers: {
-          Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
-        },
-      };
-
-      axios(config)
-        .then((response) => {
-          // const result = JSON.stringify(response.data); # ceci vient de postman
-          // console.log("résultat du stringify =>" + result);
-          console.log("😃😃😃" + response.data);
-          this.$store.commit("initializeEleve", response.data);
-          // this.eleves = response.data;
-        })
-        .catch(function(error) {
-          console.log("😢😢😢" + error);
-        });
+    CloseAlert() {
+      this.message_erreur = "";
+      this.erreur = false;
     },
-    initialize() {
-      this.desserts = [
-        {
-          name: "Frozen Yogurt",
-          calories: 159,
-          fat: 6.0,
-          carbs: 24,
-          protein: 4.0,
-        },
-        {
-          name: "Ice cream sandwich",
-          calories: 237,
-          fat: 9.0,
-          carbs: 37,
-          protein: 4.3,
-        },
-        {
-          name: "Eclair",
-          calories: 262,
-          fat: 16.0,
-          carbs: 23,
-          protein: 6.0,
-        },
-        {
-          name: "Cupcake",
-          calories: 305,
-          fat: 3.7,
-          carbs: 67,
-          protein: 4.3,
-        },
-        {
-          name: "Gingerbread",
-          calories: 356,
-          fat: 16.0,
-          carbs: 49,
-          protein: 3.9,
-        },
-        {
-          name: "Jelly bean",
-          calories: 375,
-          fat: 0.0,
-          carbs: 94,
-          protein: 0.0,
-        },
-        {
-          name: "Lollipop",
-          calories: 392,
-          fat: 0.2,
-          carbs: 98,
-          protein: 0,
-        },
-        {
-          name: "Honeycomb",
-          calories: 408,
-          fat: 3.2,
-          carbs: 87,
-          protein: 6.5,
-        },
-        {
-          name: "Donut",
-          calories: 452,
-          fat: 25.0,
-          carbs: 51,
-          protein: 4.9,
-        },
-        {
-          name: "KitKat",
-          calories: 518,
-          fat: 26.0,
-          carbs: 65,
-          protein: 7,
-        },
-      ];
+    async initialiseProf() {
+      //   this.$store.dispatch("actionInitialiseMatiere");
+      const token = "Token " + localStorage.getItem("token");
+      if (localStorage.getItem("token") != null) {
+        var config = {
+          method: "get",
+          url: "api/ecole/enseignants/",
+          headers: {
+            Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
+          },
+        };
+        await axios(config)
+          .then((response) => {
+            const result = response.data;
+
+            console.log(result);
+            localStorage.setItem("Profs", result);
+
+            let element = [];
+            for (const key in result) {
+              element.push(result[key]);
+            }
+            // let profs_cours_id=[]
+            // this.allMatieres.matiereEnseigne.forEach(element => {
+            // this.allMatieres.find((x) => x.nomMatiere == matiere).id
+            // });
+
+            element.forEach((prof) => {
+              prof.dateEmbauche = String(prof.dateEmbauche).slice(0, 10);
+            });
+
+            this.$store.state.enseignants = element;
+
+            this.enseignants = element;
+            console.log(
+              "😃😃😃 this.profs => " +
+                JSON.stringify(element) +
+                "this.response.data = " +
+                response.data
+            );
+          })
+          .catch(function(error) {
+            console.log("😢😢😢" + error);
+          });
+      }
     },
 
     editItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
+      this.editedIndex = this.enseignants.indexOf(item);
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
 
     deleteItem(item) {
-      this.editedIndex = this.desserts.indexOf(item);
+      this.editedIndex = this.enseignants.indexOf(item);
+
+      console.log("position de l'élément choisi => " + this.editedIndex);
+      console.log(
+        "id de l'élément choisi => " +
+          this.enseignants[this.editedIndex].id +
+          "\n intitulé de l'élément choisi => " +
+          this.enseignants[this.editedIndex].nomMatiere
+      );
       this.editedItem = Object.assign({}, item);
       this.dialogDelete = true;
     },
 
     deleteItemConfirm() {
-      this.desserts.splice(this.editedIndex, 1);
+      this.loader = true;
+      this.$store.dispatch(
+        "actionRemoveEnseignant",
+        this.enseignants[this.editedIndex].enseignant_numero
+      );
+      console.log(
+        "index du prof à supprimé confirmé pour la suppression =>" +
+          this.enseignants[this.editedIndex].enseignant_numero
+      );
+      this.enseignants.splice(this.editedIndex, 1);
+      this.loader = false;
+
       this.closeDelete();
     },
 
@@ -295,23 +239,123 @@ export default {
     },
 
     closeDelete() {
+      this.loader = false;
       this.dialogDelete = false;
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
       });
     },
+    SaveProf() {
+      if (this.editedIndex > -1) {
+        //update du prof
+        let index = this.editedIndex;
+        console.log("contenu de editedIndex => " + index);
+        let profToUpdate = this.editedItem.enseignant_numero;
+        let donnees = [];
+
+        donnees.push(profToUpdate, this.editedItem);
+        console.log(
+          "type pk =>" +
+            donnees[0] +
+            "\n type objet modifié du save =>" +
+            typeof donnees[1]
+        );
+        this.$store.dispatch("actionUpdateEnseignant", donnees);
+        Object.assign(this.enseignants[this.editedIndex], this.editedItem);
+        this.close();
+
+        //creer un prof
+      } else {
+        if (this.$refs.form.validate()) {
+          console.log("prof selectionné " + this.editedItem.nom);
+          // console.log("allTeachers " + JSON.stringify(this.allTeachers));
+          // let matieres_ids = [];
+          // // ici je renvois une liste des ids des matieres choisies pour le prof dans le formulaire
+          /* if (this.editedItem.matiereEnseigne.length > 1) {
+             this.editedItem.matiereEnseigne.forEach((matiere) => {
+               matieres_ids.push(
+                 this.allMatieres.find((x) => x.nomMatiere == matiere).id
+               );
+             });
+             console.log(
+               "liste des ids des matières sélectionnées " + matieres_ids
+             );
+             this.editedItem.matiereEnseigne = matieres_ids;*/
+          this.$store.dispatch("actionCreateEnseignant", this.editedItem);
+          this.enseignants.push(this.editedItem);
+          this.close();
+        } else {
+          /* let matiere_position = this.allMatieres.findIndex(
+              (x) => x.nomMatiere == this.editedItem.matiereEnseigne
+            );
+            console.log(matiere_position);
+            let id_matiere = this.allMatieres[matiere_position].id;
+
+            console.log("l'id de la matière selectionnée est " + id_matiere);
+
+            this.editedItem.matiereEnseigne = [id_matiere];*/
+          this.dialog = true;
+        }
+      }
+    },
 
     save() {
       if (this.editedIndex > -1) {
-        Object.assign(this.desserts[this.editedIndex], this.editedItem);
+        let index = this.editedIndex;
+        console.log("contenu de editedIndex => " + index);
+        let profToUpdate = this.editedItem.id;
+        //let old = this.enseignants[this.editedIndex];
+        let donnees = [];
+        donnees.push(profToUpdate, this.editedItem);
+        console.log(
+          "type pk =>" +
+            donnees[0] +
+            "\n type objet modifié du save =>" +
+            typeof donnees[1]
+        );
+        this.$store.dispatch("actionUpdateEnseignant", donnees);
+        if (this.$store.state.authStatut == "abel") {
+          console.log(
+            "if de matiere. state.alertErreur => " +
+              this.$store.state.alertErreur
+          );
+          Object.assign(this.enseignants[this.editedIndex], this.editedItem);
+        } else if (this.$store.state.authStatut == "secretaire") {
+          console.log("else if de enseignants");
+          this.message_erreur =
+            "Désolé seuls les directeurs sont autorisés à modifier une matière";
+          this.erreur = true;
+        } else {
+          console.log(
+            "else de teachers state.alertErreur => " +
+              this.$store.state.alertErreur
+          );
+        }
+
+        //creer une matière
       } else {
-        this.desserts.push(this.editedItem);
+        console.log(
+          "classe Associée de l'objet créé =>" + this.editedItem.classAssocie
+        );
+
+        this.$store.dispatch("actionCreateEnseignant", this.editedItem);
+        if (this.$store.state.authStatut == "abel") {
+          this.enseignants.push(this.editedItem);
+        } else if (this.$store.state.authStatut == "secretaire") {
+          console.log("else if de enseignants");
+          this.message_erreur =
+            "Désolé seuls les directeurs sont autorisés à créer un enseignant";
+          this.erreur = true;
+        } else {
+          this.message_erreur =
+            "Désolé une erreur s'est produite au niveau du serveur";
+          console.log("else de enseignants");
+          this.erreur = true;
+        }
       }
       this.close();
     },
   },
 };
 </script>
-
-<style lang="scss" scoped></style>
