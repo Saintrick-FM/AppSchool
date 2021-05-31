@@ -34,13 +34,13 @@
               </v-btn>
             </template>
             <!-- ----------------------------------------------------------------------------- -->
-            <v-form ref="form" lazy-validation>
+            <v-form v-model="valid" ref="form" lazy-validation>
               <v-card align-content-space-around>
                 <v-toolbar dark color="primary">
                   <v-btn icon dark @click="dialog = false">
                     <v-icon>mdi-close</v-icon>
                   </v-btn>
-                  <v-toolbar-title>Settings</v-toolbar-title>
+                  <v-toolbar-title>Fermer</v-toolbar-title>
 
                   <v-spacer></v-spacer>
                   <v-card-title>
@@ -48,8 +48,21 @@
                   </v-card-title>
                   <v-spacer></v-spacer>
                   <v-toolbar-items>
-                    <v-btn dark text @click="SaveEleve">
-                      Save
+                    <v-btn
+                      color="blue darken-1"
+                      text
+                      @click="SaveEleve"
+                      :disabled="!valid"
+                    >
+                      <v-chip
+                        label
+                        color="primary"
+                        type="button"
+                        @click="SaveEleve"
+                      >
+                        <v-icon left>mdi-content-save-move-outline</v-icon>
+                        Enregistrer
+                      </v-chip>
                     </v-btn>
                   </v-toolbar-items>
                 </v-toolbar>
@@ -69,39 +82,44 @@
                               v-model="editedItem.nom"
                               :rules="nameRules"
                               label="Noms"
-                              hint="example of persistent helper text"
-                              persistent-hint
                               required
                             ></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" md="3">
                             <v-select
-                              v-model="editedItem.civilite"
+                              v-model="editedItem.sexe"
                               label="Sexe"
                               :items="['Masculin', 'Feminin']"
-                              :rules="[(v) => !!v || 'Ce champ est requis']"
+                              :rules="[
+                                (v) => !!v || 'Vous devez renseigner ce champs',
+                              ]"
                               required
                             ></v-select>
                           </v-col>
 
                           <v-col cols="12" sm="6" md="4">
                             <v-text-field
-                              v-model="editedItem.date_naissance"
-                              label="Date de naissance"
-                              hint="Exemple: 11-Mai-1995"
+                              v-model="editedItem.dateLieuNaissance"
+                              label="Date et lieu de naissance"
+                              hint="Exemple: 11-Mai-1995 à Brazzaville"
                               persistent-hint
+                              :rules="[
+                                (v) => !!v || 'Vous devez renseigner ce champs',
+                              ]"
                               required
                             ></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
                             <v-text-field
-                              v-model="editedItem.lieu_naissance"
-                              label="Lieu de naissance"
-                              :rules="[(v) => !!v || 'Ce champ est requis']"
+                              v-model="editedItem.adresse"
+                              label="Adresse domicile actuel"
+                              :rules="[
+                                (v) => !!v || 'Vous devez renseigner ce champs',
+                              ]"
                               required
                             ></v-text-field>
                           </v-col>
-                          <v-col cols="12" sm="6" md="4">
+                          <!-- <v-col cols="12" sm="6" md="4">
                             <v-autocomplete
                               :items="[
                                 'Célibataire',
@@ -119,62 +137,60 @@
                             <v-text-field
                               v-model="editedItem.nationalite"
                               label="nationalite"
+                               :rules="[(v) => !!v || 'Ce champ est requis']"
+                              required
+
                             ></v-text-field>
-                          </v-col>
+                          </v-col> -->
                           <v-col cols="12" sm="6" md="4">
                             <v-text-field
-                              v-model="editedItem.adresse"
-                              label="Adresse"
-                              :rules="[(v) => !!v || 'Ce champ est requis']"
+                              v-model="editedItem.ecoleDorigine"
+                              label="Ecole d'origine"
                               required
                             ></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
-                            <v-text-field
-                              v-model="editedItem.telephone"
-                              label="Téléphone"
-                              :rules="telephoneRules"
-                            ></v-text-field>
-                          </v-col>
-                          <v-col cols="12" sm="6" md="4">
-                            <v-text-field
-                              v-model="editedItem.email"
-                              label="Email"
-                              type="email"
-                              :rules="emailRules"
-                            ></v-text-field>
-                          </v-col>
-
-                          <v-col md="4">
-                            <v-autocomplete
-                              :items="['Maternelle', 'Primaire', 'College']"
-                              v-model="editedItem.enseigneAu"
-                              label="Enseigne"
-                              :rules="[(v) => !!v || 'Ce champ est requis']"
+                            <v-select
+                              :items="['Apte', 'Inapte']"
+                              v-model="editedItem.etatSanitaire"
+                              label="Etat Sanitaire"
+                              :rules="[
+                                (v) => !!v || 'Vous devez renseigner ce champs',
+                              ]"
                               required
-                            ></v-autocomplete>
+                            ></v-select>
                           </v-col>
 
                           <v-col cols="12" sm="6" md="4">
-                            <v-autocomplete
-                              v-model="editedItem.matiereEnseigne"
-                              :items="matieres"
-                              label="Cours dispensé*"
-                              multiple
-                            ></v-autocomplete>
+                            <v-select
+                              v-model="editedItem.redoublant"
+                              :items="['Nouveau', 'Redoublant']"
+                              label="Nouveau ou redoublant *"
+                              :rules="[
+                                (v) => !!v || 'Vous devez renseigner ce champs',
+                              ]"
+                              required
+                            ></v-select>
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
                             <v-autocomplete
                               :items="classes"
+                              :rules="[
+                                (v) => !!v || 'Vous devez renseigner ce champs',
+                              ]"
                               required
-                              multiple
-                              v-model="editedItem.classesOccupees"
-                              label="Classes occupées*"
+                              v-model="editedItem.classe"
+                              label="Classe*"
                             ></v-autocomplete>
                           </v-col>
                         </v-row>
                       </v-container>
-                      <small>*indicates required field</small>
+                      <small
+                        ><v-chip label color="primary" text-color="white">
+                          <v-icon left>mdi-information-variant</v-icon> *
+                          indique que le champ est obligatoire
+                        </v-chip></small
+                      >
                     </v-card-text>
                   </v-card>
 
@@ -182,55 +198,112 @@
                   <v-card width="40%" style=" margin-top: 30px">
                     <v-card-title>
                       <span class="headline" style="margin-left: 100px"
-                        >Informations professionnelles</span
+                        >Informations relatives aux parents</span
                       >
                     </v-card-title>
                     <v-list three-line subheader>
                       <!-- <v-subheader>User Controls</v-subheader> -->
                       <v-list-item>
                         <v-list-item-content>
-                          <v-list-item-title
-                            >Content filtering</v-list-item-title
-                          >
+                          <v-list-item-title>
+                            <v-chip label color="info" text-color="white">
+                              <v-icon left>mdi-home-heart</v-icon> A propos du
+                              père et de la mère
+                            </v-chip>
+                          </v-list-item-title>
                           <v-list-item-subtitle
-                            >Set the content filtering level to restrict apps
-                            that can be downloaded</v-list-item-subtitle
-                          >
+                            >Dans la rubrique liée au père et à la mère
+                            renseignez les informations des parents
+                            biologogiques.
+                          </v-list-item-subtitle>
                         </v-list-item-content>
                       </v-list-item>
 
                       <v-list-item>
                         <v-list-item-content>
-                          <v-list-item-title>Password</v-list-item-title>
-                          <v-list-item-subtitle
-                            >Require password for purchase or use password to
-                            restrict purchase</v-list-item-subtitle
+                          <v-list-item-title>
+                            <v-chip label color="info" text-color="white">
+                              <v-icon left>mdi-family-tree</v-icon> A propos du
+                              tuteur
+                            </v-chip></v-list-item-title
                           >
+                          <v-list-item-subtitle>
+                            Dans la rubrique tuteur veuillez y mettre les
+                            informations du Parent le plus disponible en cas de
+                            besoin.
+                          </v-list-item-subtitle>
                         </v-list-item-content>
                       </v-list-item>
                     </v-list>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-autocomplete
-                        v-model="editedItem.modePaiement"
-                        label="Mode de Paiement"
-                        :items="['Manuel', 'Virement bancaire']"
-                        :rules="[(v) => !!v || 'Ce champ est requis']"
-                        vform
-                        required
-                      ></v-autocomplete>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-text-field
-                        v-model="editedItem.numeroCompteBancaire"
-                        label="Compte Bancaire"
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-text-field
-                        v-model="editedItem.numeroCnss"
-                        label="Numere CNSS"
-                      ></v-text-field>
-                    </v-col>
+                    <v-container class="">
+                      <v-row>
+                        <v-col cols="12" sm="6" md="7">
+                          <v-text-field
+                            v-model="editedItem.nomPapa"
+                            label="Noms et prénoms du père"
+                            :rules="nameRules"
+                            :counter="10"
+                            required
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="5">
+                          <v-text-field
+                            v-model="editedItem.telPapa"
+                            label="Téléphone du père"
+                            :rules="telephoneRules"
+                          ></v-text-field>
+                        </v-col>
+                      </v-row>
+                    </v-container>
+                    <v-container class="">
+                      <v-row>
+                        <v-col cols="12" sm="6" md="7">
+                          <v-text-field
+                            v-model="editedItem.nomMaman"
+                            label="Noms et prénoms de la mère"
+                            :rules="[
+                              (v) => !!v || 'You must agree to continue!',
+                            ]"
+                            required
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="5">
+                          <v-text-field
+                            v-model="editedItem.telMaman"
+                            label="Téléphone de la mère"
+                            :rules="telephoneRules"
+                          ></v-text-field>
+                        </v-col>
+                      </v-row>
+                    </v-container>
+                    <v-container class="">
+                      <v-row>
+                        <v-col cols="12" sm="6" md="5" contai>
+                          <v-text-field
+                            v-model="editedItem.tuteur"
+                            label="Noms et prénoms du tuteur"
+                            :rules="nameRules"
+                            required
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="3">
+                          <v-text-field
+                            v-model="editedItem.telTuteur"
+                            label="Téléphone du tuteur"
+                            :rules="telephoneRules"
+                            required
+                          ></v-text-field>
+                        </v-col>
+
+                        <v-col cols="12" sm="6" md="4">
+                          <v-text-field
+                            v-model="editedItem.emailTuteur"
+                            label="Email du tuteur"
+                            email
+                          ></v-text-field>
+                        </v-col>
+                      </v-row>
+                    </v-container>
                   </v-card>
 
                   <v-divider></v-divider>
@@ -240,16 +313,34 @@
                     style="margin-left:360px"
                   >
                     <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="dialog = false">
-                      Close
+
+                    <v-btn icon style="margin: 0 130px 0 50px">
+                      <v-chip
+                        label
+                        color="primary"
+                        type="button"
+                        @click="dialog = false"
+                      >
+                        <v-icon left>mdi-close-outline</v-icon>
+                        Annuler
+                      </v-chip>
                     </v-btn>
                     <v-btn
                       color="blue darken-1"
                       style="margin-left:250px"
                       text
                       @click="SaveEleve"
+                      :disabled="!valid"
                     >
-                      Save
+                      <v-chip
+                        label
+                        color="primary"
+                        type="button"
+                        @click="SaveEleve"
+                      >
+                        <v-icon left>mdi-content-save-move-outline</v-icon>
+                        Enregistrer
+                      </v-chip>
                     </v-btn>
                   </v-card-actions>
                 </v-row>
@@ -258,13 +349,13 @@
 
             <!-- ---------------------------------------- -->
           </v-dialog>
-          <v-dialog v-model="dialogDelete" max-width="550px">
+          <v-dialog v-model="dialogDelete" max-width="490px">
             <v-card>
               <v-card-title class="headline"
                 >Voulez-vous vraiment supprimer l'élève
 
                 <span style="color: red; margin: 3px 0px 0px 100px "
-                  >{{ profActuel }} ?</span
+                  >{{ eleveActuel }} ?</span
                 >
               </v-card-title>
               <v-card-actions>
@@ -306,12 +397,14 @@ import { mapGetters } from "vuex";
 export default {
   name: "Eleves",
   data: () => ({
+    valid: true,
     search: "",
     erreur: false,
     message_erreur: "",
     dialog: false,
     dialogDelete: false,
     loader: false,
+    eleveActuel: "",
     MyHeaders: [
       { text: "Nom", value: "nom", sortable: true },
       { text: "Sexe", value: "sexe" },
@@ -326,9 +419,10 @@ export default {
     matieres: [],
     classes: undefined,
     nameRules: [
-      (v) => !!v || "Le nom est obligatoire",
-      (v) => v.length > 6 || "Le nom doit avoir plus de 6 caractères",
+      (v) => !!v || "Name is required",
+      (v) => (v && v.length > 6) || "Le nom doit avoir plus de 6 caractères",
     ],
+
     emailRules: [
       //(v) => !!v || "L'e-mail est obligatoire",
       (v) =>
@@ -337,7 +431,6 @@ export default {
     ],
 
     telephoneRules: [
-      (v) => !!v || "Le numéro de téléphone est obligatoire",
       // (v) =>
       //   parseInt(v) == true || "Le numéro ne doit contenir que des chiffres",
       (v) =>
@@ -347,8 +440,8 @@ export default {
     editedItem: {
       nom: "",
       sexe: null,
-      naissance: "",
-      lieuNaiss: "",
+      dateLieuNaissance: "",
+      adresse: "",
       nationalite: "",
       etatSanitaire: null,
       ecoleDorigine: "",
@@ -365,8 +458,8 @@ export default {
     defaultItem: {
       nom: "",
       sexe: null,
-      naissance: "",
-      lieuNaiss: "",
+      dateLieuNaissance: "",
+      adresse: "",
       nationalite: "",
       etatSanitaire: null,
       ecoleDorigine: "",
@@ -401,11 +494,11 @@ export default {
   },
 
   beforeMount() {
-    let mat = this.allMatieres;
+    // let mat = this.allMatieres;
 
-    mat.forEach((eleves) => {
-      this.matieres.push(eleves.nomMatiere);
-    });
+    // mat.forEach((eleves) => {
+    //   this.matieres.push(eleves.nomMatiere);
+    // });
     let id_classes = [localStorage.getItem("Id_classes")];
     let classe = undefined;
     console.log(
@@ -450,20 +543,20 @@ export default {
             for (const key in result) {
               eleves.push(result[key]);
             }
-            // let profs_cours_id=[]
+            // let eleves_cours_id=[]
             // this.allMatieres.matiereEnseigne.forEach(eleves => {
             // this.allMatieres.find((x) => x.nomMatiere == matiere).id
             // });
 
-            eleves.forEach((prof) => {
-              prof.dateEmbauche = String(prof.dateEmbauche).slice(0, 10);
+            eleves.forEach((eleve) => {
+              eleve.dateEmbauche = String(eleve.dateEmbauche).slice(0, 10);
             });
 
             this.$store.state.eleves = eleves;
 
             this.eleves = eleves;
             console.log(
-              "😃😃😃 this.profs => " +
+              "😃😃😃 this.eleves => " +
                 JSON.stringify(eleves) +
                 "this.response.data = " +
                 response.data
@@ -492,18 +585,19 @@ export default {
           this.eleves[this.editedIndex].nomMatiere
       );
       this.editedItem = Object.assign({}, item);
+      this.eleveActuel = item.nom;
       this.dialogDelete = true;
     },
 
     deleteItemConfirm() {
       this.loader = true;
       this.$store.dispatch(
-        "actionRemoveEnseignant",
-        this.eleves[this.editedIndex].enseignant_numero
+        "actionRemoveEleve",
+        this.eleves[this.editedIndex].eleveNumber
       );
       console.log(
-        "index du prof à supprimé confirmé pour la suppression =>" +
-          this.eleves[this.editedIndex].enseignant_numero
+        "index du eleve à supprimé confirmé pour la suppression =>" +
+          this.eleves[this.editedIndex].eleveNumber
       );
       this.eleves.splice(this.editedIndex, 1);
       this.loader = false;
@@ -528,68 +622,50 @@ export default {
       });
     },
     SaveEleve() {
-      if (this.editedIndex > -1) {
-        //update du prof
-        let index = this.editedIndex;
-        console.log("contenu de editedIndex => " + index);
-        let profToUpdate = this.editedItem.enseignant_numero;
-        let donnees = [];
+      if (this.$refs.form.validate()) {
+        console.log("Is form valid ? " + this.$refs.form.validate());
+        if (this.editedIndex > -1) {
+          //update du eleve
+          let index = this.editedIndex;
+          console.log("contenu de editedIndex => " + index);
+          let eleveToUpdate = this.editedItem.eleveNumber;
+          let donnees = [];
 
-        donnees.push(profToUpdate, this.editedItem);
-        console.log(
-          "type pk =>" +
-            donnees[0] +
-            "\n type objet modifié du save =>" +
-            typeof donnees[1]
-        );
-        this.$store.dispatch("actionUpdateEnseignant", donnees);
-        Object.assign(this.eleves[this.editedIndex], this.editedItem);
-        this.close();
+          donnees.push(eleveToUpdate, this.editedItem);
+          console.log(
+            "type pk =>" +
+              donnees[0] +
+              "\n type objet modifié du save =>" +
+              typeof donnees[1]
+          );
+          this.$store.dispatch("actionUpdateEleve", donnees);
+          Object.assign(this.eleves[this.editedIndex], this.editedItem);
+          this.close();
 
-        //creer un prof
-      } else {
-        if (this.$refs.form.validate()) {
-          console.log("prof selectionné " + this.editedItem.nom);
-          // console.log("allTeachers " + JSON.stringify(this.allTeachers));
-          // let matieres_ids = [];
-          // // ici je renvois une liste des ids des matieres choisies pour le prof dans le formulaire
-          /* if (this.editedItem.matiereEnseigne.length > 1) {
-             this.editedItem.matiereEnseigne.forEach((matiere) => {
-               matieres_ids.push(
-                 this.allMatieres.find((x) => x.nomMatiere == matiere).id
-               );
-             });
-             console.log(
-               "liste des ids des matières sélectionnées " + matieres_ids
-             );
-             this.editedItem.matiereEnseigne = matieres_ids;*/
-          this.$store.dispatch("actionCreateEnseignant", this.editedItem);
+          //creer un eleve
+        } else {
+          console.log("eleve selectionné " + this.editedItem.nom);
+          this.$store.dispatch("actionCreateEleve", this.editedItem);
           this.eleves.push(this.editedItem);
           this.close();
-        } else {
-          /* let matiere_position = this.allMatieres.findIndex(
-              (x) => x.nomMatiere == this.editedItem.matiereEnseigne
-            );
-            console.log(matiere_position);
-            let id_matiere = this.allMatieres[matiere_position].id;
-
-            console.log("l'id de la matière selectionnée est " + id_matiere);
-
-            this.editedItem.matiereEnseigne = [id_matiere];*/
-          this.dialog = true;
         }
+      } else {
+        console.log("Is form valid ? " + this.$refs.form.validate());
       }
+    },
+    clear() {
+      this.$refs.form.reset();
     },
 
     save() {
       if (this.editedIndex > -1) {
         let index = this.editedIndex;
         console.log("contenu de editedIndex => " + index);
-        let profToUpdate = this.editedItem.id;
+        let eleveToUpdate = this.editedItem.id;
         //let old = this.eleves
         [this.editedIndex];
         let donnees = [];
-        donnees.push(profToUpdate, this.editedItem);
+        donnees.push(eleveToUpdate, this.editedItem);
         console.log(
           "type pk =>" +
             donnees[0] +
@@ -615,26 +691,14 @@ export default {
           );
         }
 
-        //creer une matière
+        //creer un élève
       } else {
         console.log(
-          "classe Associée de l'objet créé =>" + this.editedItem.classAssocie
+          "classe Associée de l'élève créé =>" + this.editedItem.classe
         );
 
-        this.$store.dispatch("actionCreateEnseignant", this.editedItem);
-        if (this.$store.state.authStatut == "abel") {
-          this.eleves.push(this.editedItem);
-        } else if (this.$store.state.authStatut == "secretaire") {
-          console.log("else if de eleves");
-          this.message_erreur =
-            "Désolé seuls les directeurs sont autorisés à créer un enseignant";
-          this.erreur = true;
-        } else {
-          this.message_erreur =
-            "Désolé une erreur s'est produite au niveau du serveur";
-          console.log("else de eleves");
-          this.erreur = true;
-        }
+        this.$store.dispatch("actionCreateEleve", this.editedItem);
+        this.eleves.push(this.editedItem);
       }
       this.close();
     },
