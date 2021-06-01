@@ -10,9 +10,12 @@
       ></v-text-field>
     </v-card-title>
     <v-data-table
+      @click:row="handleClick"
+      type="button"
       :headers="MyHeaders"
       :items="enseignants"
       :search="search"
+      no-results-text="Désolé aucun résultat ne correspond à votre recherche !"
       sort-by="calories"
       class="elevation-1"
     >
@@ -34,7 +37,7 @@
               </v-btn>
             </template>
             <!-- ----------------------------------------------------------------------------- -->
-            <v-form ref="form" lazy-validation>
+            <v-form v-model="valid" ref="form" lazy-validation>
               <v-card align-content-space-around>
                 <v-toolbar dark color="primary">
                   <v-btn icon dark @click="dialog = false">
@@ -47,9 +50,26 @@
                     <span class="headline">{{ formTitle }} </span>
                   </v-card-title>
                   <v-spacer></v-spacer>
+
                   <v-toolbar-items>
-                    <v-btn dark text @click="SaveProf">
+                    <!-- <v-btn dark text @click="SaveProf">
                       Save
+                    </v-btn> -->
+                    <v-btn
+                      color="blue darken-1"
+                      text
+                      @click="SaveProf"
+                      :disabled="!valid"
+                    >
+                      <v-chip
+                        label
+                        color="primary"
+                        type="button"
+                        @click="SaveProf"
+                      >
+                        <v-icon left>mdi-content-save-move-outline</v-icon>
+                        Enregistrer
+                      </v-chip>
                     </v-btn>
                   </v-toolbar-items>
                 </v-toolbar>
@@ -112,6 +132,7 @@
                               ]"
                               label="Statut sociale"
                               v-model="editedItem.situationSociale"
+                              :rules="[(v) => !!v || 'Ce champ est requis']"
                               required
                             ></v-autocomplete>
                           </v-col>
@@ -119,6 +140,8 @@
                             <v-text-field
                               v-model="editedItem.nationalite"
                               label="nationalite"
+                              :rules="[(v) => !!v || 'Ce champ est requis']"
+                              required
                             ></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
@@ -134,6 +157,7 @@
                               v-model="editedItem.telephone"
                               label="Téléphone"
                               :rules="telephoneRules"
+                              required
                             ></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
@@ -159,6 +183,8 @@
                             <v-autocomplete
                               v-model="editedItem.matiereEnseigne"
                               :items="matieres"
+                              :rules="[(v) => !!v || 'Ce champ est requis']"
+                              required
                               label="Cours dispensé*"
                               multiple
                             ></v-autocomplete>
@@ -166,6 +192,7 @@
                           <v-col cols="12" sm="6" md="4">
                             <v-autocomplete
                               :items="classes"
+                              :rules="[(v) => !!v || 'Ce champ est requis']"
                               required
                               multiple
                               v-model="editedItem.classesOccupees"
@@ -215,7 +242,6 @@
                         label="Mode de Paiement"
                         :items="['Manuel', 'Virement bancaire']"
                         :rules="[(v) => !!v || 'Ce champ est requis']"
-                        vform
                         required
                       ></v-autocomplete>
                     </v-col>
@@ -240,16 +266,29 @@
                     style="margin-left:360px"
                   >
                     <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1" text @click="dialog = false">
-                      Close
+
+                    <v-btn icon style="margin: 0 130px 0 50px">
+                      <v-chip label color="primary" @click="dialog = false">
+                        <v-icon left>mdi-close-outline</v-icon>
+                        Annuler
+                      </v-chip>
                     </v-btn>
                     <v-btn
                       color="blue darken-1"
                       style="margin-left:250px"
                       text
                       @click="SaveProf"
+                      :disabled="!valid"
                     >
-                      Save
+                      <v-chip
+                        label
+                        color="primary"
+                        type="button"
+                        @click="SaveProf"
+                      >
+                        <v-icon left>mdi-content-save-move-outline</v-icon>
+                        Enregistrer
+                      </v-chip>
                     </v-btn>
                   </v-card-actions>
                 </v-row>
@@ -282,14 +321,14 @@
         </v-toolbar>
       </template>
 
-      <template v-slot:item.actions="{ item }">
-        <v-icon small class="mr-2" @click="editItem(item)">
+      <!--<template v-slot:item.actions="{ item }">
+         <v-icon small class="mr-2" @click="editItem(item)">
           mdi-pencil
-        </v-icon>
-        <v-icon small @click="deleteItem(item)">
+        </v-icon> 
+        <v-icon @dblclick="deleteItem(item)">
           mdi-delete
         </v-icon>
-      </template>
+      </template>-->
 
       <template v-slot:no-data>
         <v-btn color="primary" @click="initialiseProf">
@@ -306,6 +345,8 @@ import { mapGetters } from "vuex";
 export default {
   name: "Teachers",
   data: () => ({
+    valid: true,
+
     search: "",
     erreur: false,
     message_erreur: "",
@@ -320,16 +361,18 @@ export default {
       { text: "Cours", value: "matiereEnseigne", sortable: true },
       { text: "Classes", value: "classesOccupees", sortable: true },
       { text: "Admis le", value: "dateEmbauche", sortable: true },
-      { text: "Actions", value: "actions", sortable: false },
+      // à gerer pour la suppression { text: "Actions", value: "actions", sortable: false },
     ],
 
     enseignants: [],
     matieres: [],
     classes: undefined,
+
     nameRules: [
       (v) => !!v || "Le nom est obligatoire",
-      (v) => v.length > 6 || "Le nom doit avoir plus de 6 caractères",
+      (v) => (v && v.length > 6) || "Le nom doit avoir plus de 6 caractères",
     ],
+
     emailRules: [
       //(v) => !!v || "L'e-mail est obligatoire",
       (v) =>
@@ -338,12 +381,12 @@ export default {
     ],
 
     telephoneRules: [
-      (v) => !!v || "Le numéro de téléphone est obligatoire",
       // (v) =>
       //   parseInt(v) == true || "Le numéro ne doit contenir que des chiffres",
       (v) =>
         v.length == 9 || "Le numéro doit contenir strictement 9 caractères",
     ],
+
     editedIndex: -1,
     editedItem: {
       nom: undefined,
@@ -415,10 +458,18 @@ export default {
   },
 
   methods: {
+    handleClick: function(item, row) {
+      row.select(true);
+      console.log("Détails de " + item.email);
+      this.editItem(item);
+      //item  - selected item
+    },
+
     CloseAlert() {
       this.message_erreur = "";
       this.erreur = false;
     },
+
     async initialiseProf() {
       //   this.$store.dispatch("actionInitialiseMatiere");
       const token = "Token " + localStorage.getItem("token");
@@ -521,27 +572,29 @@ export default {
       });
     },
     SaveProf() {
-      if (this.editedIndex > -1) {
-        //update du prof
-        let index = this.editedIndex;
-        console.log("contenu de editedIndex => " + index);
-        let profToUpdate = this.editedItem.enseignant_numero;
-        let donnees = [];
+      console.log("is form valid ? " + this.$refs.form.validate());
+      if (this.$refs.form.validate()) {
+        console.log("is form valid ? " + this.$refs.form.validate());
+        if (this.editedIndex > -1) {
+          //update du prof
+          let index = this.editedIndex;
+          console.log("contenu de editedIndex => " + index);
+          let profToUpdate = this.editedItem.enseignant_numero;
+          let donnees = [];
 
-        donnees.push(profToUpdate, this.editedItem);
-        console.log(
-          "type pk =>" +
-            donnees[0] +
-            "\n type objet modifié du save =>" +
-            typeof donnees[1]
-        );
-        this.$store.dispatch("actionUpdateEnseignant", donnees);
-        Object.assign(this.enseignants[this.editedIndex], this.editedItem);
-        this.close();
+          donnees.push(profToUpdate, this.editedItem);
+          console.log(
+            "type pk =>" +
+              donnees[0] +
+              "\n type objet modifié du save =>" +
+              typeof donnees[1]
+          );
+          this.$store.dispatch("actionUpdateEnseignant", donnees);
+          Object.assign(this.enseignants[this.editedIndex], this.editedItem);
+          this.close();
 
-        //creer un prof
-      } else {
-        if (this.$refs.form.validate()) {
+          //creer un prof
+        } else {
           console.log("prof selectionné " + this.editedItem.nom);
           // console.log("allTeachers " + JSON.stringify(this.allTeachers));
           // let matieres_ids = [];
@@ -559,7 +612,7 @@ export default {
           this.$store.dispatch("actionCreateEnseignant", this.editedItem);
           this.enseignants.push(this.editedItem);
           this.close();
-        } else {
+
           /* let matiere_position = this.allMatieres.findIndex(
               (x) => x.nomMatiere == this.editedItem.matiereEnseigne
             );
@@ -569,8 +622,9 @@ export default {
             console.log("l'id de la matière selectionnée est " + id_matiere);
 
             this.editedItem.matiereEnseigne = [id_matiere];*/
-          this.dialog = true;
         }
+      } else {
+        console.log("is form valid ? " + this.$refs.form.validate());
       }
     },
 
@@ -634,4 +688,8 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+v-data-table[no-results-text] {
+  color: red;
+}
+</style>

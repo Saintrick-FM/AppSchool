@@ -13,7 +13,7 @@
       :search="search"
       :headers="MyHeaders"
       :items="eleves"
-      sort-by="calories"
+      sort-by="nom"
       class="elevation-1"
     >
       <template v-slot:top>
