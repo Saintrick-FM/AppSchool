@@ -5,6 +5,49 @@ const state = {
 };
 const actions = {
 
+    actionInitialiseEleve({ commit }) {
+        //   this.$store.dispatch("actionInitialiseMatiere");
+        const token = "Token " + localStorage.getItem("token");
+        if (localStorage.getItem("token") != null) {
+            var config = {
+                method: "get",
+                url: "api/inscriptions/",
+                headers: {
+                    Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
+                },
+            };
+            axios(config)
+                .then((response) => {
+                    const result = response.data;
+                    console.log(result);
+                    let eleves = [];
+                    for (const key in result) {
+                        eleves.push(result[key]);
+                    }
+                    // let eleves_cours_id=[]
+                    // this.allMatieres.matiereEnseigne.forEach(eleves => {
+                    // this.allMatieres.find((x) => x.nomMatiere == matiere).id
+                    // });
+
+                    eleves.forEach((eleve) => {
+                        eleve.dateEmbauche = String(eleve.dateEmbauche).slice(0, 10);
+                    });
+
+                    let elevesToStore = JSON.stringify(eleves)
+                    console.log(
+                        "😃😃😃 this.eleves => " +
+                        elevesToStore
+
+                    );
+                    localStorage.setItem("Elèves", elevesToStore);
+                    commit('InititialiseEleves', elevesToStore)
+                })
+                .catch(function(error) {
+                    console.log("😢😢😢" + error);
+                });
+        }
+    },
+
     async actionCreateEleve({ commit }, eleveCreate) {
         const token = "Token " + localStorage.getItem('token');
         console.log('nom de l\' eleve créé=>' + eleveCreate.nom)
@@ -87,9 +130,8 @@ const actions = {
 };
 const mutations = {
 
-    InitialiseEleves(state, eleves) {
+    InititialiseEleves(state, eleves) {
         state.eleves = eleves
-        localStorage.setItem("Eleves", eleves);
     },
     createEleve(state, eleve) {
         state.eleves = eleve

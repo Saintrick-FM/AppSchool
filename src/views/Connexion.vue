@@ -188,7 +188,7 @@ export default {
       this.refs.form.validate();
     },
     //Login method here
-    async onLogin() {
+    onLogin() {
       this.loading = true;
       this.$store.commit("setAnneeScolaire", this.annee_choisi);
       console.log(
@@ -202,9 +202,10 @@ export default {
         password: this.password,
       };
       //api call here
-      await axios
+      axios
         .post("api-auth-token/", formLogin)
         .then((res) => {
+          this.$store.dispatch("actionInitialiseEleve");
           const token = res.data.token;
           console.log(token);
 
@@ -214,14 +215,16 @@ export default {
           localStorage.setItem("année scolaire", this.annee_choisi);
           this.$store.commit("initializeStore");
 
-          this.etape = 4;
-          this.loading = false;
+          this.$store.dispatch("actionInitialiseEleve");
+          this.loading = true;
           const toPath = this.$route.query.to || "/finances";
 
-          this.$router.push(toPath);
           setTimeout(() => {
+            this.loading = false;
+            this.etape = 4;
+            this.$router.push(toPath);
             this.$router.go(0);
-          }, 500);
+          }, 2000);
 
           // this.$forceUpdate();
         })

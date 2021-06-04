@@ -46,6 +46,7 @@ export default {
     confirmLogout() {
       //this.$store.commit("removeAlertLogout");
       localStorage.setItem("token", null);
+      localStorage.setItem("Elèves", null);
       localStorage.setItem("Classes", null);
       localStorage.setItem("Profs", null);
       localStorage.setItem("Matieres", null);
@@ -56,6 +57,7 @@ export default {
       localStorage.setItem("année scolaire", null);
       localStorage.setItem("token", null);
       localStorage.setItem("token", null);
+      localStorage.setItem("eleveChoisi", null);
       this.$store.state.token = "";
 
       this.dialog = false;
