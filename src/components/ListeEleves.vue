@@ -15,6 +15,8 @@
       :items="eleves"
       type="button"
       @click:row="rowClick"
+      loading
+      loading-text="Chargement des données"
       sort-by="nom"
       class="elevation-1"
     >

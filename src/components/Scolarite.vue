@@ -87,9 +87,7 @@
 
             <!-- rubriaue gestion des mois payés -->
             <v-col md="7">
-              <v-card-text
-                style="border-left: dashed blue ; border-radius:20px"
-              >
+              <v-card-text>
                 <v-container grid-list-md>
                   <!-- raw affichant les mois payés ou impayés -->
                   <v-row>
@@ -107,11 +105,11 @@
                                   <v-icon left
                                     >mdi-calendar-month-outline</v-icon
                                   >
-                                  Mois payés ou non payés
+                                  Mois payés / non payés
                                 </v-chip>
                               </v-col>
                               <v-col md="2"> </v-col>
-
+                              <!--
                               <v-col md="4" style="padding-right: 9px">
                                 <v-chip label>
                                   <v-select
@@ -127,7 +125,7 @@
                                   ></v-select>
                                 </v-chip>
                               </v-col>
-                              <!-- Tous les mois -->
+                              Tous les mois -->
                               <v-chip-group
                                 v-if="shawAllMonths"
                                 mandatory
@@ -264,9 +262,115 @@
             </v-col>
             <!-- fin rubriaue gestion des mois payés -->
           </v-row>
+          <v-divider style="border-style:solid;"> </v-divider>
+          <v-divider style="margin-top:1px; border-style:solid"> </v-divider>
+          <v-row style="margin-top:10px;">
+            <!-- partie paiement -->
+            <v-card-text>
+              <v-container grid-list-md>
+                <v-sheet elevation="10" class="py-4 px-1">
+                  <v-data-table
+                    light
+                    v-model="selected"
+                    :headers="HeadersFrais"
+                    :items="paiementFrais"
+                    :single-select="singleSelect"
+                    hide-default-footer
+                    item-key="typeFrais"
+                    show-select
+                    loading="true"
+                  >
+                    <!-- <template v-slot:top>
+                    <v-switch
+                      v-model="singleSelect"
+                      label="Choix unique"
+                      class="pa-3"
+                    ></v-switch>
+                  </template> -->
+                  </v-data-table>
+
+                  <div class="text-center pt-2">
+                    <v-btn @click.prevent="handleClick">Suivant</v-btn>
+                  </div>
+                  <v-alert
+                    :value="alert"
+                    color="deep-purple accent-4"
+                    dark
+                    border="top"
+                    icon="mdi-cash-100"
+                    transition="scale-transition"
+                  >
+                    <v-row>
+                      <v-card-title color="" v-if="typeFraisApayer">
+                        Paiement {{ typeFraisApayer }} par l'élève
+                        <span style="margin-left:5px; color:black">
+                          {{ eleve.nom }}</span
+                        >
+                      </v-card-title>
+                    </v-row>
+                    <v-row>
+                      <v-col md="4">
+                        <v-text-field
+                          label="Montant à payer"
+                          append-icon=""
+                          v-model="montantApayer"
+                          outlined
+                          color
+                        ></v-text-field>
+                      </v-col>
+                      <v-col md="4">
+                        <v-text-field
+                          label="Montant déjà payé"
+                          append-icon=""
+                          v-model="montantDejaPaye"
+                          filled
+                          readonly
+                        ></v-text-field>
+                      </v-col>
+                      <v-col md="4">
+                        <v-text-field
+                          label="Montant à Restant"
+                          append-icon=""
+                          v-model="montantRestant"
+                          filled
+                          readonly
+                        ></v-text-field>
+                      </v-col>
+                    </v-row>
+                    <v-divider class=""></v-divider>
+                    <v-row>
+                      <v-col>
+                        <v-chip
+                          label
+                          color="primary"
+                          type="button"
+                          @click="alert = false"
+                        >
+                          <v-icon left>mdi-close-box-outline</v-icon>
+                          Annuler
+                        </v-chip></v-col
+                      >
+                      <v-col>
+                        <v-chip
+                          label
+                          color="primary"
+                          type="button"
+                          @click="SaveFrais"
+                        >
+                          <v-icon left>mdi-content-save-move-outline</v-icon>
+                          Enregistrer
+                        </v-chip></v-col
+                      >
+                    </v-row>
+                  </v-alert>
+                </v-sheet>
+              </v-container>
+            </v-card-text>
+          </v-row>
         </v-card>
       </v-row>
     </v-col>
+    itti
   </v-row>
 </template>
 
@@ -275,6 +379,14 @@ import MiniListeEleves from "@/components/MiniListeEleves.vue";
 export default {
   data() {
     return {
+      singleSelect: true,
+      alert: false,
+      selected: [],
+      fraisChoisi: [],
+      typeFraisApayer: undefined,
+      montantApayer: undefined,
+      montantDejaPaye: undefined,
+      montantRestant: undefined,
       eleve: {
         nom: "",
         sexe: null,
@@ -293,6 +405,66 @@ export default {
         redoublant: null,
         classe: null,
       },
+
+      HeadersFrais: [
+        { text: "Frais à payer", value: "typeFrais", sortable: true },
+        { text: "Montant Frais", value: "montantFrais", sortable: true },
+        { text: "Montant à payé", value: "montantApayer", sortable: true },
+        { text: "Montant déjà payé", value: "montantDejaPaye", sortable: true },
+        { text: "Montant restant", value: "montantRestant", sortable: true },
+        { text: "Statut", value: "statut", sortable: true },
+      ],
+      paiementFrais: [
+        {
+          typeFrais: "Frais Annuel",
+          montantFrais: "150000",
+          montantApayer: "15000",
+          montantDejaPaye: "14000",
+          montantRestant: "1000",
+          statut: "avancé",
+        },
+        {
+          typeFrais: "Frais Trimesrtiel",
+          montantFrais: "75000",
+          montantApayer: "15000",
+          montantDejaPaye: "14000",
+          montantRestant: "1000",
+          statut: "avancé",
+        },
+        {
+          typeFrais: "Assurance",
+          montantFrais: "2000",
+          montantApayer: "2000",
+          montantDejaPaye: "0",
+          montantRestant: "1000",
+          statut: "avancé",
+        },
+        {
+          typeFrais: "Dossier d'examen",
+          montantFrais: "15000",
+          montantApayer: "15000",
+          montantDejaPaye: "14000",
+          montantRestant: "1000",
+          statut: "avancé",
+        },
+        {
+          typeFrais: "Macaron",
+          montantFrais: "300",
+          montantApayer: "300",
+          montantDejaPaye: "14000",
+          montantRestant: "1000",
+          statut: "avancé",
+        },
+        {
+          typeFrais: "Tenu d'eps",
+          montantFrais: "15000",
+          montantApayer: "15000",
+          montantDejaPaye: "14000",
+          montantRestant: "1000",
+          statut: "avancé",
+        },
+      ],
+
       icon: "",
       optionDeTrie: "",
       shawAllMonths: undefined,
@@ -346,6 +518,27 @@ export default {
   },
 
   methods: {
+    handleClick: function() {
+      console.log("Elements sélectionnés" + JSON.stringify(this.selected));
+      this.alert = true;
+      if (this.selected.length > 0) {
+        let typeFRAIS = this.selected[0].typeFrais;
+        let montantDejaPaye = this.selected[0].montantDejaPaye;
+        let montantRestant = this.selected[0].montantRestant;
+        let statut = this.selected[0].statut;
+        console.log(typeFRAIS);
+        this.typeFraisApayer = typeFRAIS;
+        this.montantDejaPaye = montantDejaPaye;
+        this.montantRestant = montantRestant;
+        this.statut = statut;
+      }
+
+      //item  - selected item
+    },
+    SaveFrais() {
+      console.log("Frais enregistré");
+      this.alert = false;
+    },
     InitialiseTrie(value) {
       if (value === undefined) {
         // this.shawPayedMonth = false;
@@ -441,6 +634,6 @@ export default {
 
 <style>
 #nomEleve {
-  margin: 0px 390px 0px 390px;
+  margin: 0px 360px 0px 360px;
 }
 </style>
