@@ -276,10 +276,80 @@
                     :items="paiementFrais"
                     :single-select="singleSelect"
                     hide-default-footer
-                    item-key="typeFrais"
+                    item-key="paiementFraisNumero"
                     show-select
                     loading="true"
                   >
+                    <!-- New frais and Edit frais -->
+                    <template v-slot:top>
+                      <v-toolbar flat>
+                        <v-toolbar-title
+                          >Liste des frais à payer</v-toolbar-title
+                        >
+                        <v-divider class="mx-4" inset vertical></v-divider>
+                        <v-spacer></v-spacer>
+
+                        <v-dialog v-model="dialog" max-width="500px">
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-btn
+                              color="primary"
+                              dark
+                              class="mb-2"
+                              v-bind="attrs"
+                              v-on="on"
+                            >
+                              Ajouter un frais
+                            </v-btn>
+                          </template>
+                          <v-card max-width="2000px">
+                            <v-card-title>
+                              <span class="headline">{{ formTitle }}</span>
+                            </v-card-title>
+
+                            <v-card-text>
+                              <v-container>
+                                <v-row>
+                                  <v-col md="6">
+                                    <v-text-field
+                                      v-model="editedItem.frais"
+                                      label="Intitulé"
+                                    ></v-text-field>
+                                  </v-col>
+                                  <v-col cols="12" sm="6" md="6">
+                                    <v-text-field
+                                      type="number"
+                                      v-model="editedItem.montant"
+                                      label="Montant du frais"
+                                    ></v-text-field>
+                                  </v-col>
+                                </v-row>
+                              </v-container>
+                            </v-card-text>
+
+                            <v-card-actions>
+                              <v-spacer></v-spacer>
+                              <v-btn color="blue darken-1" text @click="close">
+                                Cancel
+                              </v-btn>
+                              <v-btn
+                                color="blue darken-1"
+                                text
+                                @click="saveNewOrUpdateFrais"
+                              >
+                                Enregistrer
+                              </v-btn>
+                            </v-card-actions>
+                          </v-card>
+                        </v-dialog>
+                      </v-toolbar>
+                    </template>
+
+                    <template v-slot:item.actions="{ item }">
+                      <v-icon small class="mr-2" @click="editItem(item)">
+                        mdi-pencil
+                      </v-icon>
+                    </template>
+
                     <!-- <template v-slot:top>
                     <v-switch
                       v-model="singleSelect"
@@ -301,8 +371,8 @@
                     transition="scale-transition"
                   >
                     <v-row>
-                      <v-card-title color="" v-if="typeFraisApayer">
-                        Paiement {{ typeFraisApayer }} par l'élève
+                      <v-card-title color="" v-if="fraisApayer">
+                        Paiement {{ fraisApayer }} par l'élève
                         <span style="margin-left:5px; color:black">
                           {{ eleve.nom }}</span
                         >
@@ -329,7 +399,7 @@
                       </v-col>
                       <v-col md="4">
                         <v-text-field
-                          label="Montant à Restant"
+                          label="Montant Restant"
                           append-icon=""
                           v-model="montantRestant"
                           filled
@@ -355,7 +425,7 @@
                           label
                           color="primary"
                           type="button"
-                          @click="SaveFrais"
+                          @click="SavePayedFrais"
                         >
                           <v-icon left>mdi-content-save-move-outline</v-icon>
                           Enregistrer
@@ -376,14 +446,16 @@
 
 <script>
 import MiniListeEleves from "@/components/MiniListeEleves.vue";
+import axios from "axios";
 export default {
   data() {
     return {
+      dialog: false,
       singleSelect: true,
       alert: false,
       selected: [],
       fraisChoisi: [],
-      typeFraisApayer: undefined,
+      fraisApayer: undefined,
       montantApayer: undefined,
       montantDejaPaye: undefined,
       montantRestant: undefined,
@@ -407,63 +479,50 @@ export default {
       },
 
       HeadersFrais: [
-        { text: "Frais à payer", value: "typeFrais", sortable: true },
-        { text: "Montant Frais", value: "montantFrais", sortable: true },
-        { text: "Montant à payé", value: "montantApayer", sortable: true },
-        { text: "Montant déjà payé", value: "montantDejaPaye", sortable: true },
-        { text: "Montant restant", value: "montantRestant", sortable: true },
-        { text: "Statut", value: "statut", sortable: true },
+        { text: "Frais à payer", value: "frais", sortable: true },
+        { text: "Montant Frais", value: "montant", sortable: true },
+        // { text: "Montant à payé", value: "montantApayer", sortable: true },
+        // { text: "Montant déjà payé", value: "montantDejaPaye", sortable: true },
+        // { text: "Montant restant", value: "montantRestant", sortable: true },
+        //{ text: "Statut", value: "statut", sortable: true },
+        { text: "Actions", value: "actions", sortable: false },
       ],
-      paiementFrais: [
-        {
-          typeFrais: "Frais Annuel",
-          montantFrais: "150000",
-          montantApayer: "15000",
-          montantDejaPaye: "14000",
-          montantRestant: "1000",
-          statut: "avancé",
+      editedIndex: -1,
+      editedItem: {
+        frais: undefined,
+        montant: undefined,
+      },
+      defaultItem: {
+        frais: undefined,
+        montant: undefined,
+      },
+      paiementFrais: [],
+      classes: undefined,
+      /* {
+          frais: "Frais Annuel",
+          montant: 0.000,
+          // montantApayer: "15000",
+          // montantDejaPaye: "14000",
+          // montantRestant: "1000",
+          // statut: "avancé",
         },
         {
-          typeFrais: "Frais Trimesrtiel",
-          montantFrais: "75000",
-          montantApayer: "15000",
-          montantDejaPaye: "14000",
-          montantRestant: "1000",
-          statut: "avancé",
+          frais: "Frais Trimesrtiel",
+          montant: 0.000,
         },
         {
-          typeFrais: "Assurance",
-          montantFrais: "2000",
-          montantApayer: "2000",
-          montantDejaPaye: "0",
-          montantRestant: "1000",
-          statut: "avancé",
+          frais: "Assurance",
+          montant: 0.000,
+          
         },
         {
-          typeFrais: "Dossier d'examen",
-          montantFrais: "15000",
-          montantApayer: "15000",
-          montantDejaPaye: "14000",
-          montantRestant: "1000",
-          statut: "avancé",
+          frais: "Dossier d'examen",
+          montant: 0.000,
         },
         {
-          typeFrais: "Macaron",
-          montantFrais: "300",
-          montantApayer: "300",
-          montantDejaPaye: "14000",
-          montantRestant: "1000",
-          statut: "avancé",
-        },
-        {
-          typeFrais: "Tenu d'eps",
-          montantFrais: "15000",
-          montantApayer: "15000",
-          montantDejaPaye: "14000",
-          montantRestant: "1000",
-          statut: "avancé",
-        },
-      ],
+          frais: "Macaron",
+          montant: 0.000,
+        },*/
 
       icon: "",
       optionDeTrie: "",
@@ -501,6 +560,9 @@ export default {
     MiniListeEleves,
   },
   computed: {
+    formTitle() {
+      return this.editedIndex === -1 ? "Nouveau frais" : "Modification frais";
+    },
     iconToShow() {
       let ok = "mdi-check";
       let no = "mdi-cancel";
@@ -515,19 +577,27 @@ export default {
     optionDeTrie: function(value) {
       this.InitialiseTrie(value);
     },
+    dialog(val) {
+      val || this.close();
+    },
+  },
+  created() {
+    this.getFrais();
+    this.getClasses();
   },
 
   methods: {
     handleClick: function() {
+      this.$vuetify.goTo(document.body.scrollHeight); // ici c'est pour scroller directement vers le bas
       console.log("Elements sélectionnés" + JSON.stringify(this.selected));
       this.alert = true;
       if (this.selected.length > 0) {
-        let typeFRAIS = this.selected[0].typeFrais;
+        let frais = this.selected[0].frais;
         let montantDejaPaye = this.selected[0].montantDejaPaye;
         let montantRestant = this.selected[0].montantRestant;
         let statut = this.selected[0].statut;
-        console.log(typeFRAIS);
-        this.typeFraisApayer = typeFRAIS;
+        console.log(frais);
+        this.fraisApayer = frais;
         this.montantDejaPaye = montantDejaPaye;
         this.montantRestant = montantRestant;
         this.statut = statut;
@@ -535,7 +605,88 @@ export default {
 
       //item  - selected item
     },
-    SaveFrais() {
+    getClasses() {
+      this.classes = localStorage.getItem("Classes").split(",");
+    },
+
+    async getFrais() {
+      const token = "Token " + localStorage.getItem("token");
+
+      if (localStorage.getItem("token") != null) {
+        var config = {
+          method: "get",
+          url: "api/finances/configFraisEleve/",
+          headers: {
+            Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
+          },
+        };
+        await axios(config)
+          .then((response) => {
+            const result = response.data;
+
+            console.log(result);
+            localStorage.setItem("Frais", result);
+
+            let element = [];
+
+            for (const key in result) {
+              element.push(result[key]);
+            }
+            element.forEach((obj) => {
+              obj.montantDejaPaye = 0;
+              obj.montantRestant = 0;
+            });
+            this.paiementFrais = element;
+            console.log(
+              "😃😃😃 this.paiementFrais => " +
+                this.paiementFrais +
+                "this.response.data = " +
+                JSON.stringify(element)
+            );
+          })
+          .catch(function(error) {
+            console.log("😢😢😢" + error);
+          });
+      }
+    },
+
+    editItem(item) {
+      this.editedIndex = this.paiementFrais.indexOf(item);
+
+      this.editedItem = Object.assign({}, item);
+      this.dialog = true;
+    },
+
+    close() {
+      this.dialog = false;
+      this.$nextTick(() => {
+        this.editedItem = Object.assign({}, this.defaultItem);
+        this.editedIndex = -1;
+      });
+    },
+
+    saveNewOrUpdateFrais() {
+      if (this.editedIndex > -1) {
+        let index = this.editedIndex;
+        console.log("contenu de editedIndex => " + index);
+        let fraisToUpdate = this.editedItem.frais;
+
+        let donnees = [];
+        donnees.push(fraisToUpdate, this.editedItem);
+
+        this.$store.dispatch("actionUpdateFrais", donnees);
+
+        //creer un frais
+      } else {
+        console.log("type frais à ajouter =>" + this.editedItem.frais);
+        this.editedItem.montant = Number(this.editedItem.montant);
+
+        this.$store.dispatch("actionCreateFrais", this.editedItem);
+      }
+      this.close();
+    },
+
+    SavePayedFrais() {
       console.log("Frais enregistré");
       this.alert = false;
     },
@@ -617,7 +768,25 @@ export default {
     },
     AfficheEleve() {
       let eleveChoisi = JSON.parse(localStorage.getItem("eleveChoisi"));
-      console.log("console.log = " + eleveChoisi);
+      console.log(
+        "console.log = " +
+          JSON.stringify(eleveChoisi) +
+          "classes " +
+          typeof this.classes
+      );
+      let clas = [];
+
+      for (const iterator of this.classes) {
+        clas.push(iterator);
+      }
+
+      var montantFraisMensuel = clas.find(
+        (x) => x.classe == localStorage.getItem("eleveChoisi").classe
+      ).scolarite;
+      console.log(
+        "Frais mensuel de " + eleveChoisi.nom + " = " + montantFraisMensuel
+      );
+
       this.eleve.nom = eleveChoisi.nom;
       this.eleve.sexe = eleveChoisi.sexe;
       this.eleve.dateLieuNaissance = eleveChoisi.dateLieuNaissance;
