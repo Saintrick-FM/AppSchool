@@ -278,17 +278,18 @@ export default {
             console.log(result);
             let element = [];
 
-            for (const classe of result) {
-              element.push(classe);
-              this.identifiants_classes.push(classe.identifiant);
+            for (const classe in result) {
+              element.push(result[classe]);
+              this.identifiants_classes.push(result[classe].identifiant);
             }
 
             // element.forEach((element) => {
+
             //   this.identifiants_classes.push(element["identifiant"]);
             // });
 
             console.log("identifiants classes => " + this.identifiants_classes);
-            localStorage.setItem("Classes", element);
+            localStorage.setItem("Classes", JSON.stringify(element));
             localStorage.setItem("Id_classes", this.identifiants_classes);
             this.$store.state.classes = element;
             this.$store.state.identifiants_classes = this.identifiants_classes;

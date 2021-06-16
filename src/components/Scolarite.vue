@@ -769,20 +769,27 @@ export default {
     AfficheEleve() {
       let eleveChoisi = JSON.parse(localStorage.getItem("eleveChoisi"));
       console.log(
-        "console.log = " +
-          JSON.stringify(eleveChoisi) +
+        "classe de l'élève choisi = " +
+          eleveChoisi.classe +
           "classes " +
-          typeof this.classes
+          this.classes
       );
-      let clas = [];
 
-      for (const iterator of this.classes) {
-        clas.push(iterator);
-      }
+      /* var classe = localStorage.getItem("Id_classes").split(",");
 
-      var montantFraisMensuel = clas.find(
-        (x) => x.classe == localStorage.getItem("eleveChoisi").classe
+       var indexClasse = classe.indexOf(eleveChoisi.classe);
+      console.log(
+         typeof classe + "classe =" + classe + "\n indexClasse =" + indexClasse
+       );
+
+      // console.log(JSON.parse(this.classes)[indexClasse].scolarite);*/
+
+      //attention ne jamais oublier de parses une variable JSON stringifié car elle ne ressemble à du JSON par la forme dans le fond c'est un Array oui mais pas d'objets mais de String
+
+      var montantFraisMensuel = JSON.parse(this.classes).find(
+        (x) => x.identifiant == eleveChoisi.classe
       ).scolarite;
+
       console.log(
         "Frais mensuel de " + eleveChoisi.nom + " = " + montantFraisMensuel
       );
