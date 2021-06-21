@@ -358,6 +358,18 @@
                     ></v-switch>
                   </template> -->
                   </v-data-table>
+                  <v-divider></v-divider>
+                  <v-divider></v-divider>
+
+                  <v-autocomplete
+                    :items="mois"
+                    label="Frais mensuels"
+                    clearable
+                    v-model="moisToPay"
+                    chips
+                    multiple
+                    >Frais mensuels</v-autocomplete
+                  >
 
                   <div class="text-center pt-2">
                     <v-btn @click.prevent="handleClick">Suivant</v-btn>
@@ -370,14 +382,63 @@
                     icon="mdi-cash-100"
                     transition="scale-transition"
                   >
-                    <v-row>
-                      <v-card-title color="" v-if="fraisApayer">
-                        Paiement {{ fraisApayer }} par l'élève
+                    <!-- <v-row v-if="fraisApayer">
+                      <v-card-title>
+                        Paiement
                         <span style="margin-left:5px; color:black">
-                          {{ eleve.nom }}</span
+                          {{ fraisApayer }}</span
                         >
                       </v-card-title>
+                    </v-row> -->
+                    <v-row v-if="moisToPay">
+                      <v-row>
+                        <v-col md="8">
+                          <v-card-title v-if="selected.lenght == 0">
+                            Paiement frais mensuel :
+                            <v-chip
+                              color="primary"
+                              style="margin-left:15px"
+                              text-color="white"
+                            >
+                              {{ moisToPay.toString() }}
+                              <span style="margin-left:50px"
+                                >{{ scolariteTotal }} FCFA</span
+                              ></v-chip
+                            >
+                          </v-card-title>
+                          <!-- Ici affichage en cas de paiement frais autres que les frais mensuels -->
+                          <v-card-title v-else>
+                            Paiement
+                            <v-chip
+                              color="primary"
+                              style="margin-left:15px"
+                              text-color="white"
+                            >
+                              {{ fraisApayer }}
+                              <span style="margin-left:50px"
+                                >{{ prixFraisApayer }} FCFA</span
+                              ></v-chip
+                            >
+                          </v-card-title>
+                        </v-col>
+                        <v-col md="3">
+                          <v-text-field
+                            prepend-icon="mdi-account"
+                            :value="eleve.nom"
+                            outlined
+                            filled
+                            readonly
+                          ></v-text-field>
+                        </v-col>
+                        <v-col md="1">
+                          <v-chip label color="primary" text-color="white">
+                            <v-icon left>mdi-book-variant</v-icon>
+                            {{ eleve.classe }}
+                          </v-chip>
+                        </v-col>
+                      </v-row>
                     </v-row>
+
                     <v-row>
                       <v-col md="4">
                         <v-text-field
@@ -407,14 +468,16 @@
                         ></v-text-field>
                       </v-col>
                     </v-row>
-                    <v-divider class=""></v-divider>
+                    <v-divider></v-divider>
+                    <v-divider></v-divider>
+
                     <v-row>
                       <v-col>
                         <v-chip
                           label
                           color="primary"
                           type="button"
-                          @click="alert = false"
+                          @click="annulation"
                         >
                           <v-icon left>mdi-close-box-outline</v-icon>
                           Annuler
@@ -455,10 +518,12 @@ export default {
       alert: false,
       selected: [],
       fraisChoisi: [],
+      scolariteTotal: undefined,
+      montantFraisMensuel: undefined,
       fraisApayer: undefined,
+      prixFraisApayer: undefined,
       montantApayer: undefined,
-      montantDejaPaye: undefined,
-      montantRestant: undefined,
+
       eleve: {
         nom: "",
         sexe: null,
@@ -498,31 +563,7 @@ export default {
       },
       paiementFrais: [],
       classes: undefined,
-      /* {
-          frais: "Frais Annuel",
-          montant: 0.000,
-          // montantApayer: "15000",
-          // montantDejaPaye: "14000",
-          // montantRestant: "1000",
-          // statut: "avancé",
-        },
-        {
-          frais: "Frais Trimesrtiel",
-          montant: 0.000,
-        },
-        {
-          frais: "Assurance",
-          montant: 0.000,
-          
-        },
-        {
-          frais: "Dossier d'examen",
-          montant: 0.000,
-        },
-        {
-          frais: "Macaron",
-          montant: 0.000,
-        },*/
+      moisToPay: [],
 
       icon: "",
       optionDeTrie: "",
@@ -563,6 +604,25 @@ export default {
     formTitle() {
       return this.editedIndex === -1 ? "Nouveau frais" : "Modification frais";
     },
+    montantDejaPaye() {
+      if (this.moisToPay.length > 0) {
+        return this.montantApayer;
+      } else if (this.selected.length > 0) {
+        return this.selected[0].montantDejaPaye;
+      } else {
+        return 0;
+      }
+    },
+    montantRestant() {
+      if (this.moisToPay.length > 0) {
+        return Number(this.scolariteTotal) - Number(this.montantDejaPaye);
+      } else if (this.selected.length > 0) {
+        return this.selected[0].montantRestant;
+      } else {
+        return 0;
+      }
+    },
+
     iconToShow() {
       let ok = "mdi-check";
       let no = "mdi-cancel";
@@ -587,17 +647,32 @@ export default {
   },
 
   methods: {
+    annulation() {
+      this.alert = false;
+      this.fraisApayer = undefined;
+    },
     handleClick: function() {
       this.$vuetify.goTo(document.body.scrollHeight); // ici c'est pour scroller directement vers le bas
-      console.log("Elements sélectionnés" + JSON.stringify(this.selected));
+
       this.alert = true;
+      if (this.moisToPay.length > 0) {
+        console.log("Elements sélectionnés" + JSON.stringify(this.moisToPay));
+        this.moisToPay.slice(0);
+        this.scolariteTotal =
+          Number(this.montantFraisMensuel.slice(0, -1)) * this.moisToPay.length;
+        this.montantDejaPaye = this.montantApayer;
+        this.montantRestant = this.scolariteTotal - this.montantDejaPaye;
+      }
+
       if (this.selected.length > 0) {
+        console.log("Elements sélectionnés" + JSON.stringify(this.selected));
         let frais = this.selected[0].frais;
         let montantDejaPaye = this.selected[0].montantDejaPaye;
         let montantRestant = this.selected[0].montantRestant;
         let statut = this.selected[0].statut;
         console.log(frais);
         this.fraisApayer = frais;
+        this.prixFraisApayer = this.selected[0].montant;
         this.montantDejaPaye = montantDejaPaye;
         this.montantRestant = montantRestant;
         this.statut = statut;
@@ -786,12 +861,15 @@ export default {
 
       //attention ne jamais oublier de parses une variable JSON stringifié car elle ne ressemble à du JSON par la forme dans le fond c'est un Array oui mais pas d'objets mais de String
 
-      var montantFraisMensuel = JSON.parse(this.classes).find(
+      this.montantFraisMensuel = JSON.parse(this.classes).find(
         (x) => x.identifiant == eleveChoisi.classe
       ).scolarite;
 
       console.log(
-        "Frais mensuel de " + eleveChoisi.nom + " = " + montantFraisMensuel
+        "Frais mensuel de " +
+          eleveChoisi.nom +
+          " = " +
+          this.montantFraisMensuel.slice(0, -1)
       );
 
       this.eleve.nom = eleveChoisi.nom;
