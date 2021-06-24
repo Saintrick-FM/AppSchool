@@ -1,6 +1,7 @@
 import axios from 'axios'
 const state = {
     typeFrais: [],
+    fraisPayed: undefined,
 
 };
 const actions = {
@@ -70,6 +71,29 @@ const actions = {
             });
     },
 
+    async actionPayedFrais({ commit }, fraisPayed) {
+        const token = "Token " + localStorage.getItem('token');
+
+        let body = fraisPayed; //attention ne jamais oublié d'assigner les valeurs recues dans body car axios l'exige
+        await axios
+            .post('api/finances/paiementFraisEleve/', body, {
+                headers: {
+                    'Authorization': token,
+                }
+            })
+            .then((response) => {
+
+                console.log("😃😃😃" + JSON.stringify(response));
+                commit("fraisPayed", fraisPayed);
+            })
+            .catch(function(error) {
+                console.log('fraisPayed in catch action =>' + JSON.stringify(body))
+                console.log("😢😢😢" + error);
+
+            });
+
+    }
+
 
 };
 const mutations = {
@@ -94,7 +118,9 @@ const mutations = {
         state.typeFrais[id.indexOf(newFrais[0])] = newFrais[1]
     },
 
-
+    fraisPayed(state, fraisPayed) {
+        state.fraisPayed = fraisPayed
+    }
 
 };
 const getters = {

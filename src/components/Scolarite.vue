@@ -6,87 +6,26 @@
     <v-col elevation="5" md="10">
       <v-row>
         <v-card>
-          <v-card-title>
-            <span class="headline" color="primary" id="nomEleve">{{
-              eleve.nom
-            }}</span>
+          <v-card-title class="headline">
+            <v-chip label color="primary" text-color="white">
+              <v-icon left>mdi-account</v-icon>
+              <h2>{{ eleve.nom }}</h2>
+            </v-chip>
+
+            <v-chip
+              label
+              color="primary"
+              style="margin-left:900px"
+              text-color="white"
+            >
+              <v-icon left>mdi-book-variant</v-icon>
+              <h3>{{ eleve.classe }}</h3>
+            </v-chip>
           </v-card-title>
+
           <v-row>
             <!-- rubriaue infos civiles de l'élève qui paie -->
-            <v-col md="5">
-              <v-card-text>
-                <v-container grid-list-md>
-                  <v-row>
-                    <v-col md="6">
-                      <v-text-field
-                        prepend-icon="mdi-calendar-range"
-                        :value="eleve.dateLieuNaissance"
-                        label="Date et lieu de naissance"
-                        outlined
-                        filled
-                        readonly
-                      ></v-text-field>
-                    </v-col>
-
-                    <v-col md="6">
-                      <v-text-field
-                        prepend-icon="mdi-book-variant"
-                        :value="eleve.classe"
-                        label="Classe"
-                        outlined
-                        filled
-                        readonly
-                      ></v-text-field>
-                    </v-col>
-                    <v-col md="6">
-                      <v-text-field
-                        filled
-                        outlined
-                        :value="eleve.redoublant"
-                        label="Nouveau ou Redoublant ?"
-                        prepend-icon="mdi-reply-all-outline"
-                        readonly
-                      >
-                      </v-text-field>
-                    </v-col>
-                  </v-row>
-                  <v-divider> </v-divider>
-                  <v-row justify-space-around>
-                    <v-col md="4">
-                      <v-text-field
-                        :value="eleve.tuteur"
-                        append-icon="mdi-human-male-boy"
-                        prepend-icon="mdi-human-male-boy"
-                        label="Tuteur"
-                        readonly
-                      >
-                      </v-text-field>
-                    </v-col>
-                    <v-col md="3">
-                      <v-text-field
-                        :value="eleve.telTuteur"
-                        prepend-icon=" mdi-phone"
-                        label="Téléphone du tuteur"
-                        readonly
-                      >
-                      </v-text-field>
-                    </v-col>
-                    <v-col md="5">
-                      <v-text-field
-                        :value="eleve.adresse"
-                        prepend-icon="mdi-map-marker"
-                        label="Adresse"
-                        readonly
-                      >
-                      </v-text-field>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-card-text>
-            </v-col>
-
-            <!-- rubriaue gestion des mois payés -->
-            <v-col md="7">
+            <v-col md="6">
               <v-card-text>
                 <v-container grid-list-md>
                   <!-- raw affichant les mois payés ou impayés -->
@@ -99,13 +38,13 @@
                               <v-col md="5" style="margin-left: 25px">
                                 <v-chip
                                   label
-                                  color="primary"
+                                  color="light-green"
                                   text-color="white"
                                 >
                                   <v-icon left
                                     >mdi-calendar-month-outline</v-icon
                                   >
-                                  Mois payés / non payés
+                                  Mois payés
                                 </v-chip>
                               </v-col>
                               <v-col md="2"> </v-col>
@@ -231,23 +170,31 @@
                   </v-row>
                   <!-- fin raw affichant les mois payés ou impayés -->
                   <v-divider style="margin-bottom: 15px"> </v-divider>
+                  <v-divider> </v-divider>
 
-                  <!-- raw autres details après le divider -->
+                  <!-- Partie bas de la zone gauche 
                   <v-row justify-space-around>
-                    <v-col md="6">
+                    gdggdg
+                    <v-col md="4">
                       <v-text-field
                         :value="eleve.tuteur"
                         append-icon="mdi-human-male-boy"
                         prepend-icon="mdi-human-male-boy"
                         label="Tuteur"
                         readonly
-                        filled
-                        outlined
                       >
                       </v-text-field>
                     </v-col>
-
-                    <v-col md="6">
+                    <v-col md="3">
+                      <v-text-field
+                        :value="eleve.telTuteur"
+                        prepend-icon=" mdi-phone"
+                        label="Téléphone du tuteur"
+                        readonly
+                      >
+                      </v-text-field>
+                    </v-col>
+                    <v-col md="5">
                       <v-text-field
                         :value="eleve.adresse"
                         prepend-icon="mdi-map-marker"
@@ -256,7 +203,154 @@
                       >
                       </v-text-field>
                     </v-col>
+                  </v-row> -->
+                </v-container>
+              </v-card-text>
+            </v-col>
+
+            <!-- rubriaue gestion des mois payés -->
+            <v-col md="6">
+              <v-card-text>
+                <v-container grid-list-md>
+                  <!-- raw affichant les mois payés ou impayés -->
+                  <v-row>
+                    <v-col>
+                      <v-row justify="space-around">
+                        <v-col>
+                          <v-sheet elevation="10" class="py-4 px-1">
+                            <v-row>
+                              <v-col md="5" style="margin-left: 25px">
+                                <v-chip label color="red" text-color="white">
+                                  <v-icon left
+                                    >mdi-calendar-month-outline</v-icon
+                                  >
+                                  Mois non payés
+                                </v-chip>
+                              </v-col>
+                              <v-col md="2"> </v-col>
+                              <!--
+                              <v-col md="4" style="padding-right: 9px">
+                                <v-chip label>
+                                  <v-select
+                                    v-model="optionDeTrie"
+                                    chips
+                                    :items="[
+                                      'Tous les mois',
+                                      'Mois payés',
+                                      'Mois non-payés',
+                                      'Mois avancés',
+                                    ]"
+                                    label="Trier par :"
+                                  ></v-select>
+                                </v-chip>
+                              </v-col>
+                              Tous les mois -->
+                              <v-chip-group
+                                v-if="shawAllMonths"
+                                mandatory
+                                active-class="primary--text"
+                                center-active
+                              >
+                                <v-chip
+                                  readonly
+                                  outlined
+                                  v-for="mois in mois"
+                                  :key="mois"
+                                >
+                                  <v-icon :color="colorToShow">{{
+                                    iconToShow
+                                  }}</v-icon>
+                                  {{ mois }}
+                                </v-chip>
+                              </v-chip-group>
+                              <!-- Fin Tous les mois/ Debut Mois payés -->
+
+                              <v-chip-group
+                                v-if="shawPayedMonths == 'PayedMonths'"
+                                mandatory
+                                active-class="primary--text"
+                                center-active
+                              >
+                                <v-chip
+                                  readonly
+                                  outlined
+                                  v-for="moisPaye in MoisPaye"
+                                  :key="moisPaye"
+                                >
+                                  <v-icon color="green">mdi-check</v-icon>
+                                  {{ moisPaye }}
+                                </v-chip>
+                              </v-chip-group>
+                              <!-- Fin payedMonths/ Debut Mois non-payés -->
+
+                              <v-chip-group
+                                v-if="shawNonPayedMonths === 'NonPayedMonths'"
+                                mandatory
+                                active-class="primary--text"
+                                center-active
+                              >
+                                <v-chip
+                                  readonly
+                                  outlined
+                                  v-for="moisNonPaye in MoisNonPaye"
+                                  :key="moisNonPaye"
+                                >
+                                  <v-icon color="red">mdi-cancel</v-icon>
+                                  {{ moisNonPaye }}
+                                </v-chip>
+                              </v-chip-group>
+                              <!-- Fin nonPayedMonths/ Debut mois-Avancés -->
+                              <v-chip-group
+                                v-if="shawAvancedMonths === 'AdvancedMonths'"
+                                mandatory
+                                active-class="primary--text"
+                                center-active
+                              >
+                                <v-chip
+                                  readonly
+                                  outlined
+                                  v-for="moisAvance in moisAvance"
+                                  :key="moisAvance"
+                                >
+                                  <v-icon color="orange"
+                                    >mdi-currency-usd-off</v-icon
+                                  >
+                                  {{ moisAvance }}
+                                </v-chip>
+                              </v-chip-group>
+                            </v-row>
+                          </v-sheet>
+                        </v-col>
+                      </v-row>
+                    </v-col>
+
+                    <v-row style="margin-top: 15px">
+                      <v-col md="6">
+                        <v-text-field
+                          prepend-icon="mdi-book-variant"
+                          :value="eleve.classe"
+                          label="Classe"
+                          outlined
+                          filled
+                          readonly
+                        ></v-text-field>
+                      </v-col>
+                      <v-col md="6">
+                        <v-text-field
+                          :value="eleve.telTuteur"
+                          prepend-icon=" mdi-phone"
+                          label="Téléphone du tuteur"
+                          readonly
+                          filled
+                          outlined
+                        >
+                        </v-text-field>
+                      </v-col>
+                    </v-row>
                   </v-row>
+                  <!-- fin raw affichant les mois impayés -->
+                  <v-divider style="margin-bottom: 15px"> </v-divider>
+                  <v-divider style="margin-bottom: 15px"> </v-divider>
                 </v-container>
               </v-card-text>
             </v-col>
@@ -271,12 +365,12 @@
                 <v-sheet elevation="10" class="py-4 px-1">
                   <v-data-table
                     light
-                    v-model="selected"
+                    v-model="fraisChoisi"
                     :headers="HeadersFrais"
                     :items="paiementFrais"
                     :single-select="singleSelect"
                     hide-default-footer
-                    item-key="paiementFraisNumero"
+                    item-key="frais"
                     show-select
                     loading="true"
                   >
@@ -381,6 +475,7 @@
                     border="top"
                     icon="mdi-cash-100"
                     transition="scale-transition"
+                    persistent
                   >
                     <!-- <v-row v-if="fraisApayer">
                       <v-card-title>
@@ -393,7 +488,7 @@
                     <v-row v-if="moisToPay">
                       <v-row>
                         <v-col md="8">
-                          <v-card-title v-if="selected.lenght == 0">
+                          <v-card-title v-if="AffichePaiementMois">
                             Paiement frais mensuel :
                             <v-chip
                               color="primary"
@@ -407,7 +502,7 @@
                             >
                           </v-card-title>
                           <!-- Ici affichage en cas de paiement frais autres que les frais mensuels -->
-                          <v-card-title v-else>
+                          <v-card-title v-if="AffichePaiementAutresFrais">
                             Paiement
                             <v-chip
                               color="primary"
@@ -475,7 +570,7 @@
                       <v-col>
                         <v-chip
                           label
-                          color="primary"
+                          color="red"
                           type="button"
                           @click="annulation"
                         >
@@ -496,6 +591,40 @@
                       >
                     </v-row>
                   </v-alert>
+                  <!-- Alert en cas de double choix mois et autres frais  -->
+                  <v-alert
+                    v-if="alertErreurDuplicateTypeFrais"
+                    transition="dialog-top-transition"
+                    text
+                    prominent
+                    type="error"
+                    icon="mdi-cloud-alert"
+                    max-width="1200"
+                    border="bottom"
+                    color="pink darken-1"
+                    colored-border
+                  >
+                    <h2
+                      style="color:#d81b60; margin:0px, 10px,0px, 10px; position:absolute; margin-top:-4px"
+                    >
+                      Désolé vous ne pouvez pas procéder en même temps au
+                      paiement de frais mensuels et des
+                      <span style="margin-left: 350px">
+                        autres types de frais</span
+                      >
+                    </h2>
+
+                    <v-btn
+                      color="pink darken-1"
+                      outlined
+                      width="30px"
+                      style=" margin-left:1020px"
+                      small
+                      @click="alertErreurDuplicateTypeFrais = false"
+                    >
+                      <v-icon>mdi-close</v-icon>
+                    </v-btn>
+                  </v-alert>
                 </v-sheet>
               </v-container>
             </v-card-text>
@@ -503,7 +632,6 @@
         </v-card>
       </v-row>
     </v-col>
-    itti
   </v-row>
 </template>
 
@@ -516,7 +644,9 @@ export default {
       dialog: false,
       singleSelect: true,
       alert: false,
-      selected: [],
+      alertErreurDuplicateTypeFrais: false,
+      AffichePaiementAutresFrais: false,
+      AffichePaiementMois: false,
       fraisChoisi: [],
       scolariteTotal: undefined,
       montantFraisMensuel: undefined,
@@ -607,8 +737,8 @@ export default {
     montantDejaPaye() {
       if (this.moisToPay.length > 0) {
         return this.montantApayer;
-      } else if (this.selected.length > 0) {
-        return this.selected[0].montantDejaPaye;
+      } else if (this.fraisChoisi.length > 0) {
+        return this.fraisChoisi[0].montantDejaPaye;
       } else {
         return 0;
       }
@@ -616,8 +746,8 @@ export default {
     montantRestant() {
       if (this.moisToPay.length > 0) {
         return Number(this.scolariteTotal) - Number(this.montantDejaPaye);
-      } else if (this.selected.length > 0) {
-        return this.selected[0].montantRestant;
+      } else if (this.fraisChoisi.length > 0) {
+        return this.fraisChoisi[0].montantRestant;
       } else {
         return 0;
       }
@@ -650,35 +780,51 @@ export default {
     annulation() {
       this.alert = false;
       this.fraisApayer = undefined;
+      this.fraisChoisi = [];
+      this.moisToPay = [];
+      this.montantDejaPaye = undefined;
+      this.montantRestant = undefined;
+      this.AffichePaiementAutresFrais = false;
+      this.AffichePaiementMois = false;
+    },
+    afficheAlert() {
+      console.log(this.fraisChoisi.length);
     },
     handleClick: function() {
       this.$vuetify.goTo(document.body.scrollHeight); // ici c'est pour scroller directement vers le bas
 
-      this.alert = true;
-      if (this.moisToPay.length > 0) {
-        console.log("Elements sélectionnés" + JSON.stringify(this.moisToPay));
+      if (this.moisToPay.length > 0 && this.fraisChoisi.length == 0) {
+        this.alert = true;
+        this.AffichePaiementMois = true;
+        console.log(
+          "Frais mensuels sélectionnés" + JSON.stringify(this.moisToPay)
+        );
         this.moisToPay.slice(0);
         this.scolariteTotal =
           Number(this.montantFraisMensuel.slice(0, -1)) * this.moisToPay.length;
         this.montantDejaPaye = this.montantApayer;
         this.montantRestant = this.scolariteTotal - this.montantDejaPaye;
-      }
-
-      if (this.selected.length > 0) {
-        console.log("Elements sélectionnés" + JSON.stringify(this.selected));
-        let frais = this.selected[0].frais;
-        let montantDejaPaye = this.selected[0].montantDejaPaye;
-        let montantRestant = this.selected[0].montantRestant;
-        let statut = this.selected[0].statut;
-        console.log(frais);
+      } else if (this.fraisChoisi.length > 0 && this.moisToPay.length == 0) {
+        this.alert = true;
+        console.log(
+          "Autre Frais sélectionné" + JSON.stringify(this.fraisChoisi)
+        );
+        this.AffichePaiementAutresFrais = true;
+        let frais = this.fraisChoisi[0].frais;
+        let montantDejaPaye = this.fraisChoisi[0].montantDejaPaye;
+        let montantRestant = this.fraisChoisi[0].montantRestant;
+        let statut = this.fraisChoisi[0].statut;
+        console.log("frais sélectionné => " + frais);
         this.fraisApayer = frais;
-        this.prixFraisApayer = this.selected[0].montant;
+        this.prixFraisApayer = this.fraisChoisi[0].montant;
         this.montantDejaPaye = montantDejaPaye;
         this.montantRestant = montantRestant;
         this.statut = statut;
+      } else {
+        this.alertErreurDuplicateTypeFrais = true;
       }
 
-      //item  - selected item
+      //item  - fraisChoisi item
     },
     getClasses() {
       this.classes = localStorage.getItem("Classes").split(",");
@@ -762,9 +908,75 @@ export default {
     },
 
     SavePayedFrais() {
-      console.log("Frais enregistré");
+      let eleveChoisi = JSON.parse(localStorage.getItem("eleveChoisi"));
+      console.log(
+        "fraisChoisi.length = " +
+          this.fraisChoisi.length +
+          "\nmoisToPay.lenght = " +
+          this.moisToPay
+      );
+      let payedFrais = {
+        eleve: eleveChoisi.eleveNumber,
+        classe: eleveChoisi.classe,
+
+        montantApayer: this.montantApayer,
+        montantDejaPaye: this.montantDejaPaye,
+        montantRestant: this.montantRestant,
+      };
+      //Cas où c'est un autre frais à payer
+
+      if (this.fraisChoisi.length > 0) {
+        payedFrais["typeFrais"] = this.fraisChoisi[0].frais;
+        console.log("................" + this.fraisChoisi[0].frais);
+        if (this.montantApayer == this.fraisChoisi[0].montant) {
+          payedFrais["statut"] = "payé";
+          payedFrais["montantFrais"] = this.fraisChoisi[0].montant;
+        } else {
+          console.log("Autre frais avancé");
+          payedFrais["statut"] = "avancé";
+          payedFrais["montantFrais"] = this.fraisChoisi[0].montant;
+        }
+        //Cas où c'est un frais mensuel à payer
+      } else if (this.moisToPay.length > 0) {
+        payedFrais["typeFrais"] = "Frais mensuel";
+        if (
+          this.montantApayer ==
+          Number(this.montantFraisMensuel.slice(0, -1)) *
+            Number(this.moisToPay.length)
+        ) {
+          console.log("Frais mensuels " + this.moisToPay.toString() + " payé");
+          payedFrais["statut"] = "payé";
+          payedFrais["mois"] = this.moisToPay.toString();
+          payedFrais["montantFrais"] =
+            Number(this.montantFraisMensuel.slice(0, -1)) *
+            this.moisToPay.length;
+        } else if (
+          this.montantApayer <
+          Number(this.montantFraisMensuel.slice(0, -1)) *
+            Number(this.moisToPay.length)
+        ) {
+          console.log(
+            "Frais mensuels " + this.moisToPay.toString() + " avancé"
+          );
+          payedFrais["statut"] = "avancé";
+          payedFrais["mois"] = this.moisToPay.toString();
+          payedFrais["montantFrais"] =
+            Number(this.montantFraisMensuel.slice(0, -1)) *
+            this.moisToPay.length;
+        } else {
+          console.log(
+            "😿 comment pouvez-vous payer plus que ce qui est demandé ???"
+          );
+        }
+      } else {
+        console.log("😿 oops....");
+      }
+      console.log("Frais qui s'apprete à l'envoi => " + payedFrais);
+      this.$store.dispatch("actionPayedFrais", payedFrais);
+
       this.alert = false;
     },
+
     InitialiseTrie(value) {
       if (value === undefined) {
         // this.shawPayedMonth = false;
@@ -841,6 +1053,7 @@ export default {
         this.shawAllMonths = undefined;
       }
     },
+
     AfficheEleve() {
       let eleveChoisi = JSON.parse(localStorage.getItem("eleveChoisi"));
       console.log(
