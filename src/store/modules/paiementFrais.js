@@ -2,9 +2,41 @@ import axios from 'axios'
 const state = {
     typeFrais: [],
     fraisPayed: undefined,
+    elevesPayed: undefined,
 
 };
 const actions = {
+
+    async actionGetfinanceEleveDetail({ commit }, id) {
+        const token = "Token " + localStorage.getItem("token");
+
+        if (localStorage.getItem("token") != null) {
+            await axios
+                .get(`api/finances/paiementFraisEleve/${id}/`, {
+                    headers: {
+                        'Authorization': token,
+                    }
+                })
+                .then((response) => {
+                    const result = response.data;
+                    console.log(result);
+                    localStorage.setItem("Frais", result);
+                    let elevesPayed = [];
+                    for (const key in result) {
+                        elevesPayed.push(result[key]);
+                    }
+
+                    let elevesPayedToStore = JSON.stringify(result)
+                    console.log("😃😃😃 this.elevesPayed => " + elevesPayedToStore);
+                    localStorage.setItem("ElèvesPayed", elevesPayedToStore);
+                    commit('InititialiseElevesPayed', elevesPayedToStore)
+                })
+                .catch(function(error) {
+                    console.log("😢😢😢" + error);
+                });
+        }
+    },
+
 
     async actionCreateFrais({ commit }, fraisCreate) {
         const token = "Token " + localStorage.getItem('token');
@@ -98,6 +130,9 @@ const actions = {
 };
 const mutations = {
 
+    InititialiseElevesPayed(state, elevesPayed) {
+        state.elevesPayed = elevesPayed
+    },
     InitialisetypeFrais(state, typeFrais) {
         state.typeFrais = typeFrais
         localStorage.setItem("Matieres", typeFrais);

@@ -32,61 +32,24 @@
                   <v-row>
                     <v-col>
                       <v-row justify="space-around">
-                        <v-col>
-                          <v-sheet elevation="10" class="py-4 px-1">
-                            <v-row>
-                              <v-col md="5" style="margin-left: 25px">
-                                <v-chip
-                                  label
-                                  color="light-green"
-                                  text-color="white"
-                                >
-                                  <v-icon left
-                                    >mdi-calendar-month-outline</v-icon
-                                  >
-                                  Mois payés
-                                </v-chip>
-                              </v-col>
-                              <v-col md="2"> </v-col>
-                              <!--
-                              <v-col md="4" style="padding-right: 9px">
-                                <v-chip label>
-                                  <v-select
-                                    v-model="optionDeTrie"
-                                    chips
-                                    :items="[
-                                      'Tous les mois',
-                                      'Mois payés',
-                                      'Mois non-payés',
-                                      'Mois avancés',
-                                    ]"
-                                    label="Trier par :"
-                                  ></v-select>
-                                </v-chip>
-                              </v-col>
-                              Tous les mois -->
+                        <!-- <v-col> -->
+                        <v-sheet elevation="10" class="py-4 px-1">
+                          <v-row>
+                            <v-chip
+                              label
+                              color="light-green"
+                              text-color="white"
+                              style="margin-left:100px"
+                            >
+                              <v-icon left>mdi-calendar-month-outline</v-icon>
+                              Mois payés
+                            </v-chip>
+                          </v-row>
+                          <v-row>
+                            <!-- Debut Mois payés -->
+                            <v-col>
                               <v-chip-group
-                                v-if="shawAllMonths"
-                                mandatory
-                                active-class="primary--text"
-                                center-active
-                              >
-                                <v-chip
-                                  readonly
-                                  outlined
-                                  v-for="mois in mois"
-                                  :key="mois"
-                                >
-                                  <v-icon :color="colorToShow">{{
-                                    iconToShow
-                                  }}</v-icon>
-                                  {{ mois }}
-                                </v-chip>
-                              </v-chip-group>
-                              <!-- Fin Tous les mois/ Debut Mois payés -->
-
-                              <v-chip-group
-                                v-if="shawPayedMonths == 'PayedMonths'"
+                                v-if="shawPayedMonths"
                                 mandatory
                                 active-class="primary--text"
                                 center-active
@@ -100,47 +63,11 @@
                                   <v-icon color="green">mdi-check</v-icon>
                                   {{ moisPaye }}
                                 </v-chip>
-                              </v-chip-group>
-                              <!-- Fin payedMonths/ Debut Mois non-payés -->
-
-                              <v-chip-group
-                                v-if="shawNonPayedMonths === 'NonPayedMonths'"
-                                mandatory
-                                active-class="primary--text"
-                                center-active
-                              >
-                                <v-chip
-                                  readonly
-                                  outlined
-                                  v-for="moisNonPaye in MoisNonPaye"
-                                  :key="moisNonPaye"
-                                >
-                                  <v-icon color="red">mdi-cancel</v-icon>
-                                  {{ moisNonPaye }}
-                                </v-chip>
-                              </v-chip-group>
-                              <!-- Fin nonPayedMonths/ Debut mois-Avancés -->
-                              <v-chip-group
-                                v-if="shawAvancedMonths === 'AdvancedMonths'"
-                                mandatory
-                                active-class="primary--text"
-                                center-active
-                              >
-                                <v-chip
-                                  readonly
-                                  outlined
-                                  v-for="moisAvance in moisAvance"
-                                  :key="moisAvance"
-                                >
-                                  <v-icon color="orange"
-                                    >mdi-currency-usd-off</v-icon
-                                  >
-                                  {{ moisAvance }}
-                                </v-chip>
-                              </v-chip-group>
-                            </v-row>
-                          </v-sheet>
-                        </v-col>
+                              </v-chip-group></v-col
+                            >
+                          </v-row>
+                        </v-sheet>
+                        <!-- </v-col> -->
                       </v-row>
                     </v-col>
 
@@ -698,7 +625,7 @@ export default {
       icon: "",
       optionDeTrie: "",
       shawAllMonths: undefined,
-      shawPayedMonths: undefined,
+      shawPayedMonths: false,
       shawNonPayedMonths: undefined,
       shawAvancedMonths: undefined,
       mois: [
@@ -716,14 +643,7 @@ export default {
         "Aout",
       ],
       MoisNonPaye: ["Juin", "Juillet", "Aout"],
-      MoisPaye: [
-        "Octobre",
-        "Novembre",
-        "Decembre",
-        "Janvier",
-        "Fevrier",
-        "Mars",
-      ],
+      MoisPaye: [],
       moisAvance: ["Avril", "Mai"],
     };
   },
@@ -870,6 +790,60 @@ export default {
           });
       }
     },
+    AfficheEleve() {
+      this.getfinanceEleveDetail();
+      this.InitialiseMoisPayeImpaye();
+      let eleveChoisi = JSON.parse(localStorage.getItem("eleveChoisi"));
+      console.log(
+        "classe de l'élève choisi = " +
+          eleveChoisi.classe +
+          "classes " +
+          this.classes
+      );
+
+      /* var classe = localStorage.getItem("Id_classes").split(",");
+
+       var indexClasse = classe.indexOf(eleveChoisi.classe);
+      console.log(
+         typeof classe + "classe =" + classe + "\n indexClasse =" + indexClasse
+       );
+
+      // console.log(JSON.parse(this.classes)[indexClasse].scolarite);*/
+
+      //attention ne jamais oublier de parses une variable JSON stringifié car elle ne ressemble à du JSON par la forme dans le fond c'est un Array oui mais pas d'objets mais de String
+
+      this.montantFraisMensuel = JSON.parse(this.classes).find(
+        (x) => x.identifiant == eleveChoisi.classe
+      ).scolarite;
+
+      console.log(
+        "Frais mensuel de " +
+          eleveChoisi.nom +
+          " = " +
+          this.montantFraisMensuel.slice(0, -1)
+      );
+
+      this.eleve.nom = eleveChoisi.nom;
+      this.eleve.sexe = eleveChoisi.sexe;
+      this.eleve.dateLieuNaissance = eleveChoisi.dateLieuNaissance;
+      this.eleve.adresse = eleveChoisi.adresse;
+      this.eleve.tuteur = eleveChoisi.tuteur;
+      this.eleve.telTuteur = eleveChoisi.telTuteur;
+      this.eleve.redoublant = eleveChoisi.redoublant;
+      this.eleve.classe = eleveChoisi.classe;
+    },
+    InitialiseMoisPayeImpaye() {
+      if (localStorage.getItem("ElèvesPayed").length > 0) {
+        let moisPayé = JSON.parse(localStorage.getItem("ElèvesPayed"));
+        this.MoisPaye = moisPayé.mois.split(",");
+        console.log("Mois Payés " + this.MoisPaye);
+        this.shawPayedMonths = true;
+      }
+    },
+    getfinanceEleveDetail() {
+      let id = JSON.parse(localStorage.getItem("eleveChoisi")).eleveNumber;
+      this.$store.dispatch("actionGetfinanceEleveDetail", id);
+    },
 
     editItem(item) {
       this.editedIndex = this.paiementFrais.indexOf(item);
@@ -918,7 +892,6 @@ export default {
       let payedFrais = {
         eleve: eleveChoisi.eleveNumber,
         classe: eleveChoisi.classe,
-
         montantApayer: this.montantApayer,
         montantDejaPaye: this.montantDejaPaye,
         montantRestant: this.montantRestant,
@@ -927,7 +900,6 @@ export default {
 
       if (this.fraisChoisi.length > 0) {
         payedFrais["typeFrais"] = this.fraisChoisi[0].frais;
-        console.log("................" + this.fraisChoisi[0].frais);
         if (this.montantApayer == this.fraisChoisi[0].montant) {
           payedFrais["statut"] = "payé";
           payedFrais["montantFrais"] = this.fraisChoisi[0].montant;
@@ -971,129 +943,16 @@ export default {
       } else {
         console.log("😿 oops....");
       }
-      console.log("Frais qui s'apprete à l'envoi => " + payedFrais);
+
       this.$store.dispatch("actionPayedFrais", payedFrais);
-
       this.alert = false;
-    },
-
-    InitialiseTrie(value) {
-      if (value === undefined) {
-        // this.shawPayedMonth = false;
-        // this.shawNonPayedMonth = false;
-        // this.shawAvancedMonths = false;
-        this.shawAllMonths = "AllMonths";
-        console.log(
-          "AllMonths par defaut. PayedMonths= " +
-            this.shawPayedMonths +
-            " NonPayedMonths= " +
-            this.shawNonPayedMonths +
-            " AvancedMonths= " +
-            this.shawAvancedMonths
-        );
-      } else if (value === "Tous les mois") {
-        this.shawAllMonths = "shawAllMonths";
-        this.shawNonPayedMonths = false;
-        this.shawAvancedMonths = false;
-        this.shawPayedMonths = false;
-        console.log(
-          "PayedMonths choisi. AllMonths= " +
-            this.shawAllMonths +
-            " NonPayed= " +
-            this.shawNonPayedMonths +
-            " avancedPaye= " +
-            this.shawAvancedMonths
-        );
-      } else if (value == "Mois payés") {
-        this.shawAllMonths = false;
-        this.shawNonPayedMonths = false;
-        this.shawAvancedMonths = false;
-        this.shawPayedMonths = "PayedMonths";
-        console.log(
-          "PayedMonths choisi. AllMonths= " +
-            this.shawAllMonths +
-            " NonPayed= " +
-            this.shawNonPayedMonths +
-            " avancedPaye= " +
-            this.shawAvancedMonths
-        );
-      } else if (value == "Mois non-payés") {
-        this.shawPayedMonth = false;
-        this.shawAvancedMonths = false;
-        this.shawAllMonths = false;
-        this.shawNonPayedMonths = "NonPayedMonths";
-        console.log(
-          "NonPayedMonths choisi. AllMonths= " +
-            this.shawAllMonths +
-            " payed= " +
-            this.shawPayedMonths +
-            " avancedPaye= " +
-            this.shawAvancedMonths
-        );
-      } else if (value == "Mois avancés") {
-        console.log("Mois avancés");
-        this.shawPayedMonth = false;
-        this.shawAllMonths = false;
-        this.shawNonPayedMonths = false;
-        this.shawAvancedMonths = "AdvancedMonths";
-        console.log(
-          "AdvancedMonths choisi. AllMonths= " +
-            this.shawAllMonths +
-            " NonPayed= " +
-            this.shawNonPayedMonths +
-            " payedMonths= " +
-            this.shawPayedMonths
-        );
-      } else {
-        console.log("AllMonths par defaut mais non attendu. Value= " + value);
-
-        this.shawPayedMonth = undefined;
-        this.shawNonPayedMonth = undefined;
-        this.shawAvancedMonths = undefined;
-        this.shawAllMonths = undefined;
-      }
-    },
-
-    AfficheEleve() {
-      let eleveChoisi = JSON.parse(localStorage.getItem("eleveChoisi"));
-      console.log(
-        "classe de l'élève choisi = " +
-          eleveChoisi.classe +
-          "classes " +
-          this.classes
-      );
-
-      /* var classe = localStorage.getItem("Id_classes").split(",");
-
-       var indexClasse = classe.indexOf(eleveChoisi.classe);
-      console.log(
-         typeof classe + "classe =" + classe + "\n indexClasse =" + indexClasse
-       );
-
-      // console.log(JSON.parse(this.classes)[indexClasse].scolarite);*/
-
-      //attention ne jamais oublier de parses une variable JSON stringifié car elle ne ressemble à du JSON par la forme dans le fond c'est un Array oui mais pas d'objets mais de String
-
-      this.montantFraisMensuel = JSON.parse(this.classes).find(
-        (x) => x.identifiant == eleveChoisi.classe
-      ).scolarite;
-
-      console.log(
-        "Frais mensuel de " +
-          eleveChoisi.nom +
-          " = " +
-          this.montantFraisMensuel.slice(0, -1)
-      );
-
-      this.eleve.nom = eleveChoisi.nom;
-      this.eleve.sexe = eleveChoisi.sexe;
-      this.eleve.dateLieuNaissance = eleveChoisi.dateLieuNaissance;
-      this.eleve.adresse = eleveChoisi.adresse;
-      this.eleve.tuteur = eleveChoisi.tuteur;
-      this.eleve.telTuteur = eleveChoisi.telTuteur;
-      this.eleve.redoublant = eleveChoisi.redoublant;
-      this.eleve.classe = eleveChoisi.classe;
-      this.InitialiseTrie();
+      this.fraisApayer = undefined;
+      this.fraisChoisi = [];
+      this.moisToPay = [];
+      this.montantDejaPaye = undefined;
+      this.montantRestant = undefined;
+      this.AffichePaiementAutresFrais = false;
+      this.AffichePaiementMois = false;
     },
   },
 };
