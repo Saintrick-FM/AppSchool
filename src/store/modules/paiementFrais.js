@@ -12,14 +12,14 @@ const actions = {
 
         if (localStorage.getItem("token") != null) {
             await axios
-                .get(`api/finances/paiementFraisEleve/${id}/`, {
+                .get(`api/finances/paiementFraisEleve/?id=${id}`, {
                     headers: {
                         'Authorization': token,
                     }
                 })
                 .then((response) => {
                     const result = response.data;
-                    console.log(result);
+                    console.log('result =' + result);
                     localStorage.setItem("Frais", result);
                     let elevesPayed = [];
                     for (const key in result) {
@@ -27,7 +27,7 @@ const actions = {
                     }
 
                     let elevesPayedToStore = JSON.stringify(result)
-                    console.log("😃😃😃 this.elevesPayed => " + elevesPayedToStore);
+                    console.log("😃😃😃 tous les frais payés de l'élève => " + elevesPayedToStore);
                     localStorage.setItem("ElèvesPayed", elevesPayedToStore);
                     commit('InititialiseElevesPayed', elevesPayedToStore)
                 })

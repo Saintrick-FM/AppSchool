@@ -98,48 +98,15 @@
                   <!-- fin raw affichant les mois payés ou impayés -->
                   <v-divider style="margin-bottom: 15px"> </v-divider>
                   <v-divider> </v-divider>
-
-                  <!-- Partie bas de la zone gauche 
-                  <v-row justify-space-around>
-                    gdggdg
-                    <v-col md="4">
-                      <v-text-field
-                        :value="eleve.tuteur"
-                        append-icon="mdi-human-male-boy"
-                        prepend-icon="mdi-human-male-boy"
-                        label="Tuteur"
-                        readonly
-                      >
-                      </v-text-field>
-                    </v-col>
-                    <v-col md="3">
-                      <v-text-field
-                        :value="eleve.telTuteur"
-                        prepend-icon=" mdi-phone"
-                        label="Téléphone du tuteur"
-                        readonly
-                      >
-                      </v-text-field>
-                    </v-col>
-                    <v-col md="5">
-                      <v-text-field
-                        :value="eleve.adresse"
-                        prepend-icon="mdi-map-marker"
-                        label="Adresse"
-                        readonly
-                      >
-                      </v-text-field>
-                    </v-col>
-                  </v-row> -->
                 </v-container>
               </v-card-text>
             </v-col>
 
             <!-- rubriaue gestion des mois payés -->
-            <v-col md="6">
+            <!-- <v-col md="6">
               <v-card-text>
                 <v-container grid-list-md>
-                  <!-- raw affichant les mois payés ou impayés -->
+                
                   <v-row>
                     <v-col>
                       <v-row justify="space-around">
@@ -155,23 +122,6 @@
                                 </v-chip>
                               </v-col>
                               <v-col md="2"> </v-col>
-                              <!--
-                              <v-col md="4" style="padding-right: 9px">
-                                <v-chip label>
-                                  <v-select
-                                    v-model="optionDeTrie"
-                                    chips
-                                    :items="[
-                                      'Tous les mois',
-                                      'Mois payés',
-                                      'Mois non-payés',
-                                      'Mois avancés',
-                                    ]"
-                                    label="Trier par :"
-                                  ></v-select>
-                                </v-chip>
-                              </v-col>
-                              Tous les mois -->
                               <v-chip-group
                                 v-if="shawAllMonths"
                                 mandatory
@@ -190,7 +140,7 @@
                                   {{ mois }}
                                 </v-chip>
                               </v-chip-group>
-                              <!-- Fin Tous les mois/ Debut Mois payés -->
+                         
 
                               <v-chip-group
                                 v-if="shawPayedMonths == 'PayedMonths'"
@@ -208,7 +158,7 @@
                                   {{ moisPaye }}
                                 </v-chip>
                               </v-chip-group>
-                              <!-- Fin payedMonths/ Debut Mois non-payés -->
+                         
 
                               <v-chip-group
                                 v-if="shawNonPayedMonths === 'NonPayedMonths'"
@@ -226,7 +176,7 @@
                                   {{ moisNonPaye }}
                                 </v-chip>
                               </v-chip-group>
-                              <!-- Fin nonPayedMonths/ Debut mois-Avancés -->
+                         
                               <v-chip-group
                                 v-if="shawAvancedMonths === 'AdvancedMonths'"
                                 mandatory
@@ -275,13 +225,89 @@
                       </v-col>
                     </v-row>
                   </v-row>
-                  <!-- fin raw affichant les mois impayés -->
+                 
                   <v-divider style="margin-bottom: 15px"> </v-divider>
                   <v-divider style="margin-bottom: 15px"> </v-divider>
                 </v-container>
               </v-card-text>
-            </v-col>
+            </v-col> -->
             <!-- fin rubriaue gestion des mois payés -->
+            <v-col md="6">
+              <v-card-text>
+                <v-container grid-list-md>
+                  <!-- raw affichant les mois payés ou impayés -->
+                  <v-row>
+                    <v-col>
+                      <v-row justify="space-around">
+                        <!-- <v-col> -->
+                        <v-sheet elevation="10" class="py-4 px-1">
+                          <v-row>
+                            <v-chip
+                              label
+                              color="light-green"
+                              text-color="white"
+                              style="margin-left:100px"
+                            >
+                              <v-icon left>mdi-calendar-month-outline</v-icon>
+                              Mois Impayés
+                            </v-chip>
+                          </v-row>
+                          <v-row>
+                            <!-- Debut Mois payés -->
+                            <v-col>
+                              <v-chip-group
+                                v-if="!shawNonPayedMonths"
+                                mandatory
+                                active-class="primary--text"
+                                center-active
+                              >
+                                <v-chip
+                                  readonly
+                                  outlined
+                                  v-for="moisNonPaye in MoisNonPaye"
+                                  :key="moisNonPaye"
+                                >
+                                  <v-icon color="green">mdi-check</v-icon>
+                                  {{ moisNonPaye }}
+                                </v-chip>
+                              </v-chip-group></v-col
+                            >
+                          </v-row>
+                        </v-sheet>
+                        <!-- </v-col> -->
+                      </v-row>
+                    </v-col>
+
+                    <v-row style="margin-top: 15px">
+                      <v-col md="6">
+                        <v-text-field
+                          prepend-icon="mdi-book-variant"
+                          :value="eleve.classe"
+                          label="Classe"
+                          outlined
+                          filled
+                          readonly
+                        ></v-text-field>
+                      </v-col>
+                      <v-col md="6">
+                        <v-text-field
+                          :value="eleve.telTuteur"
+                          prepend-icon=" mdi-phone"
+                          label="Téléphone du tuteur"
+                          readonly
+                          filled
+                          outlined
+                        >
+                        </v-text-field>
+                      </v-col>
+                    </v-row>
+                  </v-row>
+                  <!-- fin raw affichant les mois payés ou impayés -->
+                  <v-divider style="margin-bottom: 15px"> </v-divider>
+                  <v-divider> </v-divider>
+                </v-container>
+              </v-card-text>
+            </v-col>
           </v-row>
           <v-divider style="border-style:solid;"> </v-divider>
           <v-divider style="margin-top:1px; border-style:solid"> </v-divider>
@@ -404,14 +430,6 @@
                     transition="scale-transition"
                     persistent
                   >
-                    <!-- <v-row v-if="fraisApayer">
-                      <v-card-title>
-                        Paiement
-                        <span style="margin-left:5px; color:black">
-                          {{ fraisApayer }}</span
-                        >
-                      </v-card-title>
-                    </v-row> -->
                     <v-row v-if="moisToPay">
                       <v-row>
                         <v-col md="8">
@@ -642,9 +660,9 @@ export default {
         "Juillet",
         "Aout",
       ],
-      MoisNonPaye: ["Juin", "Juillet", "Aout"],
+      MoisNonPaye: [],
       MoisPaye: [],
-      moisAvance: ["Avril", "Mai"],
+      moisAvance: [],
     };
   },
   components: {
@@ -833,12 +851,57 @@ export default {
       this.eleve.classe = eleveChoisi.classe;
     },
     InitialiseMoisPayeImpaye() {
+      let allMonthsPayed = [];
       if (localStorage.getItem("ElèvesPayed").length > 0) {
-        let moisPayé = JSON.parse(localStorage.getItem("ElèvesPayed"));
-        this.MoisPaye = moisPayé.mois.split(",");
+        let fraisPayés = JSON.parse(localStorage.getItem("ElèvesPayed"));
+        //s'il y'a une avance dans au moins un des paiements de l'élève
+        fraisPayés.forEach((frais) => {
+          if (
+            frais.typeFrais === "Frais mensuel" &&
+            frais.statut === "avancé"
+          ) {
+            allMonthsPayed.push(
+              frais.mois
+                .split(",")
+                .slice(0, -1)
+                .toString()
+            );
+            this.moisAvance.push(frais.mois.split(",").pop());
+          } else if (frais.typeFrais === "impôts élèves") {
+            console.log("attention ici c'est typeFrais=== fr ");
+          } else {
+            this.MoisPaye = fraisPayés.mois.split(",");
+            // this.MoisNonPaye = console.log("Mois Payés " + this.MoisPaye);
+          }
+        });
+        // ce que j'affecte aux moisPaye vient du resultat de trie opéré par la methode filter qui enlève les tableaux vides de MoisPaye car c'est un tableau de tableaux
+        this.MoisPaye = allMonthsPayed.filter(this.trieMoisVides);
+
+        this.MoisNonPaye = this.trieMoisImpaye().split(",");
         console.log("Mois Payés " + this.MoisPaye);
+        console.log(
+          "mois avancé = " +
+            this.moisAvance +
+            "\nMois Impayés =" +
+            this.MoisNonPaye
+        );
         this.shawPayedMonths = true;
       }
+    },
+    trieMoisVides(value) {
+      return value != "";
+    },
+
+    trieMoisImpaye() {
+      // ici je met les mois payés en toString que je split pour avoir un nouveau tableau propre et j'enlève à chaque tour de boucle le mois deja payé par rapport à son index
+
+      this.MoisPaye.toString()
+        .split(",")
+        .forEach((mois) => {
+          this.mois.splice(this.mois.indexOf(mois), 1);
+        });
+      console.log("months non payed = " + this.mois);
+      return this.mois.toString();
     },
     getfinanceEleveDetail() {
       let id = JSON.parse(localStorage.getItem("eleveChoisi")).eleveNumber;
