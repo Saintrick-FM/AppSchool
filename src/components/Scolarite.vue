@@ -849,7 +849,8 @@ export default {
                     .slice(0, -1)
                     .toString()
                 );
-                this.moisAvance.push(frais.mois.split(",").pop());
+                // this.moisAvance.push(frais.mois.split(",").pop());
+                this.moisAvance.push(frais.mois);
                 console.log("attention");
 
                 //si c'est un mois et que cest réglé
@@ -885,15 +886,6 @@ export default {
           });
       }
 
-      console.log("Mois Payés = " + this.MoisPaye);
-      console.log(
-        "mois avancé = " +
-          this.moisAvance +
-          "\nMois Impayés =" +
-          this.MoisNonPaye
-      );
-      // this.moisToShowWithoutPayedMonths.concat(this.moisAvance);
-      //  console.log("teststeee = " + this.moisToShowWithoutPayedMonths);
       this.shawPayedMonths = true;
     },
     trieMoisVides(value) {
@@ -920,7 +912,7 @@ export default {
 
       //this.moisAvance=[];
       if (statut === "moisPayeETavance") {
-        console.log("coucou !");
+        console.log("statut trieMoisImpayes === moisPayeETavance !");
         this.moisAvance.forEach((mois) => {
           monthsNonPayed.splice(monthsNonPayed.indexOf(mois), 1);
         });
@@ -1030,12 +1022,12 @@ export default {
               Number(this.moisToPay.length) -
               totalMonthsToSolve
           ) {
-            payedFrais["statut"] = "Avance solvée";
             payedFrais["mois"] = this.moisToPay.toString();
+            payedFrais["montantApayer"] = this.montantApayer;
+            payedFrais["montantRestant"] = this.montantRestant;
+            payedFrais["statut"] = "Avance solvée";
             payedFrais["moisAsolver"] = this.monthsAlreadySolve.toString();
-            payedFrais["montantFrais"] =
-              Number(this.montantFraisMensuel.slice(0, -1)) *
-              this.moisToPay.length;
+            payedFrais["montantFrais"] = this.montantFraisMensuel.slice(0, -1);
           }
           // S'il n'y a pas de mois avancés dans la liste et règlement total
         } else if (this.monthsAlreadySolve.length == 0) {
@@ -1103,11 +1095,12 @@ export default {
         let payedFraisToUpdate = AllFraisPayedByEleve.find((x) =>
           x.mois.indexOf(this.monthsAlreadySolve != -1)
         );
-
         console.log(
-          "le frais en question est ===> " + JSON.stringify(payedFraisToUpdate)
+          "le frais à solver ===> " +
+            JSON.stringify(payedFraisToUpdate) +
+            "le frais solvé ===> " +
+            JSON.stringify(payedFrais)
         );
-
         this.$store.dispatch("actionUpdatePayedFrais", [
           payedFraisToUpdate.id,
           payedFrais,
