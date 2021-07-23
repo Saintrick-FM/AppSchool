@@ -7,38 +7,6 @@ const state = {
 };
 const actions = {
 
-    actionGetfinanceEleveDetail({ commit }, id) {
-        const token = "Token " + localStorage.getItem("token");
-
-        if (localStorage.getItem("token") != null) {
-            axios
-                .get(`api/finances/paiementFraisEleve/?id=${id}`, {
-                    headers: {
-                        'Authorization': token,
-                    }
-                })
-                .then((response) => {
-                    const result = response.data;
-                    console.log('result =' + result);
-                    localStorage.setItem("Frais", result);
-                    let AllFraisPayedByEleve = [];
-                    for (const key in result) {
-                        AllFraisPayedByEleve.push(result[key]);
-                    }
-
-                    let AllFraisPayedbyEleve = JSON.stringify(result)
-                    console.log("😃😃😃 tous les frais payés de l'élève => " + AllFraisPayedbyEleve);
-                    localStorage.setItem("AllFraisPayedByEleve", AllFraisPayedbyEleve);
-                    //commit('InititialiseElevesPayed', AllFraisPayedByEleve)
-                    commit('InitialiseMoisPayeImpaye', AllFraisPayedbyEleve)
-                })
-                .catch(function(error) {
-                    console.log("😢😢😢" + error);
-                });
-        }
-    },
-
-
     async actionCreateFrais({ commit }, fraisCreate) {
         const token = "Token " + localStorage.getItem('token');
         console.log("Type de montant frais => " + typeof fraisCreate.montantFrais)
@@ -106,101 +74,99 @@ const actions = {
 
     async actionPayedFrais({ commit }, fraisPayed) {
         const token = "Token " + localStorage.getItem('token');
+        if (fraisPayed.length === 2) {
+            let body = fraisPayed[0];
 
-        let body = fraisPayed; //attention ne jamais oublié d'assigner les valeurs recues dans body car axios l'exige
+            //attention ne jamais oublié d'assigner les valeurs recues dans body car axios l'exige
+            console.log("fraiPayed[0] === " + JSON.stringify(fraisPayed[0]) +
+                "\nfraisPayed[1]=== " + JSON.stringify(fraisPayed[1]))
+            await axios
+                .post('api/finances/paiementFraisEleve/', body, {
+                    headers: {
+                        'Authorization': token,
+                    }
+                })
+                .then((response) => {
+
+                    console.log("😃😃😃" + JSON.stringify(response));
+                    commit("fraisPayed", fraisPayed[0]);
+
+
+                })
+                .catch(function(error) {
+                    console.log('fraisPayed in catch action =>' + JSON.stringify(body))
+                    console.log("😢😢😢" + error);
+
+                })
+
+            body = fraisPayed[1]
+            await axios
+                .post('api/finances/paiementFraisEleve/', body, {
+                    headers: {
+                        'Authorization': token,
+                    }
+                })
+                .then((response) => {
+                    console.log("😃😃😃" + JSON.stringify(response));
+                    commit("fraisPayed", fraisPayed[1]);
+                    localStorage.setItem("MoisAvanceToStoreInDB", null)
+
+                })
+                .catch(function(error) {
+                    console.log('fraisPayed in catch action =>' + JSON.stringify(body))
+                    console.log("😢😢😢" + error);
+
+                })
+
+        } else {
+            let body = fraisPayed
+            await axios
+                .post('api/finances/paiementFraisEleve/', body, {
+                    headers: {
+                        'Authorization': token,
+                    }
+                })
+                .then((response) => {
+
+                    console.log("😃😃😃" + JSON.stringify(response));
+                    commit("fraisPayed", fraisPayed[0]);
+
+
+                })
+                .catch(function(error) {
+                    console.log('fraisPayed in catch action =>' + JSON.stringify(body))
+                    console.log("😢😢😢" + error);
+
+                })
+        }
+    },
+
+    async actionUpdatePayedFrais({ commit }, donnees) {
+        const token = "Token " + localStorage.getItem('token');
+        var body = donnees[1];
+        console.log("id à upadater" + donnees[0])
         await axios
-            .post('api/finances/paiementFraisEleve/', body, {
+            .put(`api/finances/paiementFraisEleve/${donnees[0]}/`, body, {
                 headers: {
                     'Authorization': token,
                 }
             })
             .then((response) => {
+                let newPayedFrais = [donnees[0], donnees[1]]
+                console.log("😍😍😍 new data sent =>" + JSON.stringify(donnees[1]) + '\n' + response);
+                commit("updatePayedFrais", newPayedFrais);
 
-                console.log("😃😃😃" + JSON.stringify(response));
-                commit("fraisPayed", fraisPayed);
             })
             .catch(function(error) {
-                console.log('fraisPayed in catch action =>' + JSON.stringify(body))
-                console.log("😢😢😢" + error);
+
+                console.log("😢😢😢" + JSON.stringify(donnees[1]) + '\nerrors' + error);
+
 
             });
-
     }
-
 
 };
 const mutations = {
-
-    InitialiseMoisPayeImpaye(state, AllFraisPayedbyEleve) {
-        state.AllFraisPayedByEleve = AllFraisPayedbyEleve
-
-        let allMonthsPayed = [];
-        let Mois = [
-            "Septembre",
-            "Octobre",
-            "Novembre",
-            "Decembre",
-            "Janvier",
-            "Fevrier",
-            "Mars",
-            "Avril",
-            "Mai",
-            "Juin",
-            "Juillet",
-            "Aout",
-        ];
-        let moisAvance = [];
-        let MoisPaye = [];
-        let MoisNonPaye = [];
-        console.log("Jusquici ca donne" + typeof AllFraisPayedbyEleve)
-
-        //s'il y'a une avance dans au moins un des paiements de l'élève
-        JSON.parse(AllFraisPayedbyEleve).forEach((frais) => {
-            if (frais.typeFrais === "Frais mensuel" && frais.statut === "avancé") {
-                allMonthsPayed.push(
-                    frais.mois
-                    .split(",")
-                    .slice(0, -1)
-                    .toString()
-                );
-                moisAvance.push(frais.mois.split(",").pop());
-            } else if (frais.typeFrais === "impôts élèves") {
-                console.log("attention ici c'est typeFrais=== fr ");
-
-                //si c'est un mois et que cest réglé
-            } else if (
-                frais.typeFrais === "Frais mensuel" &&
-                frais.statut !== "avancé"
-            ) {
-                allMonthsPayed.push(frais.mois.split(",").toString());
-            } else {
-                console.log("ELSE ELSE ELSE");
-            }
-        });
-        if (allMonthsPayed) {
-            // ce que j'affecte aux moisPaye vient du resultat de trie opéré par la methode //filter qui enlève les tableaux vides de MoisPaye car c'est un tableau de tableaux
-            MoisPaye = allMonthsPayed.filter(function(value) {
-                return value != ""
-            });
-        }
-        if (moisAvance) {
-            MoisNonPaye.push("MustBeSet");
-        } else {
-            MoisNonPaye = Mois;
-        }
-
-        console.log("Mois Payés " + MoisPaye);
-        console.log(
-            "mois avancé = " +
-            moisAvance +
-            "\nMois Impayés =" +
-            MoisNonPaye
-        );
-        localStorage.setItem("MoisPaye", JSON.stringify(MoisPaye))
-        localStorage.setItem("MoisNonPaye", JSON.stringify(MoisNonPaye))
-        localStorage.setItem("moisAvance", JSON.stringify(moisAvance))
-            //this.shawPayedMonths = true;
-    },
     InitialisetypeFrais(state, typeFrais) {
         state.typeFrais = typeFrais
         localStorage.setItem("Matieres", typeFrais);
@@ -224,24 +190,9 @@ const mutations = {
     fraisPayed(state, fraisPayed) {
         state.fraisPayed = fraisPayed
     },
-
-
-
-    trieMoisImpaye(MoisPaye, moisAvance, Mois) {
-        // ici je met les mois payés en toString que je split pour avoir un nouveau tableau propre et j'enlève à chaque tour de boucle le mois deja payé par rapport à son index
-
-        MoisPaye.toString()
-            .split(",")
-            .forEach((mois) => {
-                Mois.splice(Mois.indexOf(mois), 1);
-            });
-        console.log("months non payed = " + this.mois);
-        moisAvance.forEach((mois) => {
-            Mois.splice(Mois.indexOf(mois), 1);
-        });
-        return Mois.toString();
+    updatePayedFrais(state, updatedPayedFrais) {
+        state.fraisPayed = updatedPayedFrais
     }
-
 
 };
 const getters = {
@@ -251,9 +202,7 @@ const getters = {
 
 };
 
-// function trieMoisVides(value) {
-//     return value != "";
-// }
+
 export default {
     state,
     actions,

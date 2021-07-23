@@ -598,17 +598,6 @@ export default {
           console.log("prof selectionné " + this.editedItem.nom);
           // console.log("allTeachers " + JSON.stringify(this.allTeachers));
           // let matieres_ids = [];
-          // // ici je renvois une liste des ids des matieres choisies pour le prof dans le formulaire
-          /* if (this.editedItem.matiereEnseigne.length > 1) {
-             this.editedItem.matiereEnseigne.forEach((matiere) => {
-               matieres_ids.push(
-                 this.allMatieres.find((x) => x.nomMatiere == matiere).id
-               );
-             });
-             console.log(
-               "liste des ids des matières sélectionnées " + matieres_ids
-             );
-             this.editedItem.matiereEnseigne = matieres_ids;*/
           this.$store.dispatch("actionCreateEnseignant", this.editedItem);
           this.enseignants.push(this.editedItem);
           this.close();
