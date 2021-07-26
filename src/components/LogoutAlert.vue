@@ -46,13 +46,16 @@ export default {
     confirmLogout() {
       //this.$store.commit("removeAlertLogout");
       localStorage.setItem("token", null);
-      localStorage.setItem("Elèves", null);
-      localStorage.setItem("Classes", null);
-      localStorage.setItem("Profs", null);
-      localStorage.setItem("Matieres", null);
-      localStorage.removeItem("id Classes");
-      localStorage.setItem("Id_classes", null);
-      localStorage.removeItem("année scolaire");
+      // localStorage.setItem("Elèves", null);
+      // localStorage.setItem("Classes", null);
+      // localStorage.setItem("Profs", null);
+      // localStorage.setItem("Matieres", null);
+      // localStorage.removeItem("id Classes");
+      localStorage.setItem("AllFraisPayedByEleve", null);
+      localStorage.setItem("MoisNonPaye", null);
+      localStorage.setItem("MoisPaye", null);
+      localStorage.setItem("moisAvance", null);
+
       localStorage.setItem("authStatut", null);
       localStorage.setItem("année scolaire", null);
       localStorage.setItem("token", null);

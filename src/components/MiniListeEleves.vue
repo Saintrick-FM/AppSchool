@@ -63,13 +63,8 @@ export default {
 
   beforeMount() {
     let id_classes = [localStorage.getItem("Id_classes")];
-    let classe = undefined;
-    console.log(
-      "id_classes du localstorage " +
-        typeof id_classes +
-        "\nid_classes de vuex " +
-        this.$store.state.identifiants_classes
-    );
+    let classe = null;
+
     id_classes.forEach((eleves) => {
       classe = eleves.split(",");
       console.log(classe);
@@ -80,7 +75,7 @@ export default {
   },
 
   methods: {
-    async initializeEleve() {
+    initializeEleve() {
       //   this.$store.dispatch("actionInitialiseMatiere");
       const token = "Token " + localStorage.getItem("token");
       if (localStorage.getItem("token") != null) {
@@ -91,7 +86,7 @@ export default {
             Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
           },
         };
-        await axios(config)
+        axios(config)
           .then((response) => {
             const result = response.data;
 

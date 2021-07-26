@@ -322,30 +322,34 @@
                       <v-row>
                         <v-col>
                           <v-card-title v-if="AffichePaiementMois">
-                            Mois à payer :
+                            <h3>Mois à payer :</h3>
                             <v-chip
-                              :style="monthToPayStyle"
+                              style="margin:0px 180px 0px 10px "
                               color="primary"
                               text-color="white"
                               width="100px"
                             >
                               {{ moisToPay }}
                             </v-chip>
-                            Mois avancés :
+                            <h3 style="margin-left:170px">Mois avancés :</h3>
                             <v-chip
                               color="red"
-                              style=" margin-left:10px"
+                              style="margin:0px 0px 0px 10px "
                               text-color="white"
                             >
                               {{ monthsAlreadySolve.toString() }}
-                              <span style="margin-left:8px"
-                                >{{ priceMonthsAlreadySolve }} FCFA</span
+                              <span style="margin-left:15px"
+                                >||
+                                {{
+                                  priceMonthsAlreadySolve.toString()
+                                }}
+                                FCFA</span
                               >
                             </v-chip>
                           </v-card-title>
                           <!-- Ici affichage en cas de paiement frais autres que les frais mensuels -->
+                          Paiement
                           <v-card-title v-if="AffichePaiementAutresFrais">
-                            Paiement
                             <v-chip
                               color="primary"
                               style="margin-left:15px"
@@ -373,16 +377,22 @@
                         </v-col>
                         <v-col md="2"> </v-col>
                         <v-col md="5">
-                          Net à payer :
+                          <h3 style="margin-left:100px">
+                            Net à payer :
+                            <v-chip
+                              color="green"
+                              text-color="white"
+                              width="300px"
+                              style="margin-left:10px"
+                              >{{ scolariteTotal }} FCFA</v-chip
+                            >
+                          </h3>
                           <v-chip
                             color="green"
-                            style="margin-left:0px,10px,0px,8px"
+                            style="margin:0px 10px 0px 100px"
                             text-color="white"
                           >
                             Non payés + Reste mois Avancés
-                            <span style="margin-left:8px"
-                              >{{ scolariteTotal }} FCFA</span
-                            >
                           </v-chip>
                         </v-col>
                       </v-row>
@@ -599,12 +609,14 @@ export default {
       return taille > 0 ? taille : 4;
     },
     advancedMonthStyle() {
-      let taille = this.moisToPay.length;
-      return 4 <= taille <= 7 ? "margin-right:5px" : "margin-right:5px";
+      let taille = this.moisAvance.length;
+      return 4 <= taille <= 7 ? "margin:0px 5px 0px 175px" : "margin-left:15px";
     },
     monthToPayStyle() {
       let taille = this.moisToPay.length;
-      return 5 <= taille <= 9 ? "margin-right:150px" : "margin-right:280px";
+      return 5 <= taille <= 9
+        ? "margin:0px 150px 0px 10px"
+        : "margin:0px 150px 0px 5px";
     },
 
     montantDejaPaye() {
@@ -788,11 +800,12 @@ export default {
       this.moisToShowWithoutPayedMonths = [];
       console.log("Mois Non Paye vides en temps normal = " + this.MoisNonPaye);
       let eleveChoisi = JSON.parse(localStorage.getItem("eleveChoisi"));
+      console.log("test1");
       //attention ne jamais oublier de parses une variable JSON stringifié car elle ne ressemble à du JSON par la forme dans le fond c'est un Array oui mais pas d'objets mais de String
       this.montantFraisMensuel = JSON.parse(this.classes).find(
         (x) => x.identifiant == eleveChoisi.classe
       ).scolarite;
-
+      console.log("test2");
       this.eleve.nom = eleveChoisi.nom;
       this.eleve.sexe = eleveChoisi.sexe;
       this.eleve.dateLieuNaissance = eleveChoisi.dateLieuNaissance;

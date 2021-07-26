@@ -85,6 +85,39 @@ const state = {
 };
 const actions = {
 
+    async actionInitialiseProfs({ commit }) {
+
+        const token = "Token " + localStorage.getItem("token");
+        if (localStorage.getItem("token") != null) {
+            var config = {
+                method: "get",
+                url: "api/ecole/enseignants/",
+                headers: {
+                    Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
+                },
+            };
+            await axios(config)
+                .then((response) => {
+                    const result = response.data;
+
+                    console.log(result);
+
+                    let profs = [];
+                    for (const key in result) {
+                        profs.push(result[key]);
+                    }
+
+                    profs.forEach((prof) => {
+                        prof.dateEmbauche = String(prof.dateEmbauche).slice(0, 10);
+                    });
+                    commit('InitialiseProfs', JSON.stringify(profs))
+                })
+                .catch(function(error) {
+                    console.log("😢😢😢" + error);
+                });
+        }
+    },
+
     async actionCreateEnseignant({ commit }, profCreate) {
         const token = "Token " + localStorage.getItem('token');
         console.log('id de la matière du prof =>' + profCreate.matiereEnseigne)
@@ -167,9 +200,9 @@ const actions = {
 };
 const mutations = {
 
-    InitialiseTeachers(state, teachers) {
-        state.teachers = teachers
-        localStorage.setItem("Matieres", teachers);
+    InitialiseProfs(state, profs) {
+        state.teachers = profs
+        localStorage.setItem("Profs", profs);
     },
     createProf(state, Prof) {
         state.teachers = Prof

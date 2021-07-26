@@ -340,7 +340,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import { mapGetters } from "vuex";
 export default {
   name: "Teachers",
@@ -435,7 +434,10 @@ export default {
   },
 
   beforeMount() {
-    let mat = this.allMatieres;
+    this.enseignants = JSON.parse(localStorage.getItem("Profs"));
+
+    console.log("😃😃😃 this.profs => " + this.enseignants);
+    let mat = JSON.parse(localStorage.getItem("Matieres"));
 
     mat.forEach((element) => {
       this.matieres.push(element.nomMatiere);
@@ -454,7 +456,7 @@ export default {
     });
 
     this.classes = classe;
-    this.initialiseProf();
+    //this.initialiseProf();
   },
 
   methods: {
@@ -468,53 +470,6 @@ export default {
     CloseAlert() {
       this.message_erreur = "";
       this.erreur = false;
-    },
-
-    async initialiseProf() {
-      //   this.$store.dispatch("actionInitialiseMatiere");
-      const token = "Token " + localStorage.getItem("token");
-      if (localStorage.getItem("token") != null) {
-        var config = {
-          method: "get",
-          url: "api/ecole/enseignants/",
-          headers: {
-            Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
-          },
-        };
-        await axios(config)
-          .then((response) => {
-            const result = response.data;
-
-            console.log(result);
-            localStorage.setItem("Profs", result);
-
-            let element = [];
-            for (const key in result) {
-              element.push(result[key]);
-            }
-            // let profs_cours_id=[]
-            // this.allMatieres.matiereEnseigne.forEach(element => {
-            // this.allMatieres.find((x) => x.nomMatiere == matiere).id
-            // });
-
-            element.forEach((prof) => {
-              prof.dateEmbauche = String(prof.dateEmbauche).slice(0, 10);
-            });
-
-            this.$store.state.enseignants = element;
-
-            this.enseignants = element;
-            console.log(
-              "😃😃😃 this.profs => " +
-                JSON.stringify(element) +
-                "this.response.data = " +
-                response.data
-            );
-          })
-          .catch(function(error) {
-            console.log("😢😢😢" + error);
-          });
-      }
     },
 
     editItem(item) {

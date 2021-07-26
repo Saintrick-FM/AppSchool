@@ -151,7 +151,6 @@
 </template>
 
 <script>
-import axios from "axios";
 import { mapGetters } from "vuex";
 export default {
   name: "Matieres",
@@ -209,97 +208,18 @@ export default {
     },
   },
 
-  created() {
-    this.initialiseMatiere();
-    this.initialiseClasse();
+  beforeMount() {
+    //this.initialiseMatiere();
+    this.matieres = JSON.parse(localStorage.getItem("Matieres"));
+    this.identifiants_classes = JSON.parse(localStorage.getItem("Id_classes"));
+    this.classes = JSON.parse(localStorage.getItem("Classes"));
+    //this.initialiseClasse();
   },
-  // beforeMount() {
-  //   this.initialiseClasse();
-  // },
 
   methods: {
     CloseAlert() {
       this.message_erreur = "";
       this.erreur = false;
-    },
-    async initialiseMatiere() {
-      //   this.$store.dispatch("actionInitialiseMatiere");
-      const token = "Token " + localStorage.getItem("token");
-
-      if (localStorage.getItem("token") != null) {
-        var config = {
-          method: "get",
-          url: "api/ecole/matiere/",
-          headers: {
-            Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
-          },
-        };
-        await axios(config)
-          .then((response) => {
-            const result = response.data;
-
-            console.log(result);
-            localStorage.setItem("Matieres", result);
-
-            let element = [];
-            for (const key in result) {
-              element.push(result[key]);
-            }
-
-            this.$store.state.matieres = element;
-            this.matieres = element;
-            console.log(
-              "😃😃😃 this.matieres => " +
-                element +
-                "this.response.data = " +
-                response.data
-            );
-          })
-          .catch(function(error) {
-            console.log("😢😢😢" + error);
-          });
-      }
-    },
-    async initialiseClasse() {
-      //   this.$store.dispatch("actionInitialiseMatiere");
-      const token = "Token " + localStorage.getItem("token");
-
-      if (localStorage.getItem("token")) {
-        var config = {
-          method: "get",
-          url: "api/ecole/classe/",
-          headers: {
-            Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
-          },
-        };
-        await axios(config)
-          .then((response) => {
-            const result = response.data;
-            console.log(result);
-            let element = [];
-
-            for (const classe in result) {
-              element.push(result[classe]);
-              this.identifiants_classes.push(result[classe].identifiant);
-            }
-
-            // element.forEach((element) => {
-
-            //   this.identifiants_classes.push(element["identifiant"]);
-            // });
-
-            console.log("identifiants classes => " + this.identifiants_classes);
-            localStorage.setItem("Classes", JSON.stringify(element));
-            localStorage.setItem("Id_classes", this.identifiants_classes);
-            this.$store.state.classes = element;
-            this.$store.state.identifiants_classes = this.identifiants_classes;
-            this.classes = element;
-            console.log("😃😃😃 this.classes => " + this.classes);
-          })
-          .catch(function(error) {
-            console.log("😢😢😢" + error);
-          });
-      }
     },
 
     editItem(item) {

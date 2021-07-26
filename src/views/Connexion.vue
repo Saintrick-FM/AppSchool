@@ -213,9 +213,12 @@ export default {
           localStorage.setItem("token", token);
           localStorage.setItem("authStatut", this.name);
           localStorage.setItem("année scolaire", this.annee_choisi);
-          this.$store.commit("initializeStore");
 
+          this.$store.commit("initializeStore");
           this.$store.dispatch("actionInitialiseEleve");
+          this.$store.dispatch("actionInitialiseClasse");
+          this.$store.dispatch("actionInitialiseMatieres");
+          this.$store.dispatch("actionInitialiseProfs");
           this.loading = true;
           const toPath = this.$route.query.to || "/finances";
 

@@ -499,27 +499,18 @@ export default {
   },
 
   beforeMount() {
-    // let mat = this.allMatieres;
-
-    // mat.forEach((eleves) => {
-    //   this.matieres.push(eleves.nomMatiere);
-    // });
     let id_classes = [localStorage.getItem("Id_classes")];
-    let classe = undefined;
-    console.log(
-      "id_classes du localstorage " +
-        typeof id_classes +
-        "\nid_classes de vuex " +
-        this.$store.state.identifiants_classes
-    );
+    let classe = null;
+    
     id_classes.forEach((eleves) => {
       classe = eleves.split(",");
       console.log(classe);
     });
 
     this.classes = classe;
-    //this.initializeEleve();
-    this.getEleves;
+   // this.$store.dispatch("actionInitialiseEleve");
+    this.eleves = JSON.parse(localStorage.getItem("ElèvesToStore"));
+   // console.log(this.eleves);
   },
 
   methods: {
@@ -533,56 +524,7 @@ export default {
       this.message_erreur = "";
       this.erreur = false;
     },
-    getEleves() {
-      this.eleves = JSON.parse(localStorage.getItem("Elèves"));
-      console.log(this.eleves);
-    },
-    // async initializeEleve() {
-    //   //   this.$store.dispatch("actionInitialiseMatiere");
-    //   const token = "Token " + localStorage.getItem("token");
-    //   if (localStorage.getItem("token") != null) {
-    //     var config = {
-    //       method: "get",
-    //       url: "api/inscriptions/",
-    //       headers: {
-    //         Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
-    //       },
-    //     };
-    //     await axios(config)
-    //       .then((response) => {
-    //         const result = response.data;
-
-    //         console.log(result);
-    //         localStorage.setItem("Elèves", result);
-
-    //         let eleves = [];
-    //         for (const key in result) {
-    //           eleves.push(result[key]);
-    //         }
-    //         // let eleves_cours_id=[]
-    //         // this.allMatieres.matiereEnseigne.forEach(eleves => {
-    //         // this.allMatieres.find((x) => x.nomMatiere == matiere).id
-    //         // });
-
-    //         eleves.forEach((eleve) => {
-    //           eleve.dateEmbauche = String(eleve.dateEmbauche).slice(0, 10);
-    //         });
-
-    //         this.$store.state.eleves = eleves;
-
-    //         this.eleves = eleves;
-    //         console.log(
-    //           "😃😃😃 this.eleves => " +
-    //             eleves +
-    //             "this.response.data = " +
-    //             response.data
-    //         );
-    //       })
-    //       .catch(function(error) {
-    //         console.log("😢😢😢" + error);
-    //       });
-    //   }
-    // },
+    getEleves() {},
 
     editItem(item) {
       this.editedIndex = this.eleves.indexOf(item);

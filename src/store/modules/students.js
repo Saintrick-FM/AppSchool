@@ -5,9 +5,10 @@ const state = {
 };
 const actions = {
 
-    actionInitialiseEleve({ commit }) {
+    async actionInitialiseEleve({ commit }) {
         //   this.$store.dispatch("actionInitialiseMatiere");
         const token = "Token " + localStorage.getItem("token");
+        console.log('Francy')
         if (localStorage.getItem("token") != null) {
             var config = {
                 method: "get",
@@ -16,7 +17,7 @@ const actions = {
                     Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
                 },
             };
-            axios(config)
+            await axios(config)
                 .then((response) => {
                     const result = response.data;
                     console.log(result);
@@ -24,22 +25,18 @@ const actions = {
                     for (const key in result) {
                         eleves.push(result[key]);
                     }
-                    // let eleves_cours_id=[]
-                    // this.allMatieres.matiereEnseigne.forEach(eleves => {
-                    // this.allMatieres.find((x) => x.nomMatiere == matiere).id
-                    // });
 
-                    eleves.forEach((eleve) => {
-                        eleve.dateEmbauche = String(eleve.dateEmbauche).slice(0, 10);
-                    });
+                    // eleves.forEach((eleve) => {
+                    //     eleve.dateEmbauche = String(eleve.dateEmbauche).slice(0, 10);
+                    // });
 
                     let elevesToStore = JSON.stringify(eleves)
                     console.log(
-                        "😃😃😃 this.eleves => " +
+                        "😃😃😃 ElevesTostore => " +
                         elevesToStore
 
                     );
-                    localStorage.setItem("Elèves", elevesToStore);
+                    localStorage.setItem("ElèvesToStore", elevesToStore);
                     commit('InititialiseEleves', elevesToStore)
                 })
                 .catch(function(error) {

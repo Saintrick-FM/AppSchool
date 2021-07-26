@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import teachers from './modules/teachers'
 import students from './modules/students'
 import paiementFrais from './modules/paiementFrais'
+import classes from './modules/classes'
 import axios from 'axios'
 
 Vue.use(Vuex)
@@ -267,5 +268,6 @@ export default new Vuex.Store({
         teachers,
         students,
         paiementFrais,
+        classes,
     },
 })
