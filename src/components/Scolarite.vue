@@ -306,6 +306,25 @@
                     >Frais mensuels</v-autocomplete
                   >
 
+                  <v-autocomplete
+                    :items="paiement_Inscription_Reinscription"
+                    label="Frais d'inscription ou de réinscription"
+                    clearable
+                    v-model="choiceBetweenInscReinsc"
+                    chips
+                    no-data-text="Désolé pas de classes disponibles pour la réinscription"
+                    >Frais d'inscription</v-autocomplete
+                  >
+
+                  <v-autocomplete
+                    :items="IdClasses"
+                    label="Frais de réinscription"
+                    clearable
+                    v-model="fraisReinscription"
+                    chips
+                    no-data-text="Désolé pas de classes disponibles pour la réinscription"
+                  ></v-autocomplete>
+
                   <div class="text-center pt-2">
                     <v-btn @click.prevent="handleClick">Suivant</v-btn>
                   </div>
@@ -340,60 +359,69 @@
                               {{ monthsAlreadySolve.toString() }}
                               <span style="margin-left:15px"
                                 >||
-                                {{
-                                  priceMonthsAlreadySolve.toString()
-                                }}
+                                {{ priceMonthsAlreadySolve.toString() }}
                                 FCFA</span
                               >
                             </v-chip>
                           </v-card-title>
                           <!-- Ici affichage en cas de paiement frais autres que les frais mensuels -->
-                          Paiement
-                          <v-card-title v-if="AffichePaiementAutresFrais">
-                            <v-chip
-                              color="primary"
-                              style="margin-left:15px"
-                              text-color="white"
-                            >
-                              {{ fraisApayer }}
-                              <span style="margin-left:50px"
-                                >{{ prixFraisApayer }} FCFA</span
-                              ></v-chip
-                            >
-                          </v-card-title>
-                        </v-col>
-                      </v-row>
-                      <v-row>
-                        <v-col md="5">
-                          <v-text-field
-                            align-content-center
-                            :value="eleve.nom"
-                            outlined
-                            filled
-                            readonly
-                            append-icon="mdi-book-variant"
-                          >
-                          </v-text-field>
-                        </v-col>
-                        <v-col md="2"> </v-col>
-                        <v-col md="5">
-                          <h3 style="margin-left:100px">
-                            Net à payer :
-                            <v-chip
-                              color="green"
-                              text-color="white"
-                              width="300px"
-                              style="margin-left:10px"
-                              >{{ scolariteTotal }} FCFA</v-chip
-                            >
-                          </h3>
-                          <v-chip
-                            color="green"
-                            style="margin:0px 10px 0px 100px"
-                            text-color="white"
-                          >
-                            Non payés + Reste mois Avancés
-                          </v-chip>
+
+                          <v-row>
+                            <v-col md="4">
+                              <v-text-field
+                                align-content-center
+                                :value="eleve.nom"
+                                outlined
+                                filled
+                                readonly
+                                append-icon="mdi-book-variant"
+                              >
+                              </v-text-field>
+                            </v-col>
+                            <v-col md="3">
+                              <v-card-title
+                                v-if="alertInscriptionReinscription"
+                              >
+                                <v-chip
+                                  color="primary"
+                                  style="margin-left:15px"
+                                  text-color="white"
+                                >
+                                  Paiement : {{ fraisApayer }}
+                                </v-chip>
+                              </v-card-title>
+
+                              <v-card-title v-if="AffichePaiementAutresFrais">
+                                <v-chip
+                                  color="primary"
+                                  style="margin-left:15px"
+                                  text-color="white"
+                                >
+                                  Paiement {{ fraisApayer }}
+                                </v-chip>
+                              </v-card-title>
+                            </v-col>
+                            <v-col md="5">
+                              <h3 style="margin-left:100px">
+                                Net à payer :
+                                <v-chip
+                                  color="green"
+                                  text-color="white"
+                                  width="300px"
+                                  style="margin-left:10px"
+                                  >{{ scolariteTotal }} FCFA</v-chip
+                                >
+                              </h3>
+                              <v-chip
+                                color="green"
+                                style="margin:0px 10px 0px 100px"
+                                text-color="white"
+                                v-if="AffichePaiementMois"
+                              >
+                                Non payés - Reste mois Avancés
+                              </v-chip>
+                            </v-col>
+                          </v-row>
                         </v-col>
                       </v-row>
                     </v-row>
@@ -439,7 +467,7 @@
                           @click="annulation"
                         >
                           <v-icon left>mdi-close-box-outline</v-icon>
-                          Annuler
+                          Annuler xxx
                         </v-chip></v-col
                       >
                       <v-col>
@@ -471,10 +499,9 @@
                     <h2
                       style="color:#d81b60; margin:0px, 10px,0px, 10px; position:absolute; margin-top:-4px"
                     >
-                      Désolé vous ne pouvez pas procéder en même temps au
-                      paiement de frais mensuels et des
-                      <span style="margin-left: 350px">
-                        autres types de frais</span
+                      {{ messageErreurDuplicateTypeFrais_A }}
+                      <span style="margin:75px 10px 0px 350px">
+                        {{ messageErreurDuplicateTypeFrais_B }}</span
                       >
                     </h2>
 
@@ -484,7 +511,9 @@
                       width="30px"
                       style=" margin-left:1020px"
                       small
-                      @click="alertErreurDuplicateTypeFrais = false"
+                      persistent
+                      persistent-hint
+                      @click="annulation"
                     >
                       <v-icon>mdi-close</v-icon>
                     </v-btn>
@@ -509,14 +538,24 @@ export default {
       singleSelect: true,
       alert: false,
       alertErreurDuplicateTypeFrais: false,
+      messageErreurDuplicateTypeFrais_A: "",
+      messageErreurDuplicateTypeFrais_B: "",
       AffichePaiementAutresFrais: false,
+      alertInscriptionReinscription: false,
       AffichePaiementMois: false,
       fraisChoisi: [],
-      scolariteTotal: undefined,
+      scolariteTotal: null,
+      allFraisInscReinsc: null,
+      paiement_Inscription_Reinscription: ["Inscription", "Réinscription"],
+      choiceBetweenInscReinsc: null,
+      prixInscriptionReinscription: null,
       montantFraisMensuel: undefined,
-      fraisApayer: undefined,
+      fraisApayer: null,
       prixFraisApayer: undefined,
       montantApayer: undefined,
+      IdClasses: null,
+      classeInscription: "",
+      fraisReinscription: "",
 
       eleve: {
         nom: "",
@@ -663,8 +702,14 @@ export default {
 
   methods: {
     annulation() {
+      this.alertErreurDuplicateTypeFrais = false;
       this.alert = false;
-      this.fraisApayer = undefined;
+      this.alertInscriptionReinscription = false;
+      this.prixInscriptionReinscription = null;
+      // this.classeInscription = "";
+      this.choiceBetweenInscReinsc = null;
+      this.fraisReinscription = "";
+      this.fraisApayer = null;
       this.fraisChoisi = [];
       this.moisToPay = [];
       this.monthsAlreadySolve = [];
@@ -674,13 +719,83 @@ export default {
       this.AffichePaiementAutresFrais = false;
       this.AffichePaiementMois = false;
     },
+    AssignMessageErreur(message) {
+      if (message === "No Choice") {
+        this.alertErreurDuplicateTypeFrais = true;
+        this.messageErreurDuplicateTypeFrais_A =
+          "Désolé vous devez d'abord choisir un frais parmi les frais au dessus et ensuite";
+        this.messageErreurDuplicateTypeFrais_B =
+          "Cliquer sur le bouton (Suivant)";
+      }
+      if (message === "Inscription/reinscription") {
+        this.alertErreurDuplicateTypeFrais = true;
+        this.messageErreurDuplicateTypeFrais_A =
+          "Désolé vous ne pouvez procéder qu'à 1 seul paiement, veuiler ne faire qu'un choix entre";
+        this.messageErreurDuplicateTypeFrais_B =
+          "l'inscription et la réinscription";
+      }
+      if (!message) {
+        this.messageErreurDuplicateTypeFrais_A =
+          " Désolé vous ne pouvez pas procéder en même temps au paiement de plusieurs types de frais";
+        this.messageErreurDuplicateTypeFrais_B =
+          "Choisissez-en un et cliquez sur le bouton suivant";
+        this.alertErreurDuplicateTypeFrais = true;
+      }
+    },
     afficheAlert() {
       console.log(this.fraisChoisi.length);
     },
     handleClick: function() {
+      console.log("naza");
+      console.log(" this.fraisChoisi.length " + this.fraisChoisi.length);
+      console.log("this.moisToPay.length " + this.moisToPay.length);
+      console.log(
+        "this.choiceBetweenInscReinsc.length " + this.choiceBetweenInscReinsc
+      );
+      console.log("this.fraisReinscription.length  " + this.fraisReinscription);
+      console.log(
+        "this.prixInscriptionReinscription " + this.prixInscriptionReinscription
+      );
+      console.log("this.scolariteTotal " + this.scolariteTotal);
+
       this.$vuetify.goTo(document.body.scrollHeight); // ici c'est pour scroller directement vers le bas
 
-      if (this.moisToPay.length > 0 && this.fraisChoisi.length == 0) {
+      if (
+        !this.choiceBetweenInscReinsc &&
+        this.moisToPay.length === 0 &&
+        this.fraisChoisi.length === 0 &&
+        this.fraisReinscription.length === 0
+      ) {
+        this.AssignMessageErreur("No Choice");
+      }
+
+      if (this.fraisChoisi.length > 0 && this.moisToPay.length > 0) {
+        this.AssignMessageErreur();
+      }
+
+      if (
+        this.moisToPay.length > 0 &&
+        (this.choiceBetweenInscReinsc || this.fraisReinscription.length > 0)
+      ) {
+        this.AssignMessageErreur();
+      }
+
+      if (
+        this.fraisChoisi.length > 0 &&
+        (this.choiceBetweenInscReinsc || this.fraisReinscription.length > 0)
+      ) {
+        this.AssignMessageErreur();
+      }
+
+      if (this.choiceBetweenInscReinsc && this.fraisReinscription.length > 0) {
+        this.AssignMessageErreur("Inscription/reinscription");
+      }
+      // gestion de la paie des frais mensuels en dehors des autres types de frais ,inscriptions et reinscriptions
+      if (
+        this.alertErreurDuplicateTypeFrais === false &&
+        this.moisToPay.length > 0 &&
+        this.fraisChoisi.length == 0
+      ) {
         // let MoisPaye = localStorage.getItem("MoisPaye");
         let moisAvance = localStorage.getItem("moisAvance");
         let AllFraisPayedByEleve = JSON.parse(
@@ -716,7 +831,10 @@ export default {
               (total, value) => Number(total) + Number(value)
             );
         } else if (fraisAvance.length == 1) {
-          this.scolariteTotal = Number(this.priceMonthsAlreadySolve[0]);
+          this.scolariteTotal =
+            this.moisToPay.length *
+              Number(this.montantFraisMensuel.slice(0, -1)) -
+            Number(this.priceMonthsAlreadySolve[0]);
         } else {
           this.scolariteTotal =
             Number(this.montantFraisMensuel.slice(0, -1)) *
@@ -727,7 +845,14 @@ export default {
         this.montantRestant = this.scolariteTotal - this.montantDejaPaye;
 
         // Autres Frais à payer
-      } else if (this.fraisChoisi.length > 0 && this.moisToPay.length == 0) {
+      }
+      // gestion de la paie des autres types de frais en dehors des frais mensuels, inscriptions et reinscriptions
+
+      if (
+        this.alertErreurDuplicateTypeFrais === false &&
+        this.fraisChoisi.length > 0 &&
+        this.moisToPay.length == 0
+      ) {
         this.alert = true;
         console.log(
           "Autre Frais sélectionné" + JSON.stringify(this.fraisChoisi)
@@ -743,13 +868,29 @@ export default {
         this.montantDejaPaye = montantDejaPaye;
         this.montantRestant = montantRestant;
         this.statut = statut;
-      } else {
-        this.alertErreurDuplicateTypeFrais = true;
+      }
+      // gestion des frais d'inscriptions
+      if (
+        this.alertErreurDuplicateTypeFrais === false &&
+        this.choiceBetweenInscReinsc === "Inscription"
+      ) {
+        console.log("alloooo ! " + this.allFraisInscReinsc);
+        this.alert = true;
+
+        console.log(
+          "alloooo ! prixInscriptionReinscription " +
+            this.prixInscriptionReinscription
+        );
+        this.fraisApayer = "Inscription";
+        this.scolariteTotal = this.prixInscriptionReinscription;
+        this.alertInscriptionReinscription = true;
+        console.log("alloooo !");
       }
     },
 
     getClasses() {
       this.classes = localStorage.getItem("Classes").split(",");
+      this.IdClasses = localStorage.getItem("Id_classes").split(",");
     },
 
     async getFrais() {
@@ -768,7 +909,7 @@ export default {
             const result = response.data;
 
             console.log(result);
-            localStorage.setItem("Frais", result);
+            localStorage.setItem("Frais", JSON.stringify(result));
 
             let element = [];
 
@@ -801,6 +942,7 @@ export default {
       console.log("Mois Non Paye vides en temps normal = " + this.MoisNonPaye);
       let eleveChoisi = JSON.parse(localStorage.getItem("eleveChoisi"));
       console.log("test1");
+
       //attention ne jamais oublier de parses une variable JSON stringifié car elle ne ressemble à du JSON par la forme dans le fond c'est un Array oui mais pas d'objets mais de String
       this.montantFraisMensuel = JSON.parse(this.classes).find(
         (x) => x.identifiant == eleveChoisi.classe
@@ -814,6 +956,12 @@ export default {
       this.eleve.telTuteur = eleveChoisi.telTuteur;
       this.eleve.redoublant = eleveChoisi.redoublant;
       this.eleve.classe = eleveChoisi.classe;
+      this.allFraisInscReinsc = localStorage.getItem(
+        "frais_Inscript_Reinscript"
+      );
+      this.prixInscriptionReinscription = JSON.parse(
+        this.allFraisInscReinsc
+      ).find((x) => x.classe == eleveChoisi.classe).fraisInscription;
 
       // this.getfinanceEleveDetail(eleveChoisi);
       //this.MoisPayedToShow = this.MoisPaye.toString().split(",");
@@ -1158,14 +1306,14 @@ export default {
       }
 
       this.alert = false;
-      this.fraisApayer = undefined;
+      this.fraisApayer = null;
       this.fraisChoisi = [];
       this.moisToPay = [];
       this.priceMonthsAlreadySolve = [];
       this.monthsAlreadySolve = [];
       this.montantDejaPaye = undefined;
       this.montantRestant = undefined;
-      this.scolariteTotal = undefined;
+      this.scolariteTotal = null;
       this.AffichePaiementAutresFrais = false;
       this.AffichePaiementMois = false;
     },

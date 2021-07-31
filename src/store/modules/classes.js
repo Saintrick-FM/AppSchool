@@ -3,6 +3,7 @@ const state = {
     classes: null,
     IdClasses: null,
     matieres: null,
+    fraisInscREsc: null,
 };
 const actions = {
     async actionInitialiseClasse({ commit }) {
@@ -17,27 +18,62 @@ const actions = {
                     Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
                 },
             };
-            await axios(config)
-                .then((response) => {
-                    const result = response.data;
-                    console.log(result);
+            var config2 = {
+                method: "get",
+                url: "api/finances/ConfigFraisInscReinsc/",
+                headers: {
+                    Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
+                },
+            };
+
+
+            await axios.all([axios(config),
+                    axios(config2)
+                ]).then(axios.spread((firstResponse, secondResponse) => {
+                    console.log("console.log des requetes doubles " + firstResponse.data, secondResponse.data)
+
                     let matieres = [];
                     let IdClasses = []
 
-                    for (const classe in result) {
-                        matieres.push(result[classe]);
-                        IdClasses.push(result[classe].identifiant);
+                    for (const classe in firstResponse.data) {
+                        matieres.push(firstResponse.data[classe]);
+                        IdClasses.push(firstResponse.data[classe].identifiant);
                     }
                     let classes = JSON.stringify(matieres)
-
+                    let fraisInscREsc = JSON.stringify(secondResponse.data)
                     console.log("identifiants classes => " + IdClasses);
                     console.log("😃😃😃 this.classes => " + this.classes);
 
                     commit("InitialiseClasse", [classes, IdClasses])
-                })
+                    commit("InitialisefraisInscREsc", fraisInscREsc)
+
+
+                }))
                 .catch(function(error) {
                     console.log("😢😢😢" + error);
                 });
+
+            /* await axios(config)
+                 .then((response) => {
+                     const result = response.data;
+                     console.log(result);
+                     let matieres = [];
+                     let IdClasses = []
+
+                     for (const classe in result) {
+                         matieres.push(result[classe]);
+                         IdClasses.push(result[classe].identifiant);
+                     }
+                     let classes = JSON.stringify(matieres)
+
+                     console.log("identifiants classes => " + IdClasses);
+                     console.log("😃😃😃 this.classes => " + this.classes);
+
+                     commit("InitialiseClasse", [classes, IdClasses])
+                 })
+                 .catch(function(error) {
+                     console.log("😢😢😢" + error);
+                 });*/
         }
     },
     async actionInitialiseMatieres({ commit }) {
@@ -82,6 +118,10 @@ const mutations = {
 
         localStorage.setItem("Classes", classes[0]);
         localStorage.setItem("Id_classes", classes[1]);
+    },
+    InitialisefraisInscREsc(state, fraisInscReinsc) {
+        state.fraisInscREsc = fraisInscReinsc
+        localStorage.setItem("frais_Inscript_Reinscript", fraisInscReinsc);
     },
     InitialiseMatieres(state, matieres) {
         state.matieres = matieres
