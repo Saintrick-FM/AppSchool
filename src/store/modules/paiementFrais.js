@@ -71,6 +71,32 @@ const actions = {
 
             });
     },
+    async actionPaiementInscReinsc({ commit }, donnees) {
+        const token = "Token " + localStorage.getItem('token');
+        let body = donnees
+
+        await axios
+
+            .post('api/finances/PaiementInscriptionReinscription/', body, {
+                headers: {
+                    'Authorization': token,
+                }
+            })
+            .then((response) => {
+
+                console.log("😃😃😃" + JSON.stringify(response));
+                commit("PaiementInscReinsc", donnees);
+                this.$store.dispatch('actionInitialiseEleve')
+
+
+            })
+            .catch(function(error) {
+                console.log('Erreur Inscription_Reinscription=>' + JSON.stringify(body))
+                console.log("😢😢😢" + error);
+
+            })
+
+    },
 
     async actionPayedFrais({ commit }, fraisPayed) {
         const token = "Token " + localStorage.getItem('token');
@@ -141,6 +167,7 @@ const actions = {
         }
     },
 
+
     async actionUpdatePayedFrais({ commit }, donnees) {
         const token = "Token " + localStorage.getItem('token');
         var body = donnees[1];
@@ -174,6 +201,9 @@ const mutations = {
     createFrais(state, Frais) {
         state.typeFrais = Frais
 
+    },
+    PaiementInscReinsc(state, frais) {
+        state.fraisInscReinsc = frais
     },
 
     updatetypeFrais(state, newFrais) {

@@ -1,14 +1,16 @@
 import axios from 'axios'
 const state = {
     eleves: [],
-    errorCreateEleve: undefined
+    errorCreateEleve: undefined,
+    inscitsAnneeActuel: null,
 };
 const actions = {
 
     async actionInitialiseEleve({ commit }) {
         //   this.$store.dispatch("actionInitialiseMatiere");
         const token = "Token " + localStorage.getItem("token");
-        console.log('Francy')
+
+
         if (localStorage.getItem("token") != null) {
             var config = {
                 method: "get",
@@ -17,28 +19,39 @@ const actions = {
                     Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
                 },
             };
-            await axios(config)
-                .then((response) => {
-                    const result = response.data;
-                    console.log(result);
-                    let eleves = [];
-                    for (const key in result) {
-                        eleves.push(result[key]);
-                    }
+            const annee = new Date()
+            const year = annee.getFullYear() + '-' + (annee.getFullYear() + 1)
+            var config2 = {
+                method: "get",
+                url: `api/finances/PaiementInscriptionReinscription/?annee_scolaire=${year}`,
+                headers: {
+                    Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
+                },
+            };
+            await axios.all([axios(config),
+                    axios(config2)
+                ]).then(axios.spread((firstResponse, secondResponse) => {
+                    console.log("console.log des requetes doubles " + firstResponse.data, secondResponse.data)
 
-                    // eleves.forEach((eleve) => {
-                    //     eleve.dateEmbauche = String(eleve.dateEmbauche).slice(0, 10);
-                    // });
+                    const result1 = firstResponse.data;
+                    const result2 = secondResponse.data;
+                    console.log(result1);
+                    let eleves = [];
+                    for (const key in result1) {
+                        eleves.push(result1[key]);
+                    }
 
                     let elevesToStore = JSON.stringify(eleves)
                     console.log(
                         "😃😃😃 ElevesTostore => " +
-                        elevesToStore
+                        elevesToStore + " \nInscitsAnneeActuel => " + result2
 
                     );
                     localStorage.setItem("ElèvesToStore", elevesToStore);
                     commit('InititialiseEleves', elevesToStore)
-                })
+                    commit("InitialiseInscitsAnneeActuel", result2)
+
+                }))
                 .catch(function(error) {
                     console.log("😢😢😢" + error);
                 });
@@ -129,6 +142,10 @@ const mutations = {
 
     InititialiseEleves(state, eleves) {
         state.eleves = eleves
+    },
+    InitialiseInscitsAnneeActuel(state, InscitsAnneeActuel) {
+        state.inscitsAnneeActuel = InscitsAnneeActuel
+        localStorage.setItem("Inscits_Annee_Actuel", JSON.stringify(InscitsAnneeActuel))
     },
     createEleve(state, eleve) {
         state.eleves = eleve

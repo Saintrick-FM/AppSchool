@@ -47,33 +47,11 @@ const actions = {
                     commit("InitialiseClasse", [classes, IdClasses])
                     commit("InitialisefraisInscREsc", fraisInscREsc)
 
-
                 }))
                 .catch(function(error) {
                     console.log("😢😢😢" + error);
                 });
 
-            /* await axios(config)
-                 .then((response) => {
-                     const result = response.data;
-                     console.log(result);
-                     let matieres = [];
-                     let IdClasses = []
-
-                     for (const classe in result) {
-                         matieres.push(result[classe]);
-                         IdClasses.push(result[classe].identifiant);
-                     }
-                     let classes = JSON.stringify(matieres)
-
-                     console.log("identifiants classes => " + IdClasses);
-                     console.log("😃😃😃 this.classes => " + this.classes);
-
-                     commit("InitialiseClasse", [classes, IdClasses])
-                 })
-                 .catch(function(error) {
-                     console.log("😢😢😢" + error);
-                 });*/
         }
     },
     async actionInitialiseMatieres({ commit }) {

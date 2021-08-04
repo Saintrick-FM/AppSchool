@@ -219,6 +219,7 @@ export default {
           this.$store.dispatch("actionInitialiseClasse");
           this.$store.dispatch("actionInitialiseMatieres");
           this.$store.dispatch("actionInitialiseProfs");
+
           this.loading = true;
           const toPath = this.$route.query.to || "/finances";
 
