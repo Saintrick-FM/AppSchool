@@ -178,29 +178,87 @@
             </v-col>
           </v-row>
 
-          <v-row style="margin-top: 15px">
+          <v-row style="margin: 15px 0px 0x 10px">
             <v-col md="6">
-              <v-text-field
-                :value="eleve.telTuteur"
-                prepend-icon=" mdi-phone"
-                label="Frais Payés"
-                readonly
-                filled
-                outlined
-              >
-              </v-text-field>
+              <v-card>
+                <v-chip label color="primary" text-color="white">
+                  <v-icon left>mdi-check</v-icon> Frais Payés
+                </v-chip>
+
+                <v-tabs v-model="tab" background-color="primary" dark>
+                  <v-tab v-for="item in allFraisPayes" :key="item.typeFrais">
+                    {{ item.typeFrais }}
+                  </v-tab>
+                </v-tabs>
+
+                <v-tabs-items v-model="tab">
+                  <v-tab-item
+                    v-for="item in allFraisPayes"
+                    :key="item.typeFrais"
+                  >
+                    <v-card flat>
+                      <v-card-text>
+                        <span
+                          style="color:black;font-weight: bold; text-decoration: underline;"
+                          >Montant Payé :</span
+                        >
+                        {{ item.montantFrais }} FCFA
+                        <span
+                          style="color:black;font-weight: bold; text-decoration: underline; margin-left:50px"
+                          >Date de paiement:</span
+                        >
+                        {{ item.cree_le }} <br />
+                        <span
+                          style="color:black; font-weight: bold; text-decoration: underline;"
+                          >Année académique:</span
+                        >
+                        {{ item.anneeAcademique }}
+                      </v-card-text>
+                    </v-card>
+                  </v-tab-item>
+                </v-tabs-items>
+              </v-card>
             </v-col>
 
             <v-col md="6">
-              <v-text-field
-                :value="eleve.telTuteur"
-                prepend-icon=" mdi-phone"
-                label="Frais Impayés"
-                readonly
-                filled
-                outlined
-              >
-              </v-text-field>
+              <!-- <v-card>
+                <v-chip label color="primary" text-color="white">
+                  <v-icon left>mdi-cancel</v-icon> Frais Impayés
+                </v-chip>
+
+                <v-tabs v-model="tab2" background-color="primary" dark>
+                  <v-tab
+                    v-for="item2 in allFraisImpayes"
+                    :key="item2.typeFrais"
+                  >
+                    {{ item2.typeFrais }}
+                  </v-tab>
+                </v-tabs>
+
+                <v-tabs-items v-model="tab2">
+                  <v-tab-item v-for="item in allFraisImPayes" :key="item">
+                    <v-card flat>
+                      <v-card-text>
+                        <span
+                          style="color:black;font-weight: bold; text-decoration: underline;"
+                          >Montant Payé :</span
+                        >
+                        {{ item2.montantFrais }} FCFA
+                        <span
+                          style="color:black;font-weight: bold; text-decoration: underline; margin-left:50px"
+                          >Date de paiement:</span
+                        >
+                        {{ item2.cree_le }} <br />
+                        <span
+                          style="color:black; font-weight: bold; text-decoration: underline;"
+                          >Année académique:</span
+                        >
+                        {{ item2.anneeAcademique }}
+                      </v-card-text>
+                    </v-card>
+                  </v-tab-item>
+                </v-tabs-items>
+              </v-card> -->
             </v-col>
           </v-row>
           <v-divider style="border-style:solid;"> </v-divider>
@@ -455,6 +513,7 @@
                           v-model="montantApayer"
                           outlined
                           color
+                          type="number"
                         ></v-text-field>
                       </v-col>
                       <v-col md="4">
@@ -556,6 +615,8 @@ export default {
   data() {
     return {
       dialog: false,
+      tab: null,
+      tab2: null,
       singleSelect: true,
       alert: false,
       alertErreurDuplicateTypeFrais: false,
@@ -603,7 +664,7 @@ export default {
       },
 
       HeadersFrais: [
-        { text: "Frais à payer", value: "frais", sortable: true },
+        { text: "Frais communs à tous", value: "frais", sortable: true },
         { text: "Montant Frais", value: "montant", sortable: true },
         // { text: "Montant à payé", value: "montantApayer", sortable: true },
         // { text: "Montant déjà payé", value: "montantDejaPaye", sortable: true },
@@ -623,6 +684,34 @@ export default {
       paiementFrais: [],
       classes: undefined,
       moisToPay: [],
+      allFraisPayes: [],
+      allFraisImpayes: [],
+      autresFraisPayesSaufInscReinsc: [],
+      /*{
+        Insc_Reinsc: [],
+        typeFrais: "Inscription",
+          datePaiement:null,
+          montantFrais: null,
+        anneeAcademique: "",
+        classe: null,
+         
+        AutresFrais: [],
+         {
+          typeFrais: "",
+          datePaiement: null,
+        montantFrais: null,
+         montantPaye: null,
+        },
+        moisPayes: [],
+         {
+          typeFrais: "",
+          datePaiement: null,
+           montantApayer: null,
+        montantDejaPaye: null,
+        montantRestant: null,
+        statut: "",
+        }
+      },*/
 
       icon: "",
       optionDeTrie: "",
@@ -728,64 +817,125 @@ export default {
   },
 
   methods: {
-    annulation() {
-      this.alertErreurDuplicateTypeFrais = false;
-      this.alert = false;
-      this.alertInscriptionReinscription = false;
-      //  this.prixInscription = null;
-      this.inscription = null;
-      this.prixReinscription = null;
-      this.reinscription = null;
-      // this.classeInscription = "";
-      this.choiceBetweenInscReinsc = null;
-      this.fraisReinscription = "";
-      this.fraisApayer = null;
-      this.fraisChoisi = [];
-      this.moisToPay = [];
-      this.monthsAlreadySolve = [];
-      this.priceMonthsAlreadySolve = [];
-      this.montantDejaPaye = undefined;
-      this.montantRestant = undefined;
-      this.AffichePaiementAutresFrais = false;
-      this.AffichePaiementMois = false;
-      console.log("annulation fini");
+    getClasses() {
+      this.classes = localStorage.getItem("Classes").split(",");
+      this.IdClasses = localStorage.getItem("Id_classes").split(",");
     },
-    AssignMessageErreur(message) {
-      if (message === "No Choice") {
-        this.alertErreurDuplicateTypeFrais = true;
-        this.messageErreurDuplicateTypeFrais_A =
-          "Désolé vous devez d'abord choisir un frais parmi les frais au dessus et ensuite";
-        this.messageErreurDuplicateTypeFrais_B =
-          "Cliquer sur le bouton (Suivant)";
-      } else {
-        this.messageErreurDuplicateTypeFrais_A =
-          " Désolé vous ne pouvez pas procéder en même temps au paiement de plusieurs types de frais";
-        this.messageErreurDuplicateTypeFrais_B =
-          "Choisissez-en un et cliquez sur le bouton suivant";
-        this.alertErreurDuplicateTypeFrais = true;
+
+    async getFrais() {
+      const token = "Token " + localStorage.getItem("token");
+
+      if (localStorage.getItem("token") != null) {
+        var config = {
+          method: "get",
+          url: "api/finances/configFraisEleve/",
+          headers: {
+            Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
+          },
+        };
+        await axios(config)
+          .then((response) => {
+            const result = response.data;
+
+            console.log(result);
+            //localStorage.setItem("Frais", JSON.stringify(result));
+
+            let element = [];
+
+            for (const key in result) {
+              element.push(result[key]);
+            }
+            element.forEach((obj) => {
+              obj.montantDejaPaye = 0;
+              obj.montantRestant = 0;
+            });
+            this.paiementFrais = element;
+            console.log(
+              "😃😃😃 this.paiementFrais => " +
+                this.paiementFrais +
+                "this.response.data = " +
+                JSON.stringify(element)
+            );
+          })
+          .catch(function(error) {
+            console.log("😢😢😢" + error);
+          });
       }
     },
-    afficheAlert() {
-      console.log(this.fraisChoisi.length);
+
+    getfinanceEleveDetail(eleveChoisi) {
+      let id = eleveChoisi.eleveNumber;
+      this.$store.dispatch("actionGetfinanceEleveDetail", id);
+    },
+
+    editItem(item) {
+      this.editedIndex = this.paiementFrais.indexOf(item);
+
+      this.editedItem = Object.assign({}, item);
+      this.dialog = true;
+    },
+
+    trieInscrits(value) {
+      return value.typeFrais === "Frais Inscription";
+    },
+    trieReinscrits(value) {
+      return value.typeFrais === "Frais Reinscription";
+    },
+    trieAutresFraisPayes(x) {
+      return x.typeFrais !== "Frais mensuel";
     },
     AfficheEleve() {
       let inscritsReinscrits = JSON.parse(
         localStorage.getItem("Inscits_Annee_Actuel")
       );
+      let AllFraisPayedByEleve = JSON.parse(
+        localStorage.getItem("AllFraisPayedByEleve")
+      );
       let inscrits = inscritsReinscrits.filter(this.trieInscrits);
+      let reinscrits = inscritsReinscrits.filter(this.trieReinscrits);
       console.log("inscrits => " + inscrits);
 
       console.log(this.MoisNonPaye.toString());
+      this.allFraisPayes = [];
+      this.autresFraisPayesSaufInscReinsc = [];
+      // this.autresFraisPayesSaufInscReinsc = [];
       this.MoisPaye = [];
       this.MoisNonPaye = [];
       this.moisAvance = [];
       this.moisToShowWithoutPayedMonths = [];
-      console.log("Mois Non Paye vides en temps normal = " + this.MoisNonPaye);
+      console.log(
+        "this.allFraisPayes vides en temps normal = " + this.allFraisPayes
+      );
       let eleveChoisi = JSON.parse(localStorage.getItem("eleveChoisi"));
-      console.log("test1");
 
-      if (inscrits.find((x) => x.eleve === eleveChoisi.eleveNumber)) {
+      let actuelInscrit = inscrits.find(
+        (x) => x.eleve === eleveChoisi.eleveNumber
+      );
+      let actuelReinscrit = reinscrits.find(
+        (x) => x.eleve === eleveChoisi.eleveNumber
+      );
+
+      this.autresFraisPayesSaufInscReinsc= AllFraisPayedByEleve.filter(this.trieAutresFraisPayes);
+
+      if (actuelInscrit) {
         this.shawInscription = true;
+        this.allFraisPayes.push(actuelInscrit);
+      }
+      if (this.autresFraisPayesSaufInscReinsc) {
+        this.allFraisPayes = this.allFraisPayes.concat(
+          this.autresFraisPayesSaufInscReinsc
+        );
+
+        console.log(
+          "autresFraisPayesSaufInscReinsc " +
+            JSON.stringify(this.autresFraisPayesSaufInscReinsc) +
+            "\n" +
+            JSON.stringify(this.allFraisPayes)
+        );
+      }
+      if (actuelReinscrit) {
+        this.shawInscription = false;
+        this.allFraisPayes.push(actuelReinscrit);
       }
 
       //attention ne jamais oublier de parses une variable JSON stringifié car elle ne ressemble à du JSON par la forme dans le fond c'est un Array oui mais pas d'objets mais de String
@@ -814,10 +964,7 @@ export default {
       // this.getfinanceEleveDetail(eleveChoisi);
       //this.MoisPayedToShow = this.MoisPaye.toString().split(",");
       // console.log("Mois Payés dans AfficheEleve " + this.MoisPayedToShow);
-      this.InitialiseMoisPayeImpaye(eleveChoisi);
-    },
-    trieInscrits(value) {
-      return value.typeFrais === "Frais Inscription";
+      this.InitialiseFraisPayeImpaye(eleveChoisi);
     },
 
     proceedToPaiement: function() {
@@ -943,13 +1090,15 @@ export default {
         let frais = this.fraisChoisi[0].frais;
         let montantDejaPaye = this.fraisChoisi[0].montantDejaPaye;
         let montantRestant = this.fraisChoisi[0].montantRestant;
-        let statut = this.fraisChoisi[0].statut;
+        // let statut = this.fraisChoisi[0].statut;
         console.log("frais sélectionné => " + frais);
         this.fraisApayer = frais;
+        this.scolariteTotal = this.fraisChoisi[0].montant;
         this.prixFraisApayer = this.fraisChoisi[0].montant;
         this.montantDejaPaye = montantDejaPaye;
         this.montantRestant = montantRestant;
-        this.statut = statut;
+
+        //this.statut = statut;
       }
       // gestion des frais d'inscriptions
       if (this.alertErreurDuplicateTypeFrais === false && this.inscription) {
@@ -974,53 +1123,37 @@ export default {
       }
     },
 
-    getClasses() {
-      this.classes = localStorage.getItem("Classes").split(",");
-      this.IdClasses = localStorage.getItem("Id_classes").split(",");
-    },
-
-    async getFrais() {
-      const token = "Token " + localStorage.getItem("token");
-
-      if (localStorage.getItem("token") != null) {
-        var config = {
-          method: "get",
-          url: "api/finances/configFraisEleve/",
-          headers: {
-            Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
-          },
-        };
-        await axios(config)
-          .then((response) => {
-            const result = response.data;
-
-            console.log(result);
-            localStorage.setItem("Frais", JSON.stringify(result));
-
-            let element = [];
-
-            for (const key in result) {
-              element.push(result[key]);
-            }
-            element.forEach((obj) => {
-              obj.montantDejaPaye = 0;
-              obj.montantRestant = 0;
-            });
-            this.paiementFrais = element;
-            console.log(
-              "😃😃😃 this.paiementFrais => " +
-                this.paiementFrais +
-                "this.response.data = " +
-                JSON.stringify(element)
-            );
-          })
-          .catch(function(error) {
-            console.log("😢😢😢" + error);
-          });
+    AssignMessageErreur(message) {
+      if (message === "No Choice") {
+        this.alertErreurDuplicateTypeFrais = true;
+        this.messageErreurDuplicateTypeFrais_A =
+          "Désolé vous devez d'abord choisir un frais parmi les frais au dessus et ensuite";
+        this.messageErreurDuplicateTypeFrais_B =
+          "Cliquer sur le bouton (Suivant)";
+      } else if (message === "noAvanceAllowed") {
+        this.alertErreurDuplicateTypeFrais = true;
+        this.messageErreurDuplicateTypeFrais_A =
+          "Désolé le paiement ne peut se faire car vous devez exactament payé la somme du frais";
+        this.messageErreurDuplicateTypeFrais_B =
+          "Avances autorisées qu'avec les Frais mensuels ";
+      } else if (message == "fraisAlreadyPayed") {
+        this.alertErreurDuplicateTypeFrais = true;
+        this.messageErreurDuplicateTypeFrais_A =
+          "Désolé le paiement ne peut se faire car l'élève avait déja payé ce frais";
+        this.messageErreurDuplicateTypeFrais_B =
+          "Jetter un coup d'oeil juste au dessus vous comprendrez  ";
+      } else {
+        this.messageErreurDuplicateTypeFrais_A =
+          " Désolé vous ne pouvez pas procéder en même temps au paiement de plusieurs types de frais";
+        this.messageErreurDuplicateTypeFrais_B =
+          "Choisissez-en un et cliquez sur le bouton suivant";
+        this.alertErreurDuplicateTypeFrais = true;
       }
     },
-
-    InitialiseMoisPayeImpaye(eleveChoisi) {
+    afficheAlert() {
+      console.log(this.fraisChoisi.length);
+    },
+    InitialiseFraisPayeImpaye(eleveChoisi) {
       const token = "Token " + localStorage.getItem("token");
       let allMonthsPayed = [];
 
@@ -1147,24 +1280,35 @@ export default {
       return monthsNonPayed.toString().split(",");
     },
 
-    getfinanceEleveDetail(eleveChoisi) {
-      let id = eleveChoisi.eleveNumber;
-      this.$store.dispatch("actionGetfinanceEleveDetail", id);
-    },
-
-    editItem(item) {
-      this.editedIndex = this.paiementFrais.indexOf(item);
-
-      this.editedItem = Object.assign({}, item);
-      this.dialog = true;
-    },
-
     close() {
       this.dialog = false;
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
       });
+    },
+    annulation() {
+      this.alertErreurDuplicateTypeFrais = false;
+      this.alert = false;
+      this.alertInscriptionReinscription = false;
+      //  this.prixInscription = null;
+      this.inscription = null;
+      this.prixReinscription = null;
+      this.reinscription = null;
+      // this.classeInscription = "";
+      this.choiceBetweenInscReinsc = null;
+      this.fraisReinscription = "";
+      this.fraisApayer = null;
+      this.fraisChoisi = [];
+      this.moisToPay = [];
+      this.monthsAlreadySolve = [];
+      this.priceMonthsAlreadySolve = [];
+      this.montantDejaPaye = undefined;
+      this.montantRestant = undefined;
+      this.AffichePaiementAutresFrais = false;
+      this.AffichePaiementMois = false;
+      // this.autresFraisPayesSaufInscReinsc=[];
+      console.log("annulation fini");
     },
 
     saveNewOrUpdateFrais() {
@@ -1193,7 +1337,10 @@ export default {
         "fraisChoisi.length = " +
           this.fraisChoisi.length +
           "\nmoisToPay.lenght = " +
-          this.moisToPay
+          this.moisToPay +
+          "\nthis.montantApayer = " +
+          this.montantApayer +
+          " this.scolariteTotal = "
       );
       let eleveChoisi = JSON.parse(localStorage.getItem("eleveChoisi"));
       let inscReinscPaiement = {
@@ -1209,6 +1356,7 @@ export default {
         montantDejaPaye: this.montantDejaPaye,
         montantRestant: this.montantRestant,
       };
+
       if (this.alertErreurDuplicateTypeFrais === false && this.inscription) {
         this.$store.dispatch("actionPaiementInscReinsc", inscReinscPaiement);
         this.annulation();
@@ -1225,7 +1373,23 @@ export default {
         }
 
         //Cas où c'est un autre frais à payer
-        if (this.fraisChoisi.length > 0) {
+        console.log(
+          "ultra test " +
+            this.autresFraisPayesSaufInscReinsc.indexOf(
+              this.fraisChoisi[0].frais
+            ) +
+            " " +
+            typeof this.autresFraisPayesSaufInscReinsc.indexOf(
+              this.fraisChoisi[0].frais
+            )
+        );
+        if (
+          this.fraisChoisi.length > 0 &&
+          Number(this.montantApayer) === Number(this.scolariteTotal) &&
+          !this.autresFraisPayesSaufInscReinsc.indexOf(
+            this.fraisChoisi[0].frais
+          )
+        ) {
           payedFrais["typeFrais"] = this.fraisChoisi[0].frais;
           if (this.montantApayer == this.fraisChoisi[0].montant) {
             payedFrais["statut"] = "payé";
@@ -1376,6 +1540,20 @@ export default {
           }
         }
 
+        if (
+          this.fraisChoisi.length > 0 &&
+          Number(this.montantApayer) !== Number(this.scolariteTotal)
+        ) {
+          this.AssignMessageErreur("noAvanceAllowed");
+        }
+        if (
+          this.fraisChoisi.length > 0 &&
+          Number(this.montantApayer) === Number(this.scolariteTotal) &&
+          this.autresFraisPayesSaufInscReinsc.indexOf(this.fraisChoisi[0].frais)
+        ) {
+          this.AssignMessageErreur("fraisAlreadyPayed");
+        }
+
         this.alert = false;
         this.fraisApayer = null;
         this.fraisChoisi = [];
@@ -1387,6 +1565,7 @@ export default {
         this.scolariteTotal = null;
         this.AffichePaiementAutresFrais = false;
         this.AffichePaiementMois = false;
+        this.InitialiseFraisPayeImpaye(eleveChoisi);
       }
     },
   },
