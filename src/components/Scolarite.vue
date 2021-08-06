@@ -221,29 +221,29 @@
             </v-col>
 
             <v-col md="6">
-              <!-- <v-card>
+              <v-card>
                 <v-chip label color="primary" text-color="white">
                   <v-icon left>mdi-cancel</v-icon> Frais Impayés
                 </v-chip>
 
                 <v-tabs v-model="tab2" background-color="primary" dark>
-                  <v-tab
-                    v-for="item2 in allFraisImpayes"
-                    :key="item2.typeFrais"
-                  >
-                    {{ item2.typeFrais }}
+                  <v-tab v-for="item2 in allFraisImpayes" :key="item2.frais">
+                    {{ item2.frais }}
                   </v-tab>
                 </v-tabs>
 
                 <v-tabs-items v-model="tab2">
-                  <v-tab-item v-for="item in allFraisImPayes" :key="item">
+                  <v-tab-item
+                    v-for="item2 in allFraisImpayes"
+                    :key="item2.frais"
+                  >
                     <v-card flat>
                       <v-card-text>
                         <span
                           style="color:black;font-weight: bold; text-decoration: underline;"
                           >Montant Payé :</span
                         >
-                        {{ item2.montantFrais }} FCFA
+                        {{ item2.montant }} FCFA
                         <span
                           style="color:black;font-weight: bold; text-decoration: underline; margin-left:50px"
                           >Date de paiement:</span
@@ -253,12 +253,12 @@
                           style="color:black; font-weight: bold; text-decoration: underline;"
                           >Année académique:</span
                         >
-                        {{ item2.anneeAcademique }}
+                        2020-2021
                       </v-card-text>
                     </v-card>
                   </v-tab-item>
                 </v-tabs-items>
-              </v-card> -->
+              </v-card>
             </v-col>
           </v-row>
           <v-divider style="border-style:solid;"> </v-divider>
@@ -686,7 +686,7 @@ export default {
       moisToPay: [],
       allFraisPayes: [],
       allFraisImpayes: [],
-      autresFraisPayesSaufInscReinsc: [],
+      autresFraisPayesSaufInscReinsc: null,
       /*{
         Insc_Reinsc: [],
         typeFrais: "Inscription",
@@ -712,7 +712,7 @@ export default {
         statut: "",
         }
       },*/
-
+      result: null,
       icon: "",
       optionDeTrie: "",
       shawAllMonths: undefined,
@@ -848,6 +848,7 @@ export default {
             element.forEach((obj) => {
               obj.montantDejaPaye = 0;
               obj.montantRestant = 0;
+              // obj.cree_le.toString().slice(0, 16);
             });
             this.paiementFrais = element;
             console.log(
@@ -884,6 +885,16 @@ export default {
     trieAutresFraisPayes(x) {
       return x.typeFrais !== "Frais mensuel";
     },
+    trieAutresFraisImpaye(x) {
+      let copiePaiementFrais = this.paiementFrais.map((item) => item);
+      let typesFrais = this.paiementFrais.map((item) => item.frais);
+
+      copiePaiementFrais.splice(typesFrais.indexOf(x), 1);
+
+      console.log(typesFrais + "\n" + JSON.stringify(copiePaiementFrais));
+
+      return copiePaiementFrais;
+    },
     AfficheEleve() {
       let inscritsReinscrits = JSON.parse(
         localStorage.getItem("Inscits_Annee_Actuel")
@@ -897,7 +908,9 @@ export default {
 
       console.log(this.MoisNonPaye.toString());
       this.allFraisPayes = [];
-      this.autresFraisPayesSaufInscReinsc = [];
+      this.allFraisImpayes = [];
+      this.result = null;
+      this.autresFraisPayesSaufInscReinsc = null;
       // this.autresFraisPayesSaufInscReinsc = [];
       this.MoisPaye = [];
       this.MoisNonPaye = [];
@@ -915,7 +928,9 @@ export default {
         (x) => x.eleve === eleveChoisi.eleveNumber
       );
 
-      this.autresFraisPayesSaufInscReinsc= AllFraisPayedByEleve.filter(this.trieAutresFraisPayes);
+      this.autresFraisPayesSaufInscReinsc = AllFraisPayedByEleve.filter(
+        this.trieAutresFraisPayes
+      );
 
       if (actuelInscrit) {
         this.shawInscription = true;
@@ -926,13 +941,19 @@ export default {
           this.autresFraisPayesSaufInscReinsc
         );
 
+        this.autresFraisPayesSaufInscReinsc.forEach((frais) => {
+          this.result = this.trieAutresFraisImpaye(frais.typeFrais);
+        });
+
+        this.allFraisImpayes = this.result;
         console.log(
-          "autresFraisPayesSaufInscReinsc " +
-            JSON.stringify(this.autresFraisPayesSaufInscReinsc) +
-            "\n" +
+          "allFraisImpayes ***************" +
+            JSON.stringify(this.allFraisImpayes) +
+            "\nallFraisPayes => " +
             JSON.stringify(this.allFraisPayes)
         );
       }
+
       if (actuelReinscrit) {
         this.shawInscription = false;
         this.allFraisPayes.push(actuelReinscrit);
@@ -1180,6 +1201,7 @@ export default {
               "😃😃😃 tous les frais payés de l'élève => " +
                 AllFraisPayedbyEleve
             );
+
             localStorage.setItem("AllFraisPayedByEleve", AllFraisPayedbyEleve);
             //commit('InititialiseElevesPayed', AllFraisPayedByEleve)
             let fraisPayés = result;
