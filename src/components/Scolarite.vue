@@ -58,11 +58,15 @@
                                   <v-chip
                                     readonly
                                     outlined
-                                    @click="ShowDetailsMonthPayed"
-                                    v-for="moisPaye in MoisPaye"
+                                    id="chipId"
+                                    v-for="(moisPaye, index) in MoisPaye"
                                     :key="moisPaye"
+                                    @click="
+                                      ShowDetailsMonthPayed(moisPaye, index)
+                                    "
                                   >
-                                    <v-icon color="green">mdi-check</v-icon>
+                                    <v-icon id color="green">mdi-check</v-icon>
+
                                     {{ moisPaye }}
                                   </v-chip>
                                 </v-chip-group>
@@ -79,13 +83,16 @@
                                 icon="mdi-home"
                                 transition="scale-transition"
                               >
-                                <span style="font-size:15px; ">Payé le :</span>
+                                <span style="font-size:15px; ">
+                                  {{ detailsMonthPayed.statut }} le :</span
+                                >
                                 {{ detailsMonthPayed.datePaiement }}
 
-                                <span icon="mdi-cash" style="margin-left:100px"
+                                <span icon="mdi-cash" style="margin-left:70px"
                                   >Montant :</span
                                 >
-                                {{ detailsMonthPayed.montantPaye }}
+                                {{ detailsMonthPayed.montantPayeJourJ }}/
+                                {{ detailsMonthPayed.montantFrais }} FCFA
                               </v-alert>
                             </div>
                           </template>
@@ -712,7 +719,10 @@ export default {
       allFraisPayes: [],
       detailsMonthPayed: {
         datePaiement: "",
-        montantPaye: "",
+        montantPayeJourJ: null,
+        montantPayeAuparavant: null,
+        montantFrais: null,
+        statut: "",
       },
       allFraisImpayes: [],
       autresFraisPayesSaufInscReinsc: null,
@@ -828,12 +838,28 @@ export default {
   },
 
   methods: {
-    ShowDetailsMonthPayed() {
+    ShowDetailsMonthPayed(moisPaye, index) {
+      console.log(index);
       if (!this.alert2) {
-        console.log("if");
+        let FraisPayesWithDetails = JSON.parse(
+          localStorage.getItem("Frais_Payés_With_Details")
+        );
+        let fraisDetails = FraisPayesWithDetails.find(
+          (frais) => frais.mois === moisPaye
+        );
+
+        console.log("**********" + moisPaye);
         this.alert2 = true;
-        this.detailsMonthPayed.datePaiement = "08-08-2021";
-        this.detailsMonthPayed.montantPaye = "10000";
+        this.detailsMonthPayed.datePaiement = fraisDetails.cree_le
+          .toString()
+          .slice(0, 16)
+          .replace("T", " à ");
+        this.detailsMonthPayed.montantPayeJourJ = fraisDetails.montantApayer;
+        this.detailsMonthPayed.montantPayeAuparavant =
+          fraisDetails.montantDejaPaye;
+        this.detailsMonthPayed.statut = fraisDetails.statut;
+        this.detailsMonthPayed.montantFrais =
+          Number(fraisDetails.montantFrais) * moisPaye.split(",").length;
       } else {
         console.log("bouton clické au lieu du close");
         this.alert2 = false;
@@ -932,6 +958,7 @@ export default {
       let AllFraisPayedByEleve = JSON.parse(
         localStorage.getItem("AllFraisPayedByEleve")
       );
+
       let Frais = JSON.parse(localStorage.getItem("Frais"));
       console.log("Frais ========= " + Frais);
       this.paiementFrais = Frais;
@@ -968,6 +995,7 @@ export default {
         this.shawInscription = true;
         this.allFraisPayes.push(actuelInscrit);
       }
+      // assignation frais communs payés et non payés s'il y a au moins un frais payé si non allFraisImpayés= Tous les frais de la BD
       if (this.autresFraisPayesSaufInscReinsc) {
         this.allFraisPayes = this.allFraisPayes.concat(
           this.autresFraisPayesSaufInscReinsc
@@ -992,6 +1020,8 @@ export default {
             "\nallFraisPayes => " +
             JSON.stringify(this.allFraisPayes)
         );
+      } else {
+        this.allFraisImpayes = this.paiementFrais;
       }
 
       if (actuelReinscrit) {
@@ -1212,6 +1242,8 @@ export default {
     InitialiseFraisPayeImpaye(eleveChoisi) {
       const token = "Token " + localStorage.getItem("token");
       let allMonthsPayed = [];
+      let FraisAvancesWithDetails = [];
+      let FraisPayesWithDetails = [];
 
       if (localStorage.getItem("token") != null) {
         axios
@@ -1252,6 +1284,8 @@ export default {
                     .slice(0, -1)
                     .toString()
                 );
+                FraisAvancesWithDetails.push(frais);
+
                 // this.moisAvance.push(frais.mois.split(",").pop());
                 this.moisAvance.push(frais.mois);
                 console.log("attention");
@@ -1262,10 +1296,9 @@ export default {
                 frais.statut !== "avancé"
               ) {
                 allMonthsPayed.push(frais.mois.split(",").toString());
-              } else if (frais.typeFrais === "impôts élèves") {
-                console.log("attention ici c'est typeFrais=== fr ");
+                FraisPayesWithDetails.push(frais);
               } else {
-                console.log("fhf");
+                console.log("else malheureusement");
               }
             });
             if (allMonthsPayed.length > 0 && this.moisAvance) {
@@ -1282,6 +1315,14 @@ export default {
               localStorage.setItem("MoisPaye", this.MoisPaye);
               localStorage.setItem("MoisNonPaye", this.MoisNonPaye);
             }
+            localStorage.setItem(
+              "Frais_Avancés_With_Details",
+              JSON.stringify(FraisAvancesWithDetails)
+            );
+            localStorage.setItem(
+              "Frais_Payés_With_Details",
+              JSON.stringify(FraisPayesWithDetails)
+            );
             localStorage.setItem("moisAvance", this.moisAvance);
           })
           .catch(function(error) {
