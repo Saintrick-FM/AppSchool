@@ -33,38 +33,62 @@
                     <v-col>
                       <v-row justify="space-around">
                         <!-- <v-col> -->
+
                         <v-sheet elevation="10" class="py-4 px-1">
-                          <v-row>
-                            <v-chip
-                              label
-                              color="light-green"
-                              text-color="white"
-                              style="margin-left:100px"
-                            >
-                              <v-icon left>mdi-calendar-month-outline</v-icon>
-                              Mois payés
-                            </v-chip>
-                          </v-row>
-                          <v-row>
-                            <!-- Debut Mois payés -->
-                            <v-col>
-                              <v-chip-group
-                                mandatory
-                                active-class="primary--text"
-                                center-active
+                          <template>
+                            <v-row>
+                              <v-chip
+                                label
+                                color="light-green"
+                                text-color="white"
+                                style="margin-left:100px"
                               >
-                                <v-chip
-                                  readonly
-                                  outlined
-                                  v-for="moisPaye in MoisPaye"
-                                  :key="moisPaye"
+                                <v-icon left>mdi-calendar-month-outline</v-icon>
+                                Mois payés
+                              </v-chip>
+                            </v-row>
+                            <v-row>
+                              <!-- Debut Mois payés -->
+                              <v-col>
+                                <v-chip-group
+                                  mandatory
+                                  active-class="primary--text"
+                                  center-active
                                 >
-                                  <v-icon color="green">mdi-check</v-icon>
-                                  {{ moisPaye }}
-                                </v-chip>
-                              </v-chip-group></v-col
-                            >
-                          </v-row>
+                                  <v-chip
+                                    readonly
+                                    outlined
+                                    @click="ShowDetailsMonthPayed"
+                                    v-for="moisPaye in MoisPaye"
+                                    :key="moisPaye"
+                                  >
+                                    <v-icon color="green">mdi-check</v-icon>
+                                    {{ moisPaye }}
+                                  </v-chip>
+                                </v-chip-group>
+                              </v-col>
+                            </v-row>
+
+                            <!-- Alert affichage details des mois payés -->
+                            <div>
+                              <v-alert
+                                :value="alert2"
+                                color="green"
+                                dark
+                                border="top"
+                                icon="mdi-home"
+                                transition="scale-transition"
+                              >
+                                <span style="font-size:15px; ">Payé le :</span>
+                                {{ detailsMonthPayed.datePaiement }}
+
+                                <span icon="mdi-cash" style="margin-left:100px"
+                                  >Montant :</span
+                                >
+                                {{ detailsMonthPayed.montantPaye }}
+                              </v-alert>
+                            </div>
+                          </template>
                         </v-sheet>
                         <!-- </v-col> -->
                       </v-row>
@@ -619,6 +643,7 @@ export default {
       tab2: null,
       singleSelect: true,
       alert: false,
+      alert2: false,
       alertErreurDuplicateTypeFrais: false,
       messageErreurDuplicateTypeFrais_A: "",
       messageErreurDuplicateTypeFrais_B: "",
@@ -685,34 +710,14 @@ export default {
       classes: undefined,
       moisToPay: [],
       allFraisPayes: [],
+      detailsMonthPayed: {
+        datePaiement: "",
+        montantPaye: "",
+      },
       allFraisImpayes: [],
       autresFraisPayesSaufInscReinsc: null,
-      /*{
-        Insc_Reinsc: [],
-        typeFrais: "Inscription",
-          datePaiement:null,
-          montantFrais: null,
-        anneeAcademique: "",
-        classe: null,
-         
-        AutresFrais: [],
-         {
-          typeFrais: "",
-          datePaiement: null,
-        montantFrais: null,
-         montantPaye: null,
-        },
-        moisPayes: [],
-         {
-          typeFrais: "",
-          datePaiement: null,
-           montantApayer: null,
-        montantDejaPaye: null,
-        montantRestant: null,
-        statut: "",
-        }
-      },*/
-      result: null,
+
+      resultat: null,
       icon: "",
       optionDeTrie: "",
       shawAllMonths: undefined,
@@ -806,6 +811,12 @@ export default {
     optionDeTrie: function(value) {
       this.InitialiseTrie(value);
     },
+    allFraisPayes(newValue, oldValue) {
+      newValue || oldValue;
+    },
+    allFraisImpayes(newValue, oldValue) {
+      newValue || oldValue;
+    },
     dialog(val) {
       val || this.close();
     },
@@ -817,6 +828,20 @@ export default {
   },
 
   methods: {
+    ShowDetailsMonthPayed() {
+      if (!this.alert2) {
+        console.log("if");
+        this.alert2 = true;
+        this.detailsMonthPayed.datePaiement = "08-08-2021";
+        this.detailsMonthPayed.montantPaye = "10000";
+      } else {
+        console.log("bouton clické au lieu du close");
+        this.alert2 = false;
+        this.detailsMonthPayed.datePaiement = "";
+        this.detailsMonthPayed.montantPaye = "";
+      }
+    },
+
     getClasses() {
       this.classes = localStorage.getItem("Classes").split(",");
       this.IdClasses = localStorage.getItem("Id_classes").split(",");
@@ -838,7 +863,7 @@ export default {
             const result = response.data;
 
             console.log(result);
-            //localStorage.setItem("Frais", JSON.stringify(result));
+            localStorage.setItem("Frais", JSON.stringify(result));
 
             let element = [];
 
@@ -885,15 +910,20 @@ export default {
     trieAutresFraisPayes(x) {
       return x.typeFrais !== "Frais mensuel";
     },
-    trieAutresFraisImpaye(x) {
+    trieAutresFraisImpaye(x, thisResult) {
       let copiePaiementFrais = this.paiementFrais.map((item) => item);
       let typesFrais = this.paiementFrais.map((item) => item.frais);
 
-      copiePaiementFrais.splice(typesFrais.indexOf(x), 1);
+      if (thisResult) {
+        thisResult.splice(typesFrais.indexOf(x), 1);
+        console.log(typesFrais + "\n" + JSON.stringify(copiePaiementFrais));
+        return thisResult;
+      } else {
+        copiePaiementFrais.splice(typesFrais.indexOf(x), 1);
+        console.log(typesFrais + "\n" + JSON.stringify(copiePaiementFrais));
 
-      console.log(typesFrais + "\n" + JSON.stringify(copiePaiementFrais));
-
-      return copiePaiementFrais;
+        return copiePaiementFrais;
+      }
     },
     AfficheEleve() {
       let inscritsReinscrits = JSON.parse(
@@ -902,6 +932,9 @@ export default {
       let AllFraisPayedByEleve = JSON.parse(
         localStorage.getItem("AllFraisPayedByEleve")
       );
+      let Frais = JSON.parse(localStorage.getItem("Frais"));
+      console.log("Frais ========= " + Frais);
+      this.paiementFrais = Frais;
       let inscrits = inscritsReinscrits.filter(this.trieInscrits);
       let reinscrits = inscritsReinscrits.filter(this.trieReinscrits);
       console.log("inscrits => " + inscrits);
@@ -909,16 +942,15 @@ export default {
       console.log(this.MoisNonPaye.toString());
       this.allFraisPayes = [];
       this.allFraisImpayes = [];
-      this.result = null;
+      this.resultat = null;
+
       this.autresFraisPayesSaufInscReinsc = null;
       // this.autresFraisPayesSaufInscReinsc = [];
       this.MoisPaye = [];
       this.MoisNonPaye = [];
       this.moisAvance = [];
       this.moisToShowWithoutPayedMonths = [];
-      console.log(
-        "this.allFraisPayes vides en temps normal = " + this.allFraisPayes
-      );
+
       let eleveChoisi = JSON.parse(localStorage.getItem("eleveChoisi"));
 
       let actuelInscrit = inscrits.find(
@@ -942,10 +974,18 @@ export default {
         );
 
         this.autresFraisPayesSaufInscReinsc.forEach((frais) => {
-          this.result = this.trieAutresFraisImpaye(frais.typeFrais);
+          if (!this.resultat) {
+            console.log("1er tour");
+            this.resultat = this.trieAutresFraisImpaye(frais.typeFrais);
+          } else {
+            this.resultat = this.trieAutresFraisImpaye(
+              frais.typeFrais,
+              this.resultat
+            );
+          }
         });
 
-        this.allFraisImpayes = this.result;
+        this.allFraisImpayes = this.resultat;
         console.log(
           "allFraisImpayes ***************" +
             JSON.stringify(this.allFraisImpayes) +
@@ -981,6 +1021,7 @@ export default {
       this.prixReinscription = JSON.parse(this.allFraisInscReinsc).find(
         (x) => x.classe == eleveChoisi.classe
       ).fraisReinscription;
+      // Reaffecté la liste si la sur la liste des frais communs recuperer de configFrais il y'a plus d'éléments que dans les frais impayés
 
       // this.getfinanceEleveDetail(eleveChoisi);
       //this.MoisPayedToShow = this.MoisPaye.toString().split(",");
@@ -1157,12 +1198,6 @@ export default {
           "Désolé le paiement ne peut se faire car vous devez exactament payé la somme du frais";
         this.messageErreurDuplicateTypeFrais_B =
           "Avances autorisées qu'avec les Frais mensuels ";
-      } else if (message == "fraisAlreadyPayed") {
-        this.alertErreurDuplicateTypeFrais = true;
-        this.messageErreurDuplicateTypeFrais_A =
-          "Désolé le paiement ne peut se faire car l'élève avait déja payé ce frais";
-        this.messageErreurDuplicateTypeFrais_B =
-          "Jetter un coup d'oeil juste au dessus vous comprendrez  ";
       } else {
         this.messageErreurDuplicateTypeFrais_A =
           " Désolé vous ne pouvez pas procéder en même temps au paiement de plusieurs types de frais";
@@ -1190,7 +1225,7 @@ export default {
           )
           .then((response) => {
             const result = response.data;
-            localStorage.setItem("Frais", result);
+            // localStorage.setItem("Frais", result);
             let AllFraisPayedByEleve = [];
             for (const key in result) {
               AllFraisPayedByEleve.push(result[key]);
@@ -1255,6 +1290,7 @@ export default {
       }
 
       this.shawPayedMonths = true;
+      this.paiementFrais = this.allFraisImpayes.map((item) => item);
     },
     trieMoisVides(value) {
       return value != "";
@@ -1405,22 +1441,18 @@ export default {
               this.fraisChoisi[0].frais
             )
         );
+        // Si c'est un paiement frais communs à tous et que le montant à payer est  égale au montant du frais
+
         if (
           this.fraisChoisi.length > 0 &&
-          Number(this.montantApayer) === Number(this.scolariteTotal) &&
-          !this.autresFraisPayesSaufInscReinsc.indexOf(
-            this.fraisChoisi[0].frais
-          )
+          Number(this.montantApayer) === Number(this.fraisChoisi[0].montant)
         ) {
           payedFrais["typeFrais"] = this.fraisChoisi[0].frais;
-          if (this.montantApayer == this.fraisChoisi[0].montant) {
-            payedFrais["statut"] = "payé";
-            payedFrais["montantFrais"] = this.fraisChoisi[0].montant;
-          } else {
-            console.log("Autre frais avancé");
-            payedFrais["statut"] = "avancé";
-            payedFrais["montantFrais"] = this.fraisChoisi[0].montant;
-          }
+          console.log(
+            "Frais communs à tous => " + this.fraisChoisi[0].frais + " payé"
+          );
+          payedFrais["statut"] = "payé";
+          payedFrais["montantFrais"] = this.fraisChoisi[0].montant;
         }
         //Cas où c'est un frais mensuel à payer
         if (this.moisToPay.length > 0) {
@@ -1561,20 +1593,14 @@ export default {
             this.$store.dispatch("actionPayedFrais", payedFrais);
           }
         }
-
+        // Si c'est un paiement frais communs à tous et que le montant à payer n'est pas égale au montant du frais
         if (
           this.fraisChoisi.length > 0 &&
           Number(this.montantApayer) !== Number(this.scolariteTotal)
         ) {
           this.AssignMessageErreur("noAvanceAllowed");
         }
-        if (
-          this.fraisChoisi.length > 0 &&
-          Number(this.montantApayer) === Number(this.scolariteTotal) &&
-          this.autresFraisPayesSaufInscReinsc.indexOf(this.fraisChoisi[0].frais)
-        ) {
-          this.AssignMessageErreur("fraisAlreadyPayed");
-        }
+        // Si c'est un paiement frais communs à tous et que le frais est déjà payé
 
         this.alert = false;
         this.fraisApayer = null;
