@@ -21,11 +21,14 @@
           </template>
 
           <v-list>
-            <v-list-item v-for="(item, id) in annee_scolaire" :key="id">
+            <v-list-item
+              v-for="item in anneesScolaire"
+              :key="item.anneeScolaire"
+            >
               <v-checkbox
-                :label="item.annee"
+                :label="item.anneeScolaire"
                 v-model="annee_choisi"
-                :value="item.annee"
+                :value="item.anneeScolaire"
               ></v-checkbox>
             </v-list-item>
           </v-list>
@@ -137,6 +140,8 @@
 <script>
 // @ is an alias to /src
 import axios from "axios";
+import { mapGetters } from "vuex";
+
 // import EventBus from "@/components/eventBus.js";
 
 export default {
@@ -153,11 +158,11 @@ export default {
     show1: false,
     show2: false,
     loading: false,
-    annee_choisi: "",
-    annee_scolaire: [
-      { id: "1", annee: "2019-2020" },
-      { id: "2", annee: "2020-2021" },
-      { id: "3", annee: "2021-2022" },
+    annee_choisi: null,
+    annees_scolaires: [
+      // { id: "1", annee: "2019-2020" },
+      // { id: "2", annee: "2020-2021" },
+      // { id: "3", annee: "2021-2022" },
     ],
     name: "",
     nameRules: [
@@ -171,6 +176,12 @@ export default {
     ],
   }),
 
+  computed: {
+    ...mapGetters(["anneesScolaire"]),
+  },
+  beforeMount() {
+    this.$store.dispatch("actionGetSchoolYears");
+  },
   mounted() {
     document.title = "login | Saint Martin";
   },
@@ -190,7 +201,13 @@ export default {
     //Login method here
     onLogin() {
       this.loading = true;
-      this.$store.commit("setAnneeScolaire", this.annee_choisi);
+      if (this.annee_choisi === "null") {
+        console.log("1er test");
+        this.annee_choisi = this.annees_scolaires[0].anneeScolaire;
+      } else {
+        this.$store.commit("setAnneeScolaire", this.annee_choisi);
+      }
+
       console.log(
         "l'année choisie du component connexion est :" + this.annee_choisi
       );
@@ -205,14 +222,13 @@ export default {
       axios
         .post("api-auth-token/", formLogin)
         .then((res) => {
-          this.$store.dispatch("actionInitialiseEleve");
           const token = res.data.token;
           console.log(token);
 
           // axios.defaults.headers.common["Authorization"] = "Token " + token;
           localStorage.setItem("token", token);
           localStorage.setItem("authStatut", this.name);
-          localStorage.setItem("année scolaire", this.annee_choisi);
+          localStorage.setItem("année_scolaire", this.annee_choisi);
 
           this.$store.commit("initializeStore");
           this.$store.dispatch("actionInitialiseEleve");

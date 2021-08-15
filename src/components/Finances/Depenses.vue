@@ -5,13 +5,15 @@
   <v-hover>
     <template v-slot:default="{ hover }">
       <v-card class="mx-auto" max-width="344">
-        <v-img src="https://cdn.vuetifyjs.com/images/cards/forest-art.jpg"></v-img>
-        <h1>Bienvenu dans le mainHome</h1>
+        <v-img
+          src="https://cdn.vuetifyjs.com/images/cards/forest-art.jpg"
+        ></v-img>
+        <h1>Bienvenu dans les dépenses</h1>
 
         <v-card-text>
           <h2 class="title primary--text">Magento Forests</h2>
-          Travel to the best outdoor experience on planet Earth. A vacation you will never
-          forget!
+          Travel to the best outdoor experience on planet Earth. A vacation you
+          will never forget!
         </v-card-text>
 
         <v-card-title>
@@ -40,7 +42,7 @@
 <script>
 // import squelette from "@/components/Squelette";
 export default {
-  name: "MainHome",
+  name: "Depenses",
   // components: { squelette },
   data: () => ({
     overlay: false,

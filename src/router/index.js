@@ -1,11 +1,17 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
-import Matieres from '@/components/Matieres.vue'
-import PresencesEnseignants from '@/components/PresencesEnseignants.vue'
 import Login from '@/components/Login.vue'
 import Students from '@/components/Students.vue'
-import Teachers from '@/components/Teachers.vue'
+
+import Teachers from '@/components/Enseignants/Teachers.vue'
+import Matieres from '@/components/Enseignants/Matieres.vue'
+import PresencesEnseignants from '@/components/Enseignants/PresencesEnseignants.vue'
+
+import Bilan from '@/components/Finances/Bilan.vue'
+import Recettes from '@/components/Finances/Recettes.vue'
+import Depenses from '@/components/Finances/Depenses.vue'
+import Mouvements from '@/components/Finances/Mouvements.vue'
 
 import Enseignants from '@/views/Enseignants.vue'
 import Eleves from '@/views/Eleves.vue'
@@ -25,9 +31,30 @@ const routes = [{
     {
         path: '/finances',
         name: 'Finances',
-        component: Finances
-
+        component: Finances,
+        children: [{
+                name: 'Recettes',
+                path: '/recettes',
+                component: Recettes
+            },
+            {
+                name: 'Depenses',
+                path: '/depenses',
+                component: Depenses
+            },
+            {
+                name: 'Mouvements',
+                path: '/mouvements',
+                component: Mouvements
+            },
+            {
+                name: 'Bilan',
+                path: '/bilan',
+                component: Bilan
+            }
+        ]
     },
+
     {
         path: '/login',
         name: 'Login',

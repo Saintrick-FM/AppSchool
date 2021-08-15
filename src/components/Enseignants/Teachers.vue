@@ -331,8 +331,8 @@
       </template>-->
 
       <template v-slot:no-data>
-        <v-btn color="primary" @click="initialiseProf">
-          Reactualiser
+        <v-btn color="primary">
+          Pas de profs pour l'instant !
         </v-btn>
       </template>
     </v-data-table>

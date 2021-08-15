@@ -1,20 +1,10 @@
 <template lang="">
   <v-tooltip app bottom>
     <template v-slot:activator="{ on, attrs }">
-      <v-btn
-        small
-        v-bind="attrs"
-        :loading="loader"
-        v-on="on"
-        @click="Deconnexion"
-      >
+      <v-btn v-bind="attrs" :loading="loader" v-on="on" @click="Deconnexion">
         <v-icon dark>mdi-logout</v-icon>
         Deconnexion
       </v-btn>
-      <!-- <v-btn v-else small v-bind="attrs" v-on="on" @click="Connexion">
-        <v-icon dar > </v-icon>
-        Connexion
-      </v-btn> -->
     </template>
     <span>Se déconnecter</span>
   </v-tooltip>

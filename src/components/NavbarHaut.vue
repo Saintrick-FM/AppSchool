@@ -11,7 +11,7 @@
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-toolbar-items>
-          <tooltipA /> <tooltipB /> <tooltipC @click="EmitAlert" />
+          <tooltipA /> <tooltipB /><tooltipD /> <tooltipC @click="EmitAlert" />
         </v-toolbar-items>
       </v-toolbar>
 
@@ -30,9 +30,10 @@
 </template>
 
 <script>
-import tooltipA from "@/components/TooltipA.vue";
-import tooltipB from "@/components/TooltipB.vue";
-import tooltipC from "@/components/TooltipC.vue";
+import tooltipA from "@/components/NavbarHaut/TooltipA.vue";
+import tooltipB from "@/components/NavbarHaut/TooltipB.vue";
+import tooltipC from "@/components/NavbarHaut/TooltipC.vue";
+import tooltipD from "@/components/NavbarHaut/TooltipD.vue";
 import LogoutAlert from "@/components/LogoutAlert";
 export default {
   name: "NavbarHaut",
@@ -40,6 +41,7 @@ export default {
     tooltipA,
     tooltipB,
     tooltipC,
+    tooltipD,
     LogoutAlert,
   },
   data() {

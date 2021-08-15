@@ -4,6 +4,7 @@ import teachers from './modules/teachers'
 import students from './modules/students'
 import paiementFrais from './modules/paiementFrais'
 import classes from './modules/classes'
+import comptabilite from './modules/comptabilite'
 import axios from 'axios'
 
 Vue.use(Vuex)
@@ -12,7 +13,8 @@ export default new Vuex.Store({
     state: {
         isAuthenticated: undefined,
         authStatut: '',
-        annee_scolaire: '',
+        annees_scolaire: null,
+        annee_scolaire: null,
         token: '',
         AlertLogout: null,
         eleves: null,
@@ -23,158 +25,8 @@ export default new Vuex.Store({
         alertErreur: '',
 
     },
-    mutations: {
-        initializeStore(state) {
-            if (localStorage.getItem('token')) {
-                state.isAuthenticated = true;
-                state.token = localStorage.getItem('token');
-                state.authStatut = localStorage.getItem('authStatut')
-            } else if (localStorage.getItem('token') == null) {
-                state.isAuthenticated = false;
-                state.token = null;
-                state.matieres = null;
-                state.classes = null;
-                state.authStatut = '';
-                state.identifiants_classes = [],
-                    localStorage.setItem("nameAuth", null);
-                localStorage.setItem('Matieres', null)
-                localStorage.setItem('Classes', null)
-                    // localStorage.setItem('id_Classes', null)
-            }
 
-            if (localStorage.getItem('année scolaire')) {
-                state.annee_scolaire = localStorage.getItem('année scolaire')
-
-            } else {
-                const annee = new Date()
-                const year = annee.getFullYear() + '-' + (annee.getFullYear() + 1)
-                state.annee_scolaire = year
-                localStorage.setItem('annee_scolaire', year)
-            }
-
-            if (localStorage.getItem('Matieres')) {
-                state.matieres = localStorage.getItem('Matieres')
-            } else {
-                state.matiere = null
-            }
-
-        },
-
-        initializeEleve(state, eleves) {
-            state.eleves = eleves
-        },
-
-        //cette methode est à corriger d'ici peu 
-        createMatieres(state, matiere) {
-            state.matieres = matiere
-        },
-        setErreurUpdate(state) {
-            state.alertErreur = 'Forbiden'
-        },
-        setAuthStatut(state, name) {
-            state.authStatut = name
-        },
-
-        updateMatieres(state, newMatiere) {
-            console.log('😷😷😷 attention j\'essaie de gérer le state.matieres du updateMatiere')
-            let id = []
-            for (const iterator of this.state.matieres) {
-                id.push(iterator.id)
-            }
-            console.log(' Le tableau des id =>' + id + '\n La matiere avec l\'id ' +
-                newMatiere[0] + ' est à la ' + id.indexOf(newMatiere[0]) + ' eme place')
-            state.matieres[id.indexOf(newMatiere[0])] = newMatiere[1]
-
-        },
-        deleteMatiere(index) {
-            const deleted = this.state.matieres.splice(index, 1);
-            console.log(deleted)
-        },
-        setAnneeScolaire(state, annee) {
-            state.annee_scolaire = annee
-        },
-        removeAnneeScolaire(state) {
-            state.annee_scolaire = ''
-        },
-        setToken(state, token) {
-            state.token = token,
-                state.isAuthenticated = true
-        },
-        removeToken(state) {
-            state.token = '',
-                state.isAuthenticated = false
-        },
-
-        setAlertLogout(state, alert) {
-            state.AlertLogout = alert
-        },
-        removeAlertLogout(state) {
-            state.AlertLogout = false
-        },
-
-    },
     actions: {
-        // async setEleves({ commit }) {
-        //     const eleves = await axios.get('api/inscriptions/inscriptions/')
-        //     console.log(eleves)
-        //     commit('initialiseEleves', eleves)
-        // },
-        /* async actionCreateMatiere({ commit }, dataSend) {
-            const token = "Token " + this.state.token;
-            console.log('données reçues' + JSON.stringify(dataSend))
-
-            let element = []
-            for (const key in dataSend) {
-                element.push(dataSend[key]);
-            }
-            this.elements = element
-            console.log('element =>' + this.elements + ' element[0] =>' + this.elements[0])
-            var config = {
-                method: "post",
-                url: `api/ecole/matiere/`,
-                data: {
-                    "nomMatiere": this.elements[0],
-
-
-                    "pluriProf": this.elements[1],
-
-                    "seanceParSemaine": Number(this.elements[2]),
-                    "coefficient": Number(this.elements[3]),
-
-                    "classAssocie": this.elements[4]
-                },
-                
-                {"nomMatiere":"Anglais","pluriProf":"oui","seanceParSemaine":"5","coefficient":"5","classAssocie":"4e"}
-                {
-                    "nomMatiere": "Chimie",
-                    //"codeMatiere": null,
-                    "pluriProf": "Non",
-                    // "matiereDeBase": null,
-                    "seanceParSemaine": 8,
-                    "coefficient": 2,
-                    //"groupeMatiere": null,
-                    "classAssocie": [
-                        "4e"
-                    ]
-                },
-                headers: {
-                    Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
-                },
-
-            };
-
-            await axios(config)
-                .then((response) => {
-                    console.log("" + response);
-                    commit("createMatieres", dataSend);
-                    // this.eleves = response.data;
-                })
-                .catch(function(error) {
-                    console.log("" + error);
-                });
-        },*/
-
-
 
         async actionCreateMatiere({ commit }, dataSend) {
             const token = "Token " + localStorage.getItem('token');
@@ -253,7 +105,111 @@ export default new Vuex.Store({
                 })
                 .catch((err) => { console.log(err) })
 
-        }
+        },
+        actionGetSchoolYears({ commit }) {
+            var config = {
+                method: "get",
+                url: "api/ecole/anneeScolaire/",
+
+            };
+            axios(config)
+                .then((response) => {
+                    const result = response.data;
+                    console.log(result);
+
+                    commit('InitialiseAnneesScolaire', result)
+                })
+                .catch(function(error) {
+                    console.log("😢😢😢" + error);
+                });
+        },
+
+    },
+    mutations: {
+        initializeStore(state) {
+            if (localStorage.getItem('token')) {
+                state.isAuthenticated = true;
+                state.token = localStorage.getItem('token');
+                state.authStatut = localStorage.getItem('authStatut')
+            } else if (localStorage.getItem('token') === "null") {
+                state.isAuthenticated = false;
+                state.token = null;
+                state.matieres = null;
+                state.classes = null;
+                state.authStatut = '';
+                state.identifiants_classes = [],
+                    localStorage.setItem("nameAuth", null);
+                localStorage.setItem('Matieres', null)
+                localStorage.setItem('Classes', null)
+                    // localStorage.setItem('id_Classes', null)
+            }
+
+
+            if (localStorage.getItem('Matieres')) {
+                state.matieres = localStorage.getItem('Matieres')
+            } else {
+                state.matiere = null
+            }
+
+        },
+        InitialiseAnneesScolaire(state, anneesScolaire) {
+            state.annees_scolaire = anneesScolaire
+            localStorage.setItem("annees_scolaires", JSON.stringify(anneesScolaire))
+        },
+        setAnneeScolaire(state, annee) {
+            console.log("annee scolaire " + annee)
+            state.annee_scolaire = annee
+        },
+        initializeEleve(state, eleves) {
+            state.eleves = eleves
+        },
+
+        //cette methode est à corriger d'ici peu 
+        createMatieres(state, matiere) {
+            state.matieres = matiere
+        },
+        setErreurUpdate(state) {
+            state.alertErreur = 'Forbiden'
+        },
+        setAuthStatut(state, name) {
+            state.authStatut = name
+        },
+
+        updateMatieres(state, newMatiere) {
+            console.log('😷😷😷 attention j\'essaie de gérer le state.matieres du updateMatiere')
+            let id = []
+            for (const iterator of this.state.matieres) {
+                id.push(iterator.id)
+            }
+            console.log(' Le tableau des id =>' + id + '\n La matiere avec l\'id ' +
+                newMatiere[0] + ' est à la ' + id.indexOf(newMatiere[0]) + ' eme place')
+            state.matieres[id.indexOf(newMatiere[0])] = newMatiere[1]
+
+        },
+        deleteMatiere(index) {
+            const deleted = this.state.matieres.splice(index, 1);
+            console.log(deleted)
+        },
+
+        removeAnneeScolaire(state) {
+            state.annee_scolaire = ''
+        },
+        setToken(state, token) {
+            state.token = token,
+                state.isAuthenticated = true
+        },
+        removeToken(state) {
+            state.token = '',
+                state.isAuthenticated = false
+        },
+
+        setAlertLogout(state, alert) {
+            state.AlertLogout = alert
+        },
+        removeAlertLogout(state) {
+            state.AlertLogout = false
+        },
+
     },
 
     getters: {
@@ -263,11 +219,15 @@ export default new Vuex.Store({
         allMatieres: state => {
             return state.matieres
         },
+        anneesScolaire: state => {
+            return state.annees_scolaire
+        }
     },
     modules: {
         teachers,
         students,
         paiementFrais,
         classes,
-    },
+        comptabilite
+    }
 })

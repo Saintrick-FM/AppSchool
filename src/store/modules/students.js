@@ -14,7 +14,7 @@ const actions = {
         if (localStorage.getItem("token") != null) {
             var config = {
                 method: "get",
-                url: "api/inscriptions/",
+                url: `api/inscriptions/?annee_scolaire=${year}`,
                 headers: {
                     Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
                 },

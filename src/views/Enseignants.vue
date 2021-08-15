@@ -59,10 +59,9 @@
 </template>
 
 <script>
-import Matieres from "@/components/Matieres.vue";
-import Teachers from "@/components/Teachers.vue";
-import PresencesEnseignants from "@/components/PresencesEnseignants.vue";
-//import TestCode from "@/components/TestCode.vue";
+import Matieres from "@/components/Enseignants/Matieres.vue";
+import Teachers from "@/components/Enseignants/Teachers.vue";
+import PresencesEnseignants from "@/components/Enseignants/PresencesEnseignants.vue";
 
 export default {
   name: "Enseignants",

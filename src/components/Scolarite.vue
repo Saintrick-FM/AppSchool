@@ -128,7 +128,7 @@
                             </v-chip>
                           </v-row>
                           <v-row>
-                            <!-- Debut Mois payés -->
+                            <!-- Debut Mois Avancés -->
                             <v-col>
                               <v-chip-group
                                 v-if="!shawNonPayedMonths"
@@ -141,12 +141,35 @@
                                   outlined
                                   v-for="mois in moisAvance"
                                   :key="mois"
+                                  @click="ShowDetailsMonthAvanced(mois)"
                                 >
-                                  <v-icon color="green">mdi-check</v-icon>
+                                  <v-icon id color="green">mdi-check</v-icon>
+
                                   {{ mois }}
                                 </v-chip>
-                              </v-chip-group></v-col
-                            >
+                              </v-chip-group>
+                            </v-col>
+
+                            <!-- Alert affichage details des mois avancés -->
+                            <div>
+                              <v-alert
+                                :value="alert3"
+                                color="orange"
+                                dark
+                                border="top"
+                                icon="mdi-home"
+                                transition="scale-transition"
+                              >
+                                <span style="font-size:15px; ">
+                                  {{ detailsMonthAvanced.statut }} le :</span
+                                >
+                                {{ detailsMonthAvanced.datePaiement }}
+
+                                <span icon="mdi-cash">Montant :</span>
+                                {{ detailsMonthAvanced.montantPayeJourJ }}/
+                                {{ detailsMonthAvanced.montantFrais }} FCFA
+                              </v-alert>
+                            </div>
                           </v-row>
                         </v-sheet>
                         <!-- </v-col> -->
@@ -651,6 +674,7 @@ export default {
       singleSelect: true,
       alert: false,
       alert2: false,
+      alert3: false,
       alertErreurDuplicateTypeFrais: false,
       messageErreurDuplicateTypeFrais_A: "",
       messageErreurDuplicateTypeFrais_B: "",
@@ -659,6 +683,7 @@ export default {
       AffichePaiementMois: false,
       fraisMensuels: null,
       fraisChoisi: [],
+      anneeActuelle:null,
       scolariteTotal: null,
       allFraisInscReinsc: null,
       paiement_Inscription_Reinscription: ["Inscription", "Réinscription"],
@@ -698,10 +723,6 @@ export default {
       HeadersFrais: [
         { text: "Frais communs à tous", value: "frais", sortable: true },
         { text: "Montant Frais", value: "montant", sortable: true },
-        // { text: "Montant à payé", value: "montantApayer", sortable: true },
-        // { text: "Montant déjà payé", value: "montantDejaPaye", sortable: true },
-        // { text: "Montant restant", value: "montantRestant", sortable: true },
-        //{ text: "Statut", value: "statut", sortable: true },
         { text: "Actions", value: "actions", sortable: false },
       ],
       editedIndex: -1,
@@ -718,6 +739,13 @@ export default {
       moisToPay: [],
       allFraisPayes: [],
       detailsMonthPayed: {
+        datePaiement: "",
+        montantPayeJourJ: null,
+        montantPayeAuparavant: null,
+        montantFrais: null,
+        statut: "",
+      },
+      detailsMonthAvanced: {
         datePaiement: "",
         montantPayeJourJ: null,
         montantPayeAuparavant: null,
@@ -834,6 +862,7 @@ export default {
   created() {
     this.getFrais();
     this.getClasses();
+    this.anneeActuelle=localStorage.getItem("annee_scolaire")
     // this.getInscritsReinscritAnneeActuelle();
   },
 
@@ -863,8 +892,41 @@ export default {
       } else {
         console.log("bouton clické au lieu du close");
         this.alert2 = false;
+        this.detailsMonthPayed.montantFrais = "";
+        this.detailsMonthPayed.montantPayeJourJ = null;
+        this.detailsMonthPayed.montantPayeAuparavant = null;
         this.detailsMonthPayed.datePaiement = "";
-        this.detailsMonthPayed.montantPaye = "";
+        this.detailsMonthPayed.statut = "";
+      }
+    },
+    ShowDetailsMonthAvanced(mois) {
+      if (!this.alert3) {
+        let FraisAvancesWithDetails = JSON.parse(
+          localStorage.getItem("Frais_Avancés_With_Details")
+        );
+        let fraisDetails = FraisAvancesWithDetails.find(
+          (frais) => frais.mois === mois
+        );
+
+        console.log("**********" + mois);
+        this.alert3 = true;
+        this.detailsMonthAvanced.datePaiement = fraisDetails.cree_le
+          .toString()
+          .slice(0, 16)
+          .replace("T", " à ");
+        this.detailsMonthAvanced.montantPayeJourJ =
+          fraisDetails.montantDejaPaye;
+
+        this.detailsMonthAvanced.statut = fraisDetails.statut;
+        this.detailsMonthAvanced.montantFrais =
+          Number(fraisDetails.montantFrais) * mois.split(",").length;
+      } else {
+        this.alert3 = false;
+        this.detailsMonthAvanced.datePaiement = "";
+        this.detailsMonthAvanced.montantPayeJourJ = null;
+        this.detailsMonthAvanced.montantPayeAuparavant = null;
+        this.detailsMonthAvanced.montantFrais = "";
+        this.detailsMonthAvanced.statut = "";
       }
     },
 
@@ -1248,7 +1310,7 @@ export default {
       if (localStorage.getItem("token") != null) {
         axios
           .get(
-            `api/finances/paiementFraisEleve/?id=${eleveChoisi.eleveNumber}`,
+            `api/finances/paiementFraisEleve/?annee_scolaire=${this.anneeActuelle}&id=${eleveChoisi.eleveNumber}`,
             {
               headers: {
                 Authorization: token,

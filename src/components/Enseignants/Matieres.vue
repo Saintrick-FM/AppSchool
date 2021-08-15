@@ -113,8 +113,8 @@
       </template>
 
       <template v-slot:no-data>
-        <v-btn color="primary" @click="initialiseMatiere">
-          Reset
+        <v-btn color="primary">
+          Pas de matières pour l'instant !
         </v-btn>
       </template>
     </v-data-table>
@@ -180,6 +180,7 @@ export default {
       seanceParSemaine: undefined,
       coefficient: undefined,
       classAssocie: "",
+      anneeScolaire: "",
     },
     defaultItem: {
       nomMatiere: "",
@@ -209,7 +210,7 @@ export default {
   },
 
   beforeMount() {
-    //this.initialiseMatiere();
+    this.editedItem.anneeScolaire = localStorage.getItem("annee_scolaire");
     this.matieres = JSON.parse(localStorage.getItem("Matieres"));
     this.identifiants_classes = JSON.parse(localStorage.getItem("Id_classes"));
     this.classes = JSON.parse(localStorage.getItem("Classes"));
@@ -282,6 +283,7 @@ export default {
         let courseToUpdate = this.editedItem.nomMatiere;
         //let old = this.matieres[this.editedIndex];
         let donnees = [];
+
         donnees.push(courseToUpdate, this.editedItem);
         console.log(
           "type pk =>" +
@@ -313,7 +315,6 @@ export default {
         console.log(
           "classe Associée de l'objet créé =>" + this.editedItem.classAssocie
         );
-
         this.$store.dispatch("actionCreateMatiere", this.editedItem);
         if (this.$store.state.authStatut == "DG") {
           this.matieres.push(this.editedItem);
