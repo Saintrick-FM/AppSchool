@@ -224,6 +224,8 @@ export default {
         .then((res) => {
           const token = res.data.token;
           console.log(token);
+          let allParamsDone = localStorage.getItem("allParamsDone");
+          console.log(" allParamsDone " + allParamsDone);
 
           // axios.defaults.headers.common["Authorization"] = "Token " + token;
           localStorage.setItem("token", token);
@@ -237,7 +239,13 @@ export default {
           this.$store.dispatch("actionInitialiseProfs");
 
           this.loading = true;
-          const toPath = this.$route.query.to || "/finances";
+          let toPath = null;
+          if (allParamsDone === "true") {
+            toPath = this.$route.query.to || "/finances";
+          } else {
+            // this.$emit("desactiveLinks");
+            toPath = this.$route.query.to || "/parametrages";
+          }
 
           setTimeout(() => {
             this.loading = false;

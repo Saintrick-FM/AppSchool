@@ -24,7 +24,7 @@
         <v-icon>mdi-account-box</v-icon>
       </v-tab>
 
-      <v-tab href="#tab-4">
+      <v-tab id="tab4" href="#tab4">
         Bilan
         <v-icon>mdi-account-box</v-icon>
       </v-tab>
@@ -49,7 +49,7 @@
         </v-card>
       </v-tab-item>
 
-      <v-tab-item :value="'tab-4'">
+      <v-tab-item :value="'tab4'">
         <v-card flat>
           <bilan />
         </v-card>
@@ -78,6 +78,13 @@ export default {
       text:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     };
+  },
+  mounted() {
+    let tab4 = this.$route.fullPath.substr(-5);
+    console.log("router " + typeof this.$route.fullPath + "--tab4 " + tab4);
+    if (tab4 === "#tab4") {
+      console.log("beug à résoudre");
+    }
   },
 };
 </script>

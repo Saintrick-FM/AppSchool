@@ -4,7 +4,7 @@
       <v-row no gutters style="padding-bottom: 110px;">
         <v-col>
           <router-link to="/">
-            <button class="learn-more">
+            <button class="learn-more" :disabled="disabled">
               <v-avatar color="#b18597" outlined class="mb-4 mr-11 mt-n6 ml-n9">
                 <v-icon dark class="mb-4">
                   mdi-account-circle
@@ -15,7 +15,7 @@
           </router-link>
         </v-col>
         <v-col order="12" id="col-right">
-          <button id="btn-right" class="learn-more">
+          <button id="btn-right" class="learn-more" :disabled="disabled">
             <v-avatar color="#b18597" outlined class="mb-4 mr-11 mt-n6 ml-n9">
               <v-icon dark class="mb-4">
                 mdi-account-circle
@@ -28,7 +28,7 @@
       <v-row no gutters>
         <v-col>
           <router-link to="/pedagogie">
-            <button class="learn-more">
+            <button class="learn-more" :disabled="disabled">
               <v-avatar color="#b18597" outlined class="mb-4 mr-11 mt-n6 ml-n9">
                 <v-icon dark class="mb-4">
                   mdi-account-circle
@@ -40,7 +40,7 @@
         </v-col>
         <v-col order="12" id="col-right">
           <router-link to="/finances">
-            <button id="btn-right" class="learn-more">
+            <button id="btn-right" class="learn-more" :disabled="disabled">
               <v-avatar color="#b18597" outlined class="mb-4 mr-11 mt-n6 ml-n9">
                 <v-icon dark class="mb-4">
                   mdi-account-circle
@@ -54,9 +54,16 @@
     </v-container>
   </div>
 </template>
+
 <script>
 export default {
   name: "RubriqueNav",
+  data() {
+    return {
+      show: false,
+      disabled: false,
+    };
+  },
   computed: {
     checkedToken: function() {
       let token = localStorage.getItem("token");
@@ -68,6 +75,12 @@ export default {
         return true;
       }
     },
+  },
+  beforeMount() {
+    if (localStorage.getItem("allParamsDone") === "false") {
+      this.disabled = true;
+      // document.getElementById("btn-right").addEventListener("mouseover");
+    }
   },
 };
 </script>
@@ -121,7 +134,8 @@ button.learn-more {
   color: #382b22;
   text-transform: uppercase;
   padding: 1.25em 2em;
-  background: #fff0f0;
+  background: #9c27b0;
+  /*  couleur d'origine #fff0f0; 2e couleur #9c27b0*/
   border: 2px solid #b18597;
   border-radius: 0.75em;
   transform-style: preserve-3d;

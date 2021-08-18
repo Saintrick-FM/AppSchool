@@ -17,6 +17,8 @@ import Enseignants from '@/views/Enseignants.vue'
 import Eleves from '@/views/Eleves.vue'
 import Finances from '@/views/Finances.vue'
 
+import Parametrages from '@/views/Parametrages.vue'
+
 
 
 Vue.use(VueRouter)
@@ -59,6 +61,11 @@ const routes = [{
         path: '/login',
         name: 'Login',
         component: Login
+    },
+    {
+        path: '/parametrages',
+        name: 'Parametrages',
+        component: Parametrages
     },
     {
         path: '/eleves',

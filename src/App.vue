@@ -24,6 +24,24 @@
       <transition name="fade" mode="out-in">
         <router-view />
       </transition>
+      <v-alert
+        transition="dialog-top-transition"
+        text
+        prominent
+        type="error"
+        icon="mdi-cloud-alert"
+        max-width="1200"
+        border="bottom"
+        color="pink darken-1"
+        colored-border
+        v-if="show"
+      >
+        <h2
+          style="color:#d81b60; margin-left:30px; position:absolute; margin-top:-2px"
+        >
+          {{ message }}
+        </h2>
+      </v-alert>
     </v-main>
   </v-app>
 </template>
@@ -42,6 +60,8 @@ export default {
     //
     drawerTop: null,
     annee_scolaire: "",
+    show: null,
+    message: null,
   }),
   beforeCreate() {
     const checkToken = this.checkToken;
@@ -51,6 +71,21 @@ export default {
     } else {
       this.drawerTop = false;
       axios.defaults.headers.common["Authorization"] = "Token " + checkToken;
+    }
+  },
+  beforeMount() {
+    let allParamsDone = localStorage.getItem("allParamsDone");
+    if (allParamsDone && allParamsDone === "false") {
+      console.log("if " + allParamsDone);
+      this.show = "true";
+      this.message =
+        "Veuillez finaliser tous les parametrages du logiciel afin que vous en ayez un accès complet";
+    } else {
+      localStorage.setItem("allParamsDone", "false");
+      console.log("else " + allParamsDone);
+      this.show = "true";
+      this.message =
+        "Veuillez finaliser tous les parametrages du logiciel afin que vous en ayez un accès complet";
     }
   },
   computed: {
