@@ -14,7 +14,7 @@ export default new Vuex.Store({
     state: {
         isAuthenticated: undefined,
         authStatut: '',
-        annees_scolaire: null,
+
         annee_scolaire: null,
         token: '',
         AlertLogout: null,
@@ -73,6 +73,7 @@ export default new Vuex.Store({
                 .then((response) => {
                     let newMatiere = [donnees[0], donnees[1]]
                     console.log("😍😍😍 new data sent =>" + JSON.stringify(donnees[1]) + '\n' + response);
+                    //****************attention il faut gérer ce beug (pas de mutation updateMatieres)
                     commit("updateMatieres", newMatiere);
 
                 })
@@ -107,23 +108,6 @@ export default new Vuex.Store({
                 .catch((err) => { console.log(err) })
 
         },
-        actionGetSchoolYears({ commit }) {
-            var config = {
-                method: "get",
-                url: "api/ecole/anneeScolaire/",
-
-            };
-            axios(config)
-                .then((response) => {
-                    const result = response.data;
-                    console.log(result);
-
-                    commit('InitialiseAnneesScolaire', result)
-                })
-                .catch(function(error) {
-                    console.log("😢😢😢" + error);
-                });
-        },
 
     },
     mutations: {
@@ -153,14 +137,7 @@ export default new Vuex.Store({
             }
 
         },
-        InitialiseAnneesScolaire(state, anneesScolaire) {
-            state.annees_scolaire = anneesScolaire
-            localStorage.setItem("annees_scolaires", JSON.stringify(anneesScolaire))
-        },
-        setAnneeScolaire(state, annee) {
-            console.log("annee scolaire " + annee)
-            state.annee_scolaire = annee
-        },
+
         initializeEleve(state, eleves) {
             state.eleves = eleves
         },
@@ -220,9 +197,7 @@ export default new Vuex.Store({
         allMatieres: state => {
             return state.matieres
         },
-        anneesScolaire: state => {
-            return state.annees_scolaire
-        }
+
     },
     modules: {
         teachers,

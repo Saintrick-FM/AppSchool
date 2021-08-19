@@ -1,7 +1,11 @@
 <template>
   <v-row style="margin-left:50px">
-    <h2 class="purple--text text-uppercase" v-if="showModifAlert">
-      Modification{{}}
+    <h2
+      class="purple--text text-uppercase text-center"
+      style="margin-top:10px;flex:auto"
+      v-if="showModifAlert"
+    >
+      Modification Année scolaire : {{ yearToModify }}
     </h2>
     <v-row class="text-center">
       <v-col md="6">
@@ -23,7 +27,7 @@
                   required
                   outlined
                   shaped
-                  v-model="editAnnee.yearSet"
+                  v-model="editAnnee.anneeScolaire"
                   label="Année scolaire*"
                   auto-select-first
                   placeholder="1er choix recommandé"
@@ -47,7 +51,7 @@
               <v-col cols="12" sm="6">
                 <v-text-field
                   label="Date Ouverture administrative"
-                  v-model="editAnnee.dateOuvertureAdministrative"
+                  v-model="editAnnee.ouvertureAdministratif"
                   :rules="[(v) => !!v || 'Vous devez renseigner ce champs']"
                   required
                   type="date"
@@ -59,7 +63,7 @@
               <v-col cols="12" sm="6">
                 <v-text-field
                   label="Date rentrée scolaire"
-                  v-model="editAnnee.dateRentreeScolaire"
+                  v-model="editAnnee.rentreeScolaire"
                   :rules="[(v) => !!v || 'Vous devez renseigner ce champs']"
                   required
                   type="date"
@@ -101,7 +105,7 @@
               <v-col cols="12" sm="6">
                 <v-text-field
                   label="Période congés 1er trimestre "
-                  v-model="editAnnee.congesPremierTrimestre"
+                  v-model="editAnnee.conges1erTrimestre"
                   outlined
                   shaped
                 ></v-text-field>
@@ -109,7 +113,7 @@
               <v-col cols="12" sm="6">
                 <v-text-field
                   label="Période congés 2e trimestre"
-                  v-model="editAnnee.congesDeuxiemeTrimestre"
+                  v-model="editAnnee.conges2eTrimestre"
                   outlined
                   shaped
                 ></v-text-field>
@@ -120,7 +124,7 @@
               <v-col cols="12" sm="6">
                 <v-text-field
                   label="Date début de vacances (élèves)"
-                  v-model="editAnnee.debutVacanceScolaire"
+                  v-model="editAnnee.debutVacancesScolaire"
                   type="date"
                   filled
                   shaped
@@ -130,7 +134,7 @@
               <v-col cols="12" sm="6">
                 <v-text-field
                   label="Date début de vacances (personnel)"
-                  v-model="editAnnee.debutVacancesPersonnel"
+                  v-model="editAnnee.debutVacancesAdministratives"
                   type="date"
                   filled
                   shaped
@@ -148,7 +152,7 @@
               class="mr-4 text"
               @click="validate"
             >
-              <span class="white--text">Enregistrer</span>
+              <span class="white--text">Enregistrez</span>
               <v-icon light>mdi-cached</v-icon>
             </v-btn>
           </v-form>
@@ -163,7 +167,7 @@
         class="mr-4 text"
         @click="confirmAll"
       >
-        <span class="white--text">Tout enregistrer</span>
+        <span class="white--text">{{ contentbuttonSaveOrUpdate }}</span>
         <v-icon light>mdi-cached</v-icon>
       </v-btn>
 
@@ -180,9 +184,11 @@
           ></v-text-field>
         </v-card-title>
         <v-data-table
+          style="flex:auto; margin-top:10px"
           :headers="headers"
           :items="allYears"
           :search="search"
+          type="button"
           @click:row="anneeClicked"
         ></v-data-table>
       </v-card>
@@ -193,13 +199,17 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
+mapGetters;
 export default {
   name: "AnneeScolaire",
   data: () => ({
     search: "",
-    allYears: [],
     showModifAlert: false,
+    yearToModify: null,
     threeLastYears: [],
+    allYears: [],
 
     headers: [
       {
@@ -211,25 +221,25 @@ export default {
       { text: "Créé le", value: "cree_le", sortable: true },
       { text: "Rentrée Scolaire", value: "rentreeScolaire", sortable: true },
       { text: "Congés du 1er trimestre", value: "conges1erTrimestre" },
-      { text: "Congés du 2e trimestre", value: "congees2eTrimestre" },
+      { text: "Congés du 2e trimestre", value: "conges2eTrimestre" },
       {
         text: "Grandes Vacances",
         value: "debutVacancesScolaire",
         sortable: true,
       },
-      { text: "Statut", value: "Statut" },
-      { text: "Moidifier", value: "actions" },
+      { text: "Statut", value: "statut" },
     ],
     editAnnee: {
-      yearSet: null,
+      cree_le: null,
+      anneeScolaire: null,
       debutInscriptions: null,
-      dateOuvertureAdministrative: null,
-      dateRentreeScolaire: null,
+      ouvertureAdministratif: null,
+      rentreeScolaire: null,
 
-      congesPremierTrimestre: null,
-      congesDeuxiemeTrimestre: null,
+      conges1erTrimestre: "",
+      conges2eTrimestre: "",
       debutVacancesScolaire: null,
-      debutVacancesPersonnel: null,
+      debutVacancesAdministratives: null,
       statut: null,
     },
     valid: true,
@@ -246,22 +256,44 @@ export default {
       (v) => (v && v.length >= 8) || "Password must be less than 8 characters",
     ],
   }),
+  computed: {
+    ...mapGetters(["anneesScolaire"]),
+    contentbuttonSaveOrUpdate() {
+      if (this.showModifAlert) {
+        return "Confirmer les modifications";
+      } else {
+        return "Tout enregistrer";
+      }
+    },
+  },
+  created() {
+    this.$store.dispatch("actionGetSchoolYears");
+  },
   beforeMount() {
+    setTimeout(() => {
+      this.anneesScolaire.forEach((year) => {
+        this.allYears.push(year);
+      });
+    }, 1000);
     let actualYear = localStorage.getItem("année_scolaire");
-    let allYears = JSON.parse(localStorage.getItem("annees_scolaires"));
-    allYears.forEach((year) => {
-      this.allYears.push(year);
-    });
+
     console.log(
-      String(parseInt(actualYear.slice(-4))).concat(
-        "-" + parseInt(actualYear.slice(0, 4))
-      )
+      "anneesScolaire de mapGetters " +
+        JSON.stringify(this.anneesScolaire) +
+        "\n\n\nallYears => " +
+        JSON.stringify(this.allYears)
     );
 
     this.threeLastYears[0] = actualYear;
     this.threeLastYears[1] = String(
       parseInt(actualYear.slice(0, 4) - 1)
     ).concat("-" + parseInt(actualYear.slice(0, 4)));
+  },
+
+  watch: {
+    allYears(newValue, oldValue) {
+      newValue || oldValue;
+    },
   },
 
   methods: {
@@ -273,35 +305,35 @@ export default {
 
     anneeClicked: function(item, row) {
       row.select(true);
-      console.log("Type item " + JSON.stringify(item));
+      console.log("item cliqué" + JSON.stringify(item));
+      console.log(
+        "anneesScolaire de mapGetters " +
+          JSON.stringify(this.anneesScolaire) +
+          "\nallYears => " +
+          this.allYears
+      );
+      this.showModifAlert = true;
+      this.yearToModify = item.anneeScolaire;
       this.$vuetify.goTo(document.body.scrollTop);
-      this.editAnnee.yearSet = item.anneeScolaire;
+      this.editAnnee.cree_le = item.cree_le;
+
+      this.editAnnee.anneeScolaire = item.anneeScolaire;
       this.editAnnee.debutInscriptions = item.debutInscriptions;
       this.editAnnee.rentreeScolaire = item.rentreeScolaire;
       this.editAnnee.ouvertureAdministratif = item.ouvertureAdministratif;
 
-      this.editAnnee.congesPremierTrimestre = item.conges1erTrimestre;
-      this.editAnnee.congesDeuxiemeTrimestre = item.conges2eTrimestre;
-      this.editAnnee.debutVacanceScolaire = item.debutVacancesScolaire;
-      this.editAnnee.debutVacancesPersonnel = item.debutVacancesAdministratives;
+      this.editAnnee.conges1erTrimestre = item.conges1erTrimestre;
+      this.editAnnee.conges2eTrimestre = item.conges2eTrimestre;
+      this.editAnnee.debutVacancesScolaire = item.debutVacancesScolaire;
+      this.editAnnee.debutVacancesAdministratives =
+        item.debutVacancesAdministratives;
       this.editAnnee.statut = item.statut;
       // = Object.assign(item);
     },
     //Login method here
     onLoginRentree() {
       //api call here
-      /* let anneeScolaire = {
-        anneeScolaire: this.editAnnee.yearSet,
-        ouvertureAdministratif: this.editAnnee.dateOuvertureAdministrative,
-        debutInscriptions: this.editAnnee.debutInscriptions,
-        rentreeScolaire: this.editAnnee.dateRentreeScolaire,
-        conges1erTrimestre: this.editAnnee.congesPremierTrimestre,
-        conges2eTrimestre: this.editAnnee.congesDeuxiemeTrimestre,
-        debutVacancesScolaire: this.editAnnee.debutVacancesScolaire,
-        debutVacancesAdministratives: this.editAnnee
-          .debutVacancesAdministratives,
-        statut: "année ouverte",
-      };*/
+
       console.log("On loginRentree " + JSON.stringify(this.editAnnee));
       console.log(this.$refs.form.validate());
       //this.$store.dispatch("actionNewAnneeScolaire", anneeScolaire);
@@ -311,10 +343,32 @@ export default {
       console.log("On login Congés " + JSON.stringify(this.editAnnee));
     },
     confirmAll() {
+      this.allYears = [];
       console.log(this.$refs.form.validate());
       console.log(
         "this.editAnnee dans confirmAll " + JSON.stringify(this.editAnnee)
       );
+      if (this.showModifAlert) {
+        this.editAnnee.statut = "année ouverte";
+        this.$store.dispatch("actionModifAnneeScolaire", this.editAnnee);
+        this.$store.dispatch("actionGetSchoolYears");
+
+        setTimeout(() => {
+          this.showModifAlert = false;
+          this.$vuetify.goTo(document.body.scrollHeight);
+          this.allYears = this.anneesScolaire.map((item) => item);
+          console.log("new allYears " + JSON.stringify(this.allYears));
+        }, 1500);
+      } else {
+        this.editAnnee.statut = "année ouverte";
+        this.$store.dispatch("actionNewAnneeScolaire", this.editAnnee);
+        this.$store.dispatch("actionGetSchoolYears");
+        setTimeout(() => {
+          this.$vuetify.goTo(document.body.scrollHeight);
+          this.allYears = this.anneesScolaire.map((item) => item);
+          console.log("new allYears " + JSON.stringify(this.allYears));
+        }, 1500);
+      }
     },
   },
 };

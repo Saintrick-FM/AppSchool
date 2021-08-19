@@ -10,7 +10,6 @@ const actions = {
         //   this.$store.dispatch("actionInitialiseMatiere");
         const token = "Token " + localStorage.getItem("token");
 
-
         if (localStorage.getItem("token") != null) {
             var config = {
                 method: "get",
