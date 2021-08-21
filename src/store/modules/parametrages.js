@@ -71,7 +71,6 @@ const actions = {
 const mutations = {
 
     newAnneeScolaire(state, anneeScolaire) {
-
         state.newAnneeScolaire = anneeScolaire
     },
 

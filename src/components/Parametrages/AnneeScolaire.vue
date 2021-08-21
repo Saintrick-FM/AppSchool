@@ -173,7 +173,7 @@
 
       <v-card>
         <v-card-title>
-          Nutrition
+          Liste des années scolaires
           <v-spacer></v-spacer>
           <v-text-field
             v-model="search"

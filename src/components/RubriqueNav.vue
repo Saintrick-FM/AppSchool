@@ -134,7 +134,7 @@ button.learn-more {
   color: #382b22;
   text-transform: uppercase;
   padding: 1.25em 2em;
-  background: #9c27b0;
+  background: cyan;
   /*  couleur d'origine #fff0f0; 2e couleur #9c27b0*/
   border: 2px solid #b18597;
   border-radius: 0.75em;

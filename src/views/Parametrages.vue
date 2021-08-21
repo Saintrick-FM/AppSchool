@@ -2,13 +2,13 @@
   <v-stepper v-model="etape">
     <v-stepper-header>
       <v-stepper-step :complete="etape > 1" step="1">
-        Année Scolaire
+        Etablissement
       </v-stepper-step>
 
       <v-divider></v-divider>
 
       <v-stepper-step :complete="etape > 2" step="2">
-        Etablissement
+        Année Scolaire
       </v-stepper-step>
 
       <v-divider></v-divider>
@@ -31,30 +31,32 @@
           color="grey lighten-1"
           height="200px"
         ></v-card> -->
-        <annee-scolaire></annee-scolaire>
-
+        <etablissement></etablissement>
         <v-btn
           color="#4a148c"
-          style="margin-left:50px"
-          class="mt-5"
+          style="margin:50px 10px 30px 0px"
           @click="etape = 2"
         >
           <span style="color:white">Etape suivante</span>
         </v-btn>
 
-        <v-btn text class="mt-5">
+        <v-btn text style="margin:50px 0px 30px 10px">
           Annuler
         </v-btn>
       </v-stepper-content>
 
       <v-stepper-content step="2">
-        <etablissement></etablissement>
+        <annee-scolaire></annee-scolaire>
 
-        <v-btn color="primary" @click="etape = 3">
+        <v-btn
+          color="primary"
+          style="margin:50px 10px 30px 0px"
+          @click="etape = 3"
+        >
           Etape suivante
         </v-btn>
 
-        <v-btn @click="etape = 1" text>
+        <v-btn @click="etape = 1" style="margin:50px 10px 30px 0px" text>
           Etape précédente
         </v-btn>
       </v-stepper-content>
@@ -62,11 +64,15 @@
       <v-stepper-content step="3">
         <finances></finances>
 
-        <v-btn color="primary" @click="etape = 4">
+        <v-btn
+          color="primary"
+          style="margin:50px 10px 30px 0px"
+          @click="etape = 4"
+        >
           Etape suivante
         </v-btn>
 
-        <v-btn @click="etape = 2" text>
+        <v-btn style="margin:50px 10px 30px 0px" @click="etape = 2" text>
           Etape précédente
         </v-btn>
       </v-stepper-content>
@@ -79,11 +85,11 @@
         ></v-card> -->
         <pedagogie></pedagogie>
 
-        <v-btn to="/finances" color="primary">
+        <v-btn to="/finances" style="margin:50px 10px 30px 0px" color="primary">
           Etape suivante
         </v-btn>
 
-        <v-btn @click="etape = 3" text>
+        <v-btn @click="etape = 3" style="margin:50px 10px 30px 0px" text>
           Etape précédente
         </v-btn>
       </v-stepper-content>
