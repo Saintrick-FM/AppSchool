@@ -14,10 +14,11 @@
           <v-col v-else :md="tailleCycles" v-for="item in Cycles2" :key="item">
             <v-icon>mdi-silverware</v-icon>
             <v-toolbar-title
-              @click="showAlert(item)"
-              type="button"
               class="title-h6 font-weight-light pa-4 title-center"
-              >{{ item }}</v-toolbar-title
+            >
+              <v-btn elevation="2" @click="showAlert(item)">{{
+                item
+              }}</v-btn></v-toolbar-title
             >
             <v-divider vertical color="primary"></v-divider>
             <v-divider vertical color="primary"></v-divider>
@@ -45,7 +46,6 @@
             <template v-slot:top>
               <!-- boite de dialog pour ajout et modif classe -->
               <v-dialog
-                style="margin-left:100px"
                 transition="fab-transition"
                 persistent
                 dark
@@ -182,6 +182,7 @@ export default {
   props: ["nomsCycles", "Cycles", "Garderie"],
   data() {
     return {
+      activeCycle: null,
       classeCliquee: null,
       dialogForDelete: false,
       dialog: false,
@@ -199,7 +200,7 @@ export default {
         { text: "Vague", value: "vague" },
         { text: "Nmbre de Salles", value: "nbreSalle" },
         { text: "Capacité totale", value: "contenance" },
-        { text: "Actions", align: "end", value: "actions" },
+        { text: "Actions", align: "center", value: "actions" },
       ],
       defaultClasse: {
         identifiant: null,
@@ -273,6 +274,8 @@ export default {
       return [];
     },
     showAlert(item) {
+      console.log(typeof item);
+      this.activeCycle = item;
       if (this.alert1) {
         this.alert1 = false;
         setTimeout(() => {
@@ -283,6 +286,7 @@ export default {
           this.alert1 = true;
         }, 200);
       } else {
+        this.classes = this.Cycles.find((cycle) => cycle.nom === item).classes;
         console.log(item);
         this.alert1 = true;
       }
@@ -337,4 +341,8 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.active {
+  background-color: green;
+}
+</style>

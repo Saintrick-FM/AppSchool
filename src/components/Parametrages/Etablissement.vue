@@ -20,27 +20,36 @@
             class="mt-10 mb-6 pr-8 pl-8 pb-8 pt-4"
           >
             <v-row>
-              <v-col md="6">
+              <v-col md="4">
                 <v-text-field
                   label="Nom de l'école"
                   v-model="editEcole.nom"
                   outlined
-                  type="date"
                   :rules="[(v) => !!v || 'Vous devez renseigner ce champs']"
                   required
                   shaped
                 ></v-text-field>
               </v-col>
-              <v-col md="6">
+              <v-col md="3">
                 <v-text-field
                   label="Devise"
                   v-model="editEcole.devise"
                   outlined
-                  type="date"
                   :rules="[(v) => !!v || 'Vous devez renseigner ce champs']"
                   required
                   shaped
                 ></v-text-field>
+              </v-col>
+              <v-col md="5">
+                <v-select
+                  label="Programme"
+                  v-model="editEcole.programme"
+                  :items="['Congolais', 'Français', 'Franco-congolais']"
+                  outlined
+                  :rules="[(v) => !!v || 'Vous devez renseigner ce champs']"
+                  required
+                  shaped
+                ></v-select>
               </v-col>
             </v-row>
 
@@ -51,7 +60,6 @@
                   v-model="editEcole.ville"
                   :rules="[(v) => !!v || 'Vous devez renseigner ce champs']"
                   required
-                  type="date"
                   filled
                   shaped
                 ></v-text-field>
@@ -59,11 +67,10 @@
 
               <v-col cols="12" sm="6">
                 <v-text-field
-                  label="Adresse"
+                  label="Adresse (site pricipale)"
                   v-model="editEcole.adresse"
                   :rules="[(v) => !!v || 'Vous devez renseigner ce champs']"
                   required
-                  type="date"
                   filled
                   shaped
                 ></v-text-field>
@@ -77,7 +84,6 @@
                   v-model="editEcole.telephone"
                   :rules="[(v) => !!v || 'Vous devez renseigner ce champs']"
                   required
-                  type="date"
                   filled
                   shaped
                 ></v-text-field>
@@ -87,9 +93,9 @@
                 <v-text-field
                   label="Email"
                   v-model="editEcole.email"
-                  :rules="[(v) => !!v || 'Vous devez renseigner ce champs']"
+                  :rules="emailRules"
                   required
-                  type="date"
+                  type=""
                   filled
                   shaped
                 ></v-text-field>
@@ -118,7 +124,7 @@
           <v-divider color="purple" class="mt-2"></v-divider>
 
           <v-form
-            @submit.prevent="onLogin"
+            @submit.prevent="onLoginConges"
             ref="form"
             v-model="valid"
             lazy-validation
@@ -128,7 +134,7 @@
               <v-col cols="12" sm="6">
                 <v-text-field
                   label="Nombre de sites"
-                  v-model="editEcole.nbreSites"
+                  v-model="editedNbreSites"
                   type="number"
                   outlined
                   shaped
@@ -137,32 +143,21 @@
               <v-col cols="12" sm="6">
                 <v-text-field
                   label="Préfixe Matricue"
-                  v-model="editEcole.prefixematricule"
+                  v-model="editEcole.prefixmatricule"
                   placeholder="préfixe des matricules pour examens"
                   outlined
                   shaped
                 ></v-text-field>
               </v-col>
-
-              <!-- <v-col cols="12" sm="6">
-                <v-select
-                  v-model="editEcole.typeProgramme"
-                  :items="['Congolais', 'Français', 'Franco-Congolais']"
-                  attach
-                  chips
-                  label="Programme suivi"
-                  filled
-                  shaped
-                ></v-select>
-              </v-col> -->
             </v-row>
 
             <v-row>
               <v-col md="2">
-                <v-switch label="Matin" v-model="editEcole.matin"> </v-switch>
+                <v-switch label="Matin" v-model="editedMatin"> </v-switch>
               </v-col>
               <v-col md="2" width="70px">
                 <v-text-field
+                  :disabled="editedMatin === false"
                   placeholder="Ex:7h-13h"
                   label="Heures"
                   v-model="editEcole.heuresMatin"
@@ -173,7 +168,8 @@
               </v-col>
               <v-col md="2">
                 <v-text-field
-                  placeholder="Ex:7h-13h"
+                  :disabled="editedMatin === false"
+                  placeholder="Ex:10h-10h30"
                   label="Recré"
                   v-model="editEcole.recreMatin"
                   outlined
@@ -183,11 +179,11 @@
               </v-col>
 
               <v-col md="2">
-                <v-switch label="Midi" v-model="editEcole.midi"> </v-switch>
+                <v-switch label="Midi" v-model="editedMidi"> </v-switch>
               </v-col>
               <v-col md="" width="70px">
                 <v-text-field
-                  type=""
+                  :disabled="editedMidi === false"
                   placeholder="13h-17h30"
                   label="Heures"
                   append-icon=""
@@ -198,6 +194,7 @@
               </v-col>
               <v-col md="2">
                 <v-text-field
+                  :disabled="editedMidi === false"
                   placeholder="15h-15h30"
                   label="Récré"
                   append-icon=""
@@ -208,7 +205,7 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col md="7">
+              <v-col md="8">
                 <v-combobox
                   width="35px"
                   :items="nomsCycles"
@@ -216,25 +213,25 @@
                   deletable-chips
                   outlined
                   shaped
-                  v-model="editEcole.cycles"
+                  v-model="editedCycles"
                   label="Cycles d'enseignements*"
                   chips
                   multiple
                 ></v-combobox>
               </v-col>
-              <v-col md="3">
+              <v-col md="2">
                 <v-switch
-                  label="Garderie"
+                  label="Crèche"
                   v-model="editEcole.garderie"
                 ></v-switch>
               </v-col>
               <v-col md="2">
                 <v-text-field
-                  placeholder="En Garderie"
                   type="number"
+                  outlined
                   shaped
-                  label="Nombre de classes"
-                  v-model="editEcole.nbreSallesGarderie"
+                  label="Total Salles"
+                  v-model="nbreSalleGarderie"
                 >
                 </v-text-field>
               </v-col>
@@ -258,9 +255,8 @@
       </v-col>
       <v-btn
         x-large
-        type="submit"
         block
-        :disabled="!valid"
+        :loading="loading"
         color="purple darken-4"
         class="mr-4 text"
         @click="confirmAll"
@@ -269,7 +265,12 @@
         <v-icon light>mdi-cached</v-icon>
       </v-btn>
 
-      <v-card class="mt-5" style="flex:auto">
+      <v-card
+        v-if="showAutresConfig"
+        id="configClasses"
+        class="mt-5"
+        style="flex:auto"
+      >
         <v-toolbar flat color="primary" dark>
           <v-toolbar-title>Autres configurations pour l'école</v-toolbar-title>
         </v-toolbar>
@@ -304,7 +305,7 @@
           </v-tab-item>
           <v-tab-item>
             <v-card flat>
-              <configMatieres />
+              <configMatieres :Cycles="Cycles" :nomsCycles="editEcole.cycles" />
             </v-card>
           </v-tab-item>
           <v-tab-item>
@@ -338,6 +339,8 @@ export default {
   },
   data: () => ({
     search: "",
+    loading: false,
+    showAutresConfig: false,
     nomsCycles: ["Prescolaire", "Primaire", "College", "Lycée"],
     Cycles: [
       {
@@ -500,14 +503,29 @@ export default {
     editEcole: {
       nom: null,
       devise: null,
+      programme: null,
+      ville: null,
       adresse: null,
       telephone: null,
       email: null,
-      typeProgramme: null,
-      cycles: null,
+      prefixmatricule: null,
+
+      vagues: null,
+      recreMidi: null,
+      recreMatin: null,
+      heuresMidi: null,
+      heuresMatin: null,
+
       garderie: false,
-      nbreSallesGarderie: 0,
+      nbreSalleGarderie: null,
     },
+
+    nbreSalleGarderie: null,
+    editedMatin: true,
+    editedMidi: false,
+    editedCycles: null,
+
+    editedNbreSites: 0,
 
     headers: [
       {
@@ -533,8 +551,8 @@ export default {
     show2: false,
     email: "",
     emailRules: [
-      (v) => !!v || "E-mail is required",
-      (v) => /.+@.+\..+/.test(v) || "E-mail must be valid",
+      (v) => !!v || "Vous devez renseigner ce champs",
+      (v) => /.+@.+\..+/.test(v) || "L'e-mail doit être valide",
     ],
     password: "",
     passwordRules: [
@@ -561,13 +579,54 @@ export default {
 
       console.log("On loginRentree " + JSON.stringify(this.editAnnee));
       console.log(this.$refs.form.validate());
+      
+
       //this.$store.dispatch("actionNewAnneeScolaire", anneeScolaire);
     },
     onLoginConges() {
       //api call here
       console.log("On login Congés " + JSON.stringify(this.editAnnee));
     },
-    confirmAll() {},
+    confirmAll() {
+      //   editedCycles: null,
+      // editedGarderie: false,
+      // editedNbreSites: 0,
+      // editedNbreSallesGarderie: 0,
+      this.loading = true;
+      // const annee = new Date();
+      //const year = annee.getFullYear() + "-" + (annee.getFullYear() + 1);
+
+      let Cycle = {
+        nomCycle: "",
+      };
+
+      this.editedCycles.forEach((cycle) => {
+        Cycle.nomCycle = cycle;
+        this.$store.dispatch("actionCreateCycle", Cycle);
+      });
+
+      if (this.editEcole.heuresMidi) {
+        this.editEcole.vagues = "matin et midi";
+      } else {
+        this.editEcole.vagues = "matin uniquement";
+      }
+      this.editEcole.nbreSalleGarderie = parseInt(this.nbreSalleGarderie);
+      this.$store.dispatch("actionCreateEcole", this.editEcole);
+
+      if (this.editedNbreSites >= 1) {
+        let index = 0;
+        while (index < this.editedNbreSites) {
+          this.$store.dispatch("actionCreateSite", {
+            numeroSite: index + 1,
+          });
+          index++;
+        }
+      }
+      this.loading = false;
+      this.showAutresConfig = true;
+      this.$vuetify.goTo(document.body.scrollHeight);
+      
+    },
   },
 };
 </script>

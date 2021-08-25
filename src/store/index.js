@@ -15,6 +15,9 @@ export default new Vuex.Store({
         isAuthenticated: undefined,
         authStatut: '',
 
+        ecole: null,
+        cycle: null,
+        site: [],
         annee_scolaire: null,
         token: '',
         AlertLogout: null,
@@ -33,7 +36,7 @@ export default new Vuex.Store({
             const token = "Token " + localStorage.getItem('token');
             console.log('données reçues' + dataSend)
 
-            let body = dataSend; //attention ne jamais oublié d'assigner les valeurs recues dans body car axios l'exige
+            let body = dataSend; //attention ne jamais oublié d'assigner les valeurs recues dans body car axios l'exige           
             await axios
                 .post('api/ecole/matiere/', body, {
                     headers: {
@@ -108,6 +111,114 @@ export default new Vuex.Store({
                 .catch((err) => { console.log(err) })
 
         },
+        async actionCreateCycle({ commit }, dataSend) {
+            const token = "Token " + localStorage.getItem('token');
+            console.log('Cycle reçue ' + dataSend)
+
+            let body = dataSend; //attention ne jamais oublié d'assigner les valeurs recues dans body car axios l'exige           
+            await axios
+                .post('api/ecole/cycle/', body, {
+                    headers: {
+                        'Authorization': token,
+                    }
+                })
+                .then((response) => {
+                    console.log("😃😃😃" + response);
+                    commit("createCycle", dataSend);
+                })
+                .catch(function(error) {
+                    console.log('dataSend in catch action =>' + JSON.stringify(body))
+                    console.log("😢😢😢" + error);
+
+                });
+        },
+
+        async actionCreateEcole({ commit }, dataSent) {
+            const token = "Token " + localStorage.getItem('token');
+            console.log('Ecole reçue' + JSON.stringify(dataSent));
+
+            let body = dataSent; //attention ne jamais oublié d'assigner les valeurs recues dans body car axios l'exige           
+            await axios
+                .post('api/ecole/ecole/', body, {
+                    headers: {
+                        'Authorization': token,
+                    }
+                })
+                .then((response) => {
+                    console.log("😃😃😃" + response);
+                    localStorage.setItem("Ecole", JSON.stringify(dataSent));
+                    commit('createEcole', dataSent)
+                })
+                .catch(function(error) {
+                    console.log('dataSend in catch action =>' + JSON.stringify(body))
+                    console.log("😢😢😢" + error);
+
+                });
+
+        },
+
+        async actionCreateSite({ commit }, dataSent) {
+            const token = "Token " + localStorage.getItem('token');
+            console.log('Site reçue ' + JSON.stringify(dataSent));
+
+            let body = {
+                identifiant: "Site "+dataSent.numeroSite
+            }; //attention ne jamais oublié d'assigner les valeurs recues dans body car axios l'exige           
+            await axios
+                .post('api/ecole/site/', body, {
+                    headers: {
+                        'Authorization': token,
+                    }
+                })
+                .then((response) => {
+                    console.log("😃😃😃" + response);
+                    localStorage.setItem("Ecole", JSON.stringify(dataSent));
+                    commit("createSite", dataSent)
+                })
+                .catch(function(error) {
+
+                    console.log("😢😢😢" + error);
+
+                });
+
+        },
+
+        async actionUpdateEcole({ commit }, donnees) {
+            const token = "Token " + localStorage.getItem('token');
+            console.log(
+                "id  à updater =>" +
+                donnees[0] +
+                "\n objet modifié du save =>" +
+                JSON.stringify(donnees[1])
+            );
+
+            var body = donnees[1];
+            console.log(typeof body)
+            await axios
+                .put(`api/ecole/matiere/${donnees[0]}/`, body, {
+                    headers: {
+                        'Authorization': token,
+                    }
+                })
+                .then((response) => {
+                    let newMatiere = [donnees[0], donnees[1]]
+                    console.log("😍😍😍 new data sent =>" + JSON.stringify(donnees[1]) + '\n' + response);
+                    //****************attention il faut gérer ce beug (pas de mutation updateMatieres)
+                    commit("updateMatieres", newMatiere);
+
+                })
+                .catch(function(error) {
+
+                    console.log("😢😢😢" + JSON.stringify(donnees[1]) + '\nerrors' + error);
+                    if (error == "Error: Request failed with status code 403") {
+                        console.log('forbiden')
+                        commit('setErreurMessage')
+                    } else {
+                        console.log('oups pas forbiden')
+                    }
+
+                });
+        },
 
     },
     mutations: {
@@ -140,6 +251,17 @@ export default new Vuex.Store({
 
         initializeEleve(state, eleves) {
             state.eleves = eleves
+        },
+        createSite(state, site) {
+            state.site.push(site)
+        },
+        createEcole(state, ecole) {
+            state.ecole = ecole
+            localStorage.setItem("Infos Ecole", JSON.stringify(ecole))
+        },
+        createCycle(state, cycle) {
+            state.cycle = cycle
+
         },
 
         //cette methode est à corriger d'ici peu 

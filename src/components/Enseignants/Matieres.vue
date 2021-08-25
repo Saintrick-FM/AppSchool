@@ -3,16 +3,27 @@
     <v-data-table
       :headers="MyHeaders"
       :items="matieres"
-      sort-by="calories"
+      :single-select="singleSelect"
+      v-model="selected"
+      item-key="nomMatiere"
+      show-select
       class="elevation-1"
     >
       <template v-slot:top>
         <v-toolbar flat>
-          <v-toolbar-title>Matières enseignées</v-toolbar-title>
+          <v-toolbar-title
+            >Toutes les matières du {{ cycleClique }}</v-toolbar-title
+          >
           <v-divider class="mx-4" inset vertical></v-divider>
+          <!-- {{ selected }} -->
           <v-spacer></v-spacer>
 
-          <v-dialog v-model="dialog" max-width="500px">
+          <v-dialog
+            v-model="dialog"
+            transition="fab-transition"
+            dark
+            max-width="500px"
+          >
             <template v-slot:activator="{ on, attrs }">
               <v-btn color="primary" dark class="mb-2" v-bind="attrs" v-on="on">
                 Nouvelle matière
@@ -53,14 +64,14 @@
                         label="coefficient"
                       ></v-text-field>
                     </v-col>
-                    <v-col cols>
+                    <!-- <v-col cols>
                       <v-select
                         v-model="editedItem.classAssocie"
                         :items="identifiants_classes"
                         label="Enseignée en ?"
                         multiple
                       ></v-select>
-                    </v-col>
+                    </v-col> -->
                   </v-row>
                 </v-container>
               </v-card-text>
@@ -112,6 +123,25 @@
         </v-icon>
       </template>
 
+      <template v-slot:footer>
+        <v-btn
+          x-large
+          type="submit"
+          block
+          color="purple darken-4"
+          class="mr-4 text"
+          @click="confirmAllMatieres"
+        >
+          <span class="white--text"
+            >Confirmer l'affectation des matieres sélectionnées en
+            <v-chip color="primary" style="text-transform:lowercase">
+              {{ classeMatiere }}
+            </v-chip></span
+          >
+          <v-icon light>mdi-cached</v-icon>
+        </v-btn>
+      </template>
+
       <template v-slot:no-data>
         <v-btn color="primary">
           Pas de matières pour l'instant !
@@ -154,12 +184,15 @@
 import { mapGetters } from "vuex";
 export default {
   name: "Matieres",
+  props: ["cycleClique", "classeMatiere"],
   data: () => ({
     erreur: false,
     message_erreur: "",
     pluri_prof: ["Oui", "Non"],
     classes: [],
     identifiants_classes: [],
+    selected: [],
+    singleSelect: false,
     dialog: false,
     dialogDelete: false,
     loader: false,
@@ -210,14 +243,31 @@ export default {
   },
 
   beforeMount() {
-    this.editedItem.anneeScolaire = localStorage.getItem("annee_scolaire");
+    this.editedItem.anneeScolaire = JSON.parse(
+      localStorage.getItem("annee_scolaire")
+    )[0].anneeScolaire;
+    console.log("annee scolaire " + this.editedItem.anneeScolaire);
     this.matieres = JSON.parse(localStorage.getItem("Matieres"));
-    this.identifiants_classes = JSON.parse(localStorage.getItem("Id_classes"));
+    console.log("annee scolaire2 " + this.editedItem.anneeScolaire);
+    this.identifiants_classes = localStorage.getItem("Id_classes");
+
+    console.log("annee scolaire3 " + this.editedItem.anneeScolaire);
     this.classes = JSON.parse(localStorage.getItem("Classes"));
+    console.log("annee scolaire " + this.editedItem.anneeScolaire);
     //this.initialiseClasse();
   },
 
   methods: {
+    confirmAllMatieres() {
+      console.log(
+        "Matieres selected " +
+          JSON.stringify(this.selected) +
+          "\nClasseMatiere " +
+          this.classeMatiere +
+          "\nCycle " +
+          this.cycleClique
+      );
+    },
     CloseAlert() {
       this.message_erreur = "";
       this.erreur = false;
@@ -291,7 +341,7 @@ export default {
             "\n type objet modifié du save =>" +
             typeof donnees[1]
         );
-        this.$store.dispatch("actionUpdateMatiere", donnees);
+        // this.$store.dispatch("actionUpdateMatiere", donnees);
         if (localStorage.getItem("authStatut") == "DG") {
           console.log(
             "if de matiere. state.alertErreur => " +
@@ -315,8 +365,8 @@ export default {
         console.log(
           "classe Associée de l'objet créé =>" + this.editedItem.classAssocie
         );
-        this.$store.dispatch("actionCreateMatiere", this.editedItem);
-        if (this.$store.state.authStatut == "DG") {
+        //  this.$store.dispatch("actionCreateMatiere", this.editedItem);
+        if (localStorage.getItem("authStatut") === "DG") {
           this.matieres.push(this.editedItem);
         } else if (this.$store.state.authStatut == "secretaire") {
           console.log("else if de matieres");
