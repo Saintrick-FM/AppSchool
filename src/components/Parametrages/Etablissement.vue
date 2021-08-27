@@ -13,7 +13,7 @@
           <h2 class="purple--text text-uppercase">Informations générales</h2>
           <v-divider color="purple" class="mt-2"></v-divider>
           <v-form
-            @submit.prevent="onLoginRentree"
+            @submit.prevent="onLoginLeft"
             ref="form"
             v-model="valid"
             lazy-validation
@@ -107,11 +107,12 @@
               type="submit"
               block
               :disabled="!valid"
+              :loading="loading"
               color="purple darken-4"
               class="mr-4 text"
               @click="validate"
             >
-              <span class="white--text">Enregistrer</span>
+              <span class="white--text">{{ contentBtn }}</span>
               <v-icon light>mdi-cached</v-icon>
             </v-btn>
           </v-form>
@@ -124,7 +125,7 @@
           <v-divider color="purple" class="mt-2"></v-divider>
 
           <v-form
-            @submit.prevent="onLoginConges"
+            @submit.prevent="onLoginRight"
             ref="form"
             v-model="valid"
             lazy-validation
@@ -134,7 +135,7 @@
               <v-col cols="12" sm="6">
                 <v-text-field
                   label="Nombre de sites"
-                  v-model="editedNbreSites"
+                  v-model="editEcole.nbreSites"
                   type="number"
                   outlined
                   shaped
@@ -227,11 +228,12 @@
               </v-col>
               <v-col md="2">
                 <v-text-field
+                  :disabled="!editEcole.garderie"
                   type="number"
                   outlined
                   shaped
                   label="Total Salles"
-                  v-model="nbreSalleGarderie"
+                  v-model="editEcole.nbreSalleGarderie"
                 >
                 </v-text-field>
               </v-col>
@@ -243,17 +245,19 @@
               hidden
               block
               :disabled="!valid"
+              :loading="loading"
               color="purple darken-4"
               class="mr-4 text"
               @click="validate"
             >
-              <span class="white--text">Enregistrez</span>
+              <span class="white--text">{{ contentBtn }}</span>
               <v-icon light>mdi-cached</v-icon>
             </v-btn>
           </v-form>
         </v-card>
       </v-col>
       <v-btn
+        v-if="contentBtn === 'Enregistrez'"
         x-large
         block
         :loading="loading"
@@ -300,12 +304,12 @@
 
           <v-tab-item>
             <v-card flat>
-              <config-classes :Cycles="Cycles" :nomsCycles="editEcole.cycles" />
+              <config-classes :Cycles="Cycles" :nomsCycles="editedCycles" />
             </v-card>
           </v-tab-item>
           <v-tab-item>
             <v-card flat>
-              <configMatieres :Cycles="Cycles" :nomsCycles="editEcole.cycles" />
+              <configMatieres :Cycles="Cycles" :nomsCycles="editedCycles" />
             </v-card>
           </v-tab-item>
           <v-tab-item>
@@ -328,7 +332,7 @@ import { mapGetters } from "vuex";
 import configClasses from "@/components/Parametrages/configClasses.vue";
 import configMatieres from "@/components/Parametrages/configMatieres.vue";
 import configEmploisDuTemps from "@/components/Parametrages/configEmploisDuTemps.vue";
-
+import axios from "axios";
 mapGetters;
 export default {
   name: "AnneeScolaire",
@@ -339,9 +343,13 @@ export default {
   },
   data: () => ({
     search: "",
+    ecoleId: null,
+    showBtnModify: false,
+    contentBtn: "",
     loading: false,
     showAutresConfig: false,
     nomsCycles: ["Prescolaire", "Primaire", "College", "Lycée"],
+    firstSaveCycles: [],
     Cycles: [
       {
         nom: "Prescolaire",
@@ -509,6 +517,7 @@ export default {
       telephone: null,
       email: null,
       prefixmatricule: null,
+      nbreSites: 0,
 
       vagues: null,
       recreMidi: null,
@@ -525,7 +534,7 @@ export default {
     editedMidi: false,
     editedCycles: null,
 
-    editedNbreSites: 0,
+    nbreSites: 0,
 
     headers: [
       {
@@ -561,8 +570,46 @@ export default {
     ],
   }),
   computed: {},
-  created() {},
-  beforeMount() {},
+  created() {
+    if (localStorage.getItem("Ecole")) {
+      axios
+        .get("api/ecole/ecole/")
+        .then((response) => {
+          console.log("response.data " + JSON.stringify(response.data));
+          this.ecoleId = response.data[0].id;
+          console.log("Id ecole = " + this.ecoleId);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  },
+  beforeMount() {
+    if (localStorage.getItem("Ecole")) {
+      let ecole = JSON.parse(localStorage.getItem("Ecole"));
+      let Cycles = JSON.parse(localStorage.getItem("Cycles"));
+      // this.editEcole = ecole;
+      Object.assign(this.editEcole, ecole);
+      this.editedMidi = true;
+
+      this.nbreSalleGarderie = 2;
+      Cycles.forEach((cycle) => {
+        this.firstSaveCycles.push(cycle.nomCycle);
+      });
+
+      this.editedCycles = this.firstSaveCycles;
+      console.log(
+        "this.FirsSaveCycles in before mount " + this.firstSaveCycles
+      );
+      console.log("Ecole " + JSON.stringify(this.editEcole));
+      this.contentBtn = "Validez les Modifications";
+      this.showAutresConfig = true;
+    } else {
+      console.log("Ecole else" + this.editEcole);
+      this.showBtnModify = true;
+      this.contentBtn = "Enregistrez";
+    }
+  },
 
   watch: {},
 
@@ -570,39 +617,143 @@ export default {
     //..validate inputs
     validate() {
       this.$refs.form.validate();
-      console.log("this.editAnnee " + this.editAnnee);
+      // console.log("this.editAnnee " + this.editAnnee);
     },
 
     //Login method here
-    onLoginRentree() {
+    onLoginLeft() {
       //api call here
+      this.loading = true;
+      if (this.contentBtn !== "Enregistrez") {
+        console.log("modification partie gauche Ecole ");
 
-      console.log("On loginRentree " + JSON.stringify(this.editAnnee));
-      console.log(this.$refs.form.validate());
-      
-
-      //this.$store.dispatch("actionNewAnneeScolaire", anneeScolaire);
+        this.$store.dispatch("actionUpdateEcole", [
+          this.ecoleId,
+          this.editEcole,
+        ]);
+        setTimeout(() => {
+          this.loading = false;
+        }, 2000);
+      } else {
+        console.log("création impossible Partie gauche Ecole");
+      }
     },
-    onLoginConges() {
+    affectLastSaveCycles() {
+      this.firstSaveCycles = [];
+
+      let Cycles = JSON.parse(localStorage.getItem("Cycles"));
+      Cycles.forEach((cycle) => {
+        this.firstSaveCycles.push(cycle.nomCycle);
+      });
+    },
+
+    onLoginRight() {
       //api call here
-      console.log("On login Congés " + JSON.stringify(this.editAnnee));
+      this.loading = true;
+      this.affectLastSaveCycles();
+      if (this.contentBtn !== "Enregistrez") {
+        console.log("modification Ecole et cycles");
+
+        if (this.editedCycles.toString() === this.firstSaveCycles.toString()) {
+          this.$store.dispatch("actionUpdateEcole", [
+            this.ecoleId,
+            this.editEcole,
+          ]);
+          setTimeout(() => {
+            this.loading = false;
+          }, 2000);
+        } else {
+          /* this.$store.dispatch("actionUpdateEcole", [
+            this.ecoleId,
+            this.editEcole,
+          ]);*/
+
+          // this.firstSaveCycles = ["Primaire", "College"];
+
+          console.log("First Save Cycles " + this.firstSaveCycles);
+          console.log("Actual Cycles " + this.editedCycles);
+          let newCyclesToAdd = null;
+          let cyclesToDelete = null;
+
+          if (this.editedCycles.length >= this.firstSaveCycles.length) {
+            //  si tout est dans la grande liste ignorer, si 1 ou plusieurs cycles sont dans la 1ere liste, suprimer ce qui etait dans le firstSaveCycle qui n'est plus dans la new liste et créer ceux qui n'y sont pas
+            if (
+              this.firstSaveCycles.every((x) => this.editedCycles.includes(x))
+            ) {
+              newCyclesToAdd = this.editedCycles.filter(
+                (cycle) => !this.firstSaveCycles.includes(cycle)
+              );
+              console.log("Cycles to add 1er if " + newCyclesToAdd);
+
+              newCyclesToAdd.forEach((cycle) => {
+                this.$store.dispatch("actionCreateCycle", { nomCycle: cycle });
+              });
+            } else {
+              cyclesToDelete = this.firstSaveCycles.filter(
+                (cycle) => !this.editedCycles.includes(cycle)
+              );
+
+              console.log("Cycles to delete 1er if " + cyclesToDelete);
+              cyclesToDelete.forEach((cycle) => {
+                this.$store.dispatch("actionDeleteCycle", { nomCycle: cycle });
+              });
+
+              newCyclesToAdd = this.editedCycles.filter(
+                (cycle) => !this.firstSaveCycles.includes(cycle)
+              );
+              console.log("New Cycles to create 1er if " + newCyclesToAdd);
+              newCyclesToAdd.forEach((cycle) => {
+                this.$store.dispatch("actionCreateCycle", { nomCycle: cycle });
+              });
+            }
+          } else {
+            // si les 2 new cycles sont exactement dans la 1ere liste alors je supprime le ou les cycles de trop et si non je dois créer le ou les cycles qui manquent et laisse le reste
+            if (
+              this.editedCycles.every((x) => this.firstSaveCycles.includes(x))
+            ) {
+              cyclesToDelete = this.firstSaveCycles.filter(
+                (cycle) => !this.editedCycles.includes(cycle)
+              );
+
+              console.log("Cycles to delete dans le else " + cyclesToDelete);
+              cyclesToDelete.forEach((cycle) => {
+                this.$store.dispatch("actionDeleteCycle", { nomCycle: cycle });
+              });
+            } else {
+              newCyclesToAdd = this.firstSaveCycles.filter(
+                (cycle) => !this.editedCycles.includes(cycle)
+              );
+              console.log("Cycles to add dans le else  " + newCyclesToAdd);
+              newCyclesToAdd.forEach((cycle) => {
+                this.$store.dispatch("actionCreateCycle", { nomCycle: cycle });
+              });
+            }
+          }
+
+          /* newCycles.forEach((cycle) => {
+            this.$store.dispatch("actionCreateCycle", { nomCycle: cycle });
+          });*/
+        }
+
+        setTimeout(() => {
+          this.loading = false;
+        }, 2000);
+      } else {
+        console.log("création impossible Partie droite Ecole");
+      }
     },
+
     confirmAll() {
       //   editedCycles: null,
       // editedGarderie: false,
-      // editedNbreSites: 0,
+      // nbreSites: 0,
       // editedNbreSallesGarderie: 0,
       this.loading = true;
       // const annee = new Date();
       //const year = annee.getFullYear() + "-" + (annee.getFullYear() + 1);
 
-      let Cycle = {
-        nomCycle: "",
-      };
-
       this.editedCycles.forEach((cycle) => {
-        Cycle.nomCycle = cycle;
-        this.$store.dispatch("actionCreateCycle", Cycle);
+        this.$store.dispatch("actionCreateCycle", { nomCycle: cycle });
       });
 
       if (this.editEcole.heuresMidi) {
@@ -610,12 +761,14 @@ export default {
       } else {
         this.editEcole.vagues = "matin uniquement";
       }
-      this.editEcole.nbreSalleGarderie = parseInt(this.nbreSalleGarderie);
+      this.editEcole.nbreSalleGarderie = parseInt(
+        this.editEcole.nbreSalleGarderie
+      );
       this.$store.dispatch("actionCreateEcole", this.editEcole);
 
-      if (this.editedNbreSites >= 1) {
+      if (this.editEcole.nbreSites >= 1) {
         let index = 0;
-        while (index < this.editedNbreSites) {
+        while (index < this.editEcole.nbreSites) {
           this.$store.dispatch("actionCreateSite", {
             numeroSite: index + 1,
           });
@@ -625,7 +778,8 @@ export default {
       this.loading = false;
       this.showAutresConfig = true;
       this.$vuetify.goTo(document.body.scrollHeight);
-      
+      this.showBtnModify = true;
+      this.contentBtn = "Modifier";
     },
   },
 };

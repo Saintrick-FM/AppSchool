@@ -16,8 +16,8 @@ export default new Vuex.Store({
         authStatut: '',
 
         ecole: null,
-        cycle: null,
-        site: [],
+        cycles: [],
+        sites: [],
         annee_scolaire: null,
         token: '',
         AlertLogout: null,
@@ -113,7 +113,7 @@ export default new Vuex.Store({
         },
         async actionCreateCycle({ commit }, dataSend) {
             const token = "Token " + localStorage.getItem('token');
-            console.log('Cycle reçue ' + dataSend)
+            console.log('Cycle reçue ' + dataSend.nomCycle)
 
             let body = dataSend; //attention ne jamais oublié d'assigner les valeurs recues dans body car axios l'exige           
             await axios
@@ -123,8 +123,8 @@ export default new Vuex.Store({
                     }
                 })
                 .then((response) => {
-                    console.log("😃😃😃" + response);
-                    commit("createCycle", dataSend);
+                    console.log("😃😃😃" + JSON.stringify(response.data));
+                    commit("createCycle", response.data);
                 })
                 .catch(function(error) {
                     console.log('dataSend in catch action =>' + JSON.stringify(body))
@@ -132,6 +132,33 @@ export default new Vuex.Store({
 
                 });
         },
+
+        actionDeleteCycle({ commit }, index) {
+            var token = 'Token ' + localStorage.getItem('token')
+            console.log("Cycles to delete dans actionDelete " + index.nomCycle)
+            var config = {
+                method: 'delete',
+                url: `api/ecole/cycle/${index.nomCycle}`,
+                headers: {
+                    'Authorization': token
+                }
+            }
+            axios(config)
+                .then((resp) => {
+                    console.log('😍😍😍 element  ' + index.nomCycle + ' deleted\n' + JSON.stringify(resp));
+                    let deleted = JSON.parse(localStorage.getItem("Cycles"));
+
+                    let newCycles = deleted.filter(x => x.nomCycle !== index.nomCycle);
+                    localStorage.setItem("Cycles", JSON.stringify(newCycles));
+                    console.log("newCycles to store to localStorage " + JSON.stringify(newCycles))
+                        //Obliger de ne pas commiter a cause du Beug du cycle(index.nomCycle) que deleteCycle n'arrive pas à recuperer 
+                    commit('deleteCycle', index)
+
+                })
+                .catch((err) => { console.log(err) })
+
+        },
+
 
         async actionCreateEcole({ commit }, dataSent) {
             const token = "Token " + localStorage.getItem('token');
@@ -146,8 +173,8 @@ export default new Vuex.Store({
                 })
                 .then((response) => {
                     console.log("😃😃😃" + response);
-                    localStorage.setItem("Ecole", JSON.stringify(dataSent));
-                    commit('createEcole', dataSent)
+
+                    commit('createEcole', response.data)
                 })
                 .catch(function(error) {
                     console.log('dataSend in catch action =>' + JSON.stringify(body))
@@ -162,7 +189,7 @@ export default new Vuex.Store({
             console.log('Site reçue ' + JSON.stringify(dataSent));
 
             let body = {
-                identifiant: "Site "+dataSent.numeroSite
+                identifiant: "Site " + dataSent.numeroSite
             }; //attention ne jamais oublié d'assigner les valeurs recues dans body car axios l'exige           
             await axios
                 .post('api/ecole/site/', body, {
@@ -172,8 +199,7 @@ export default new Vuex.Store({
                 })
                 .then((response) => {
                     console.log("😃😃😃" + response);
-                    localStorage.setItem("Ecole", JSON.stringify(dataSent));
-                    commit("createSite", dataSent)
+                    commit("createSite", response.data)
                 })
                 .catch(function(error) {
 
@@ -184,6 +210,7 @@ export default new Vuex.Store({
         },
 
         async actionUpdateEcole({ commit }, donnees) {
+
             const token = "Token " + localStorage.getItem('token');
             console.log(
                 "id  à updater =>" +
@@ -193,18 +220,18 @@ export default new Vuex.Store({
             );
 
             var body = donnees[1];
-            console.log(typeof body)
+
             await axios
-                .put(`api/ecole/matiere/${donnees[0]}/`, body, {
+                .put(`api/ecole/ecole/${donnees[0]}/`, body, {
                     headers: {
                         'Authorization': token,
                     }
                 })
                 .then((response) => {
-                    let newMatiere = [donnees[0], donnees[1]]
-                    console.log("😍😍😍 new data sent =>" + JSON.stringify(donnees[1]) + '\n' + response);
+
+                    console.log("😍😍😍 new data sent =>" + JSON.stringify(donnees[1]) + '\n' + JSON.stringify(response.data));
                     //****************attention il faut gérer ce beug (pas de mutation updateMatieres)
-                    commit("updateMatieres", newMatiere);
+                    commit("updateEcole", response.data);
 
                 })
                 .catch(function(error) {
@@ -253,14 +280,30 @@ export default new Vuex.Store({
             state.eleves = eleves
         },
         createSite(state, site) {
-            state.site.push(site)
+            state.sites.push(site)
+            localStorage.setItem("Sites", JSON.stringify(state.sites));
         },
         createEcole(state, ecole) {
             state.ecole = ecole
-            localStorage.setItem("Infos Ecole", JSON.stringify(ecole))
+            localStorage.setItem("Ecole", JSON.stringify(ecole));
+        },
+        updateEcole(state, ecoleUpdated) {
+            state.ecole = ecoleUpdated
+            localStorage.setItem("Ecole", JSON.stringify(ecoleUpdated))
         },
         createCycle(state, cycle) {
-            state.cycle = cycle
+
+            state.cycles.push(cycle)
+            if (!localStorage.getItem("Cycles")) {
+                localStorage.setItem("Cycles", JSON.stringify(cycle));
+            } else {
+                let previousCycles = JSON.parse(localStorage.getItem("Cycles"));
+                let newCycles = previousCycles.concat(cycle);
+                localStorage.setItem("Cycles", JSON.stringify(newCycles));
+
+                console.log("newCycles to send in loacalStorage " + newCycles)
+            }
+
 
         },
 
@@ -289,6 +332,14 @@ export default new Vuex.Store({
         deleteMatiere(index) {
             const deleted = this.state.matieres.splice(index, 1);
             console.log(deleted)
+        },
+        deleteCycle(index) {
+
+            console.log("Json stringify " + JSON.stringify(index))
+            console.log('nomCycle received ' + index[0].nomCycle)
+                //  let newCycles = deleted.filter(x => x.nomCycle === nomCycle.nomCycle);
+                // localStorage.setItem("Cycles", JSON.stringify(newCycles));
+                //console.log("newCycles to store to localStorage " + newCycles)
         },
 
         removeAnneeScolaire(state) {

@@ -86,6 +86,7 @@ export default {
             Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
           },
         };
+
         axios(config)
           .then((response) => {
             const result = response.data;
