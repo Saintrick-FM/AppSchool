@@ -292,16 +292,17 @@ export default new Vuex.Store({
             localStorage.setItem("Ecole", JSON.stringify(ecoleUpdated))
         },
         createCycle(state, cycle) {
-
+            let initArrayOfCycles = []
+            initArrayOfCycles.push(cycle)
             state.cycles.push(cycle)
-            if (!localStorage.getItem("Cycles")) {
-                localStorage.setItem("Cycles", JSON.stringify(cycle));
-            } else {
+            if (localStorage.getItem("Cycles")) {
                 let previousCycles = JSON.parse(localStorage.getItem("Cycles"));
-                let newCycles = previousCycles.concat(cycle);
-                localStorage.setItem("Cycles", JSON.stringify(newCycles));
+                previousCycles.push(cycle);
+                console.log("newCycles to send in loacalStorage " + JSON.stringify(previousCycles))
+                localStorage.setItem("Cycles", JSON.stringify(previousCycles));
+            } else {
+                localStorage.setItem("Cycles", JSON.stringify(initArrayOfCycles));
 
-                console.log("newCycles to send in loacalStorage " + newCycles)
             }
 
 
@@ -340,6 +341,7 @@ export default new Vuex.Store({
                 //  let newCycles = deleted.filter(x => x.nomCycle === nomCycle.nomCycle);
                 // localStorage.setItem("Cycles", JSON.stringify(newCycles));
                 //console.log("newCycles to store to localStorage " + newCycles)
+
         },
 
         removeAnneeScolaire(state) {

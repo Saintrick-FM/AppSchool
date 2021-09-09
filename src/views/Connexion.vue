@@ -202,11 +202,15 @@ export default {
     onLogin() {
       this.loading = true;
       if (this.annee_choisi === "null") {
-        console.log("1er test");
-        this.annee_choisi = this.annees_scolaires[0].anneeScolaire;
-      } else {
-        this.$store.commit("setAnneeScolaire", this.annee_choisi);
+        this.anneesScolaire.length > 0
+          ? (this.annee_choisi = this.anneesScolaire[0].anneeScolaire)
+          : (this.annee_choisi = "⛔");
+
+        //  this.annee_choisi = this.annees_scolaires[0].anneeScolaire;
       }
+      /* else {
+        this.$store.commit("setAnneeScolaire", this.annee_choisi);
+      }*/
 
       console.log(
         "l'année choisie du component connexion est :" + this.annee_choisi
@@ -230,6 +234,10 @@ export default {
           // axios.defaults.headers.common["Authorization"] = "Token " + token;
           localStorage.setItem("token", token);
           localStorage.setItem("authStatut", this.name);
+          if (!this.annee_choisi) {
+            this.annee_choisi = "⛔";
+          }
+
           localStorage.setItem("année_scolaire", this.annee_choisi);
 
           this.$store.commit("initializeStore");

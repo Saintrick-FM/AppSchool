@@ -14,6 +14,7 @@
           <v-toolbar-title
             >Toutes les matières du {{ cycleClique }}</v-toolbar-title
           >
+
           <v-divider class="mx-4" inset vertical></v-divider>
           <!-- {{ selected }} -->
           <v-spacer></v-spacer>
@@ -29,6 +30,7 @@
                 Nouvelle matière
               </v-btn>
             </template>
+
             <v-card max-width="2000px">
               <v-card-title>
                 <span class="headline">{{ formTitle }}</span>
@@ -267,6 +269,11 @@ export default {
           "\nCycle " +
           this.cycleClique
       );
+
+      /*this.$store.dispatch("actionAffectMatieresInClasse", {
+        classe: this.classeMatiere,
+        matieres: this.selected,
+      });*/
     },
     CloseAlert() {
       this.message_erreur = "";

@@ -178,13 +178,14 @@
           <v-text-field
             v-model="search"
             append-icon="mdi-magnify"
-            label="Search"
+            label="Recherche"
             single-line
             hide-details
           ></v-text-field>
         </v-card-title>
         <v-data-table
-          style="flex:auto; margin-top:10px"
+          style="width: 1450px"
+          hide-default-footer
           :headers="headers"
           :items="allYears"
           :search="search"
@@ -193,8 +194,6 @@
         ></v-data-table>
       </v-card>
     </v-row>
-    <v-divider></v-divider>
-    <v-divider></v-divider>
   </v-row>
 </template>
 
@@ -236,8 +235,8 @@ export default {
       ouvertureAdministratif: null,
       rentreeScolaire: null,
 
-      conges1erTrimestre: "",
-      conges2eTrimestre: "",
+      conges1erTrimestre: null,
+      conges2eTrimestre: null,
       debutVacancesScolaire: null,
       debutVacancesAdministratives: null,
       statut: null,
@@ -270,12 +269,16 @@ export default {
     this.$store.dispatch("actionGetSchoolYears");
   },
   beforeMount() {
-    setTimeout(() => {
-      this.anneesScolaire.forEach((year) => {
-        this.allYears.push(year);
-      });
-    }, 1000);
-    let actualYear = localStorage.getItem("année_scolaire");
+    let annees_scolaires = JSON.parse(localStorage.getItem("annees_scolaires"));
+    if (annees_scolaires) {
+      setTimeout(() => {
+        annees_scolaires.forEach((year) => {
+          this.allYears.push(year);
+        });
+      }, 1000);
+    }
+
+    let actualYear = localStorage.getItem("annee_scolaire");
 
     console.log(
       "anneesScolaire de mapGetters " +
@@ -283,11 +286,21 @@ export default {
         "\n\n\nallYears => " +
         JSON.stringify(this.allYears)
     );
-
-    this.threeLastYears[0] = actualYear;
-    this.threeLastYears[1] = String(
-      parseInt(actualYear.slice(0, 4) - 1)
-    ).concat("-" + parseInt(actualYear.slice(0, 4)));
+    if (actualYear !== "null") {
+      this.threeLastYears[0] = actualYear;
+      this.threeLastYears[1] = String(
+        parseInt(actualYear.slice(0, 4) - 1)
+      ).concat("-" + parseInt(actualYear.slice(0, 4)));
+      console.log("threeLastYears[0] " + this.threeLastYears[0]);
+    } else {
+      const annee = new Date();
+      this.threeLastYears[0] =
+        annee.getFullYear() + "-" + (annee.getFullYear() + 1);
+      console.log("threeLastYears[1] " + this.threeLastYears[0]);
+      this.threeLastYears[1] = String(
+        parseInt(this.threeLastYears[0].slice(0, 4) - 1)
+      ).concat("-" + parseInt(this.threeLastYears[0].slice(0, 4)));
+    }
   },
 
   watch: {
@@ -348,7 +361,9 @@ export default {
       console.log(
         "this.editAnnee dans confirmAll " + JSON.stringify(this.editAnnee)
       );
+
       if (this.showModifAlert) {
+        console.log("editAnnee showModif" + JSON.stringify(this.editAnnee));
         this.editAnnee.statut = "année ouverte";
         this.$store.dispatch("actionModifAnneeScolaire", this.editAnnee);
         this.$store.dispatch("actionGetSchoolYears");
@@ -361,6 +376,7 @@ export default {
         }, 1500);
       } else {
         this.editAnnee.statut = "année ouverte";
+        console.log("editAnnee " + JSON.stringify(this.editAnnee));
         this.$store.dispatch("actionNewAnneeScolaire", this.editAnnee);
         this.$store.dispatch("actionGetSchoolYears");
         setTimeout(() => {

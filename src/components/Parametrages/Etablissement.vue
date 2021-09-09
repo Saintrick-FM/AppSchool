@@ -304,7 +304,16 @@
 
           <v-tab-item>
             <v-card flat>
-              <config-classes :Cycles="Cycles" :nomsCycles="editedCycles" />
+              <config-classes
+                :Cycles="Cycles"
+                :Garderie="{
+                  garderie: editEcole.garderie,
+                  nbreSalleGarderie: editEcole.nbreSalleGarderie,
+                  nbreSites: editEcole.nbreSites,
+                  midi: editedMidi,
+                }"
+                :nomsCycles="editedCycles"
+              />
             </v-card>
           </v-tab-item>
           <v-tab-item>
@@ -587,7 +596,12 @@ export default {
   beforeMount() {
     if (localStorage.getItem("Ecole")) {
       let ecole = JSON.parse(localStorage.getItem("Ecole"));
-      let Cycles = JSON.parse(localStorage.getItem("Cycles"));
+      let vraiCycles = JSON.parse(localStorage.getItem("Cycles"));
+      let Cycles = null;
+
+      Cycles = vraiCycles.filter((cycle) => cycle.nomCycle !== "Garderie");
+
+      console.log("cycles filtrés " + JSON.stringify(Cycles));
       // this.editEcole = ecole;
       Object.assign(this.editEcole, ecole);
       this.editedMidi = true;
@@ -649,6 +663,7 @@ export default {
 
     onLoginRight() {
       //api call here
+      //let ecole = JSON.parse(localStorage.getItem("Ecole"));
       this.loading = true;
       this.affectLastSaveCycles();
       if (this.contentBtn !== "Enregistrez") {
@@ -659,6 +674,7 @@ export default {
             this.ecoleId,
             this.editEcole,
           ]);
+
           setTimeout(() => {
             this.loading = false;
           }, 2000);
@@ -741,6 +757,11 @@ export default {
       } else {
         console.log("création impossible Partie droite Ecole");
       }
+      //création cycle Garderie
+      if (this.editEcole.garderie && this.editEcole.nbreSalleGarderie > 0) {
+        console.log("pret à ajouter le cycle garderie");
+        this.$store.dispatch("actionCreateCycle", { nomCycle: "Garderie" });
+      }
     },
 
     confirmAll() {
@@ -765,7 +786,7 @@ export default {
         this.editEcole.nbreSalleGarderie
       );
       this.$store.dispatch("actionCreateEcole", this.editEcole);
-
+      // création autant de sites que le nombre de sites entré
       if (this.editEcole.nbreSites >= 1) {
         let index = 0;
         while (index < this.editEcole.nbreSites) {
@@ -774,6 +795,11 @@ export default {
           });
           index++;
         }
+      }
+      //création cycle Garderie
+      if (this.editEcole.garderie && this.editEcole.nbreSalleGarderie > 0) {
+        console.log("pret à ajouter le cycle garderie");
+        this.$store.dispatch("actionCreateCycle", { nomCycle: "Garderie" });
       }
       this.loading = false;
       this.showAutresConfig = true;

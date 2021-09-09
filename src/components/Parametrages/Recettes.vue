@@ -1,0 +1,828 @@
+<template>
+  <div style="width:1300px">
+    <v-row>
+      <v-col cols="12">
+        <v-toolbar color="cyan" flat>
+          <v-col md="4" v-for="item in Finances" :key="item">
+            <v-toolbar-title
+              class="title-h6 font-weight-light pa-4 title-center"
+              style="margin-top:25px"
+            >
+              <v-btn elevation="2" width="125px" @click="showAlert(item)">{{
+                item
+              }}</v-btn></v-toolbar-title
+            >
+            <v-divider vertical color="primary"></v-divider>
+            <v-divider vertical color="primary"></v-divider>
+          </v-col>
+        </v-toolbar>
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col>
+        <v-alert
+          :value="alert1"
+          color="cyan"
+          elevation="2"
+          border="top"
+          transition="scale-transition"
+          icon="mdi-home"
+        >
+          <!-- Ici alignement des classes du cycle  -->
+
+          <div>
+            <v-carousel v-model="model" height="100">
+              <v-carousel-item
+                v-for="classe in classes"
+                :key="classe.identifiant"
+              >
+                <v-sheet height="100%" tile>
+                  <v-row class="fill-height" align="center" justify="center">
+                    <div class="text-h3 pb-2">
+                      {{
+                        classe.cycle === "Garderie"
+                          ? classe.identifiant + " (Garderie)"
+                          : classe.identifiant
+                      }}
+                    </div>
+                  </v-row>
+                </v-sheet>
+              </v-carousel-item>
+            </v-carousel>
+          </div>
+          <!-- Formulaire configs inscriptions, réinscriptions et écolage -->
+          <v-card elevation="11" class="pt-5">
+            <h2 class="purple--text text-uppercase">{{ activeTypeRecette }}</h2>
+            <v-divider color="purple" class="mt-2"></v-divider>
+
+            <v-form
+              @submit.prevent="onLogin()"
+              ref="form"
+              v-model="valid"
+              lazy-validation
+              class="mt-10 mb-6 pr-8 pl-8 pb-8 pt-4"
+            >
+              <v-row>
+                <v-col md="5">
+                  <v-text-field
+                    v-if="activeTypeRecette === 'Ecolage'"
+                    type="number"
+                    v-model="editRecette.montant"
+                    label="Montant Frais mensuel"
+                    shaped
+                    outlined
+                  ></v-text-field>
+                </v-col>
+                <v-col md="2" width="70px">
+                  <v-switch
+                    v-model="editRecette.obligatoire"
+                    filled
+                    label="Obligatoire ?"
+                    shaped
+                    outlined
+                  >
+                  </v-switch>
+                </v-col>
+
+                <v-col md="5">
+                  <v-text-field
+                    readonly
+                    v-model="anneeScolaireActuelle"
+                    label="Année scolaire"
+                    shaped
+                    outlined
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+
+              <v-row>
+                <v-col md="6">
+                  <v-text-field
+                    v-if="activeTypeRecette === 'Insc-Réinsc'"
+                    type="number"
+                    v-model="editRecette.fraisInscription"
+                    label="frais Inscription"
+                    shaped
+                    outlined
+                  ></v-text-field>
+                </v-col>
+                <v-col md="6">
+                  <v-text-field
+                    v-if="activeTypeRecette === 'Insc-Réinsc'"
+                    type="number"
+                    v-model="editRecette.fraisReinscription"
+                    label="Frais Reinscription"
+                    shaped
+                    outlined
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col md="12" style="margin-top:-20px">
+                  <v-text-field
+                    v-model="editRecette.periodePaiement"
+                    :label="
+                      activeTypeRecette === 'Ecolage'
+                        ? 'Date limite de recouvrement'
+                        : 'Periode de recouvrement'
+                    "
+                    :placeholder="
+                      activeTypeRecette === 'Ecolage'
+                        ? 'Ex: 07 jours après la fin du mois en cours '
+                        : 'Du 01/01/2021 au 01/05/2021'
+                    "
+                    :hint="
+                      activeTypeRecette === 'Ecolage'
+                        ? 'Ex: 07 jours après la fin du mois en cours '
+                        : 'Du 01/01/2021 au 01/05/2021'
+                    "
+                    persistent-hint
+                    shaped
+                    outlined
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+
+              <v-btn
+                x-large
+                type="submit"
+                hidden
+                block
+                :disabled="!recettesToShow"
+                :loading="loading"
+                color="purple darken-4"
+                class="mr-4 text"
+                @click="validate"
+              >
+                <span class="white--text">{{ contentBtn }}</span>
+                <v-icon light>mdi-cached</v-icon>
+              </v-btn>
+
+              <v-card>
+                <v-card-title>
+                  {{ activeTypeRecette }} {{ classeRecette }}
+                  <v-spacer></v-spacer>
+                  <v-text-field
+                    v-model="search"
+                    append-icon="mdi-magnify"
+                    label="Recherche"
+                    single-line
+                    hide-details
+                  ></v-text-field>
+                </v-card-title>
+                <v-data-table
+                  hide-default-footer
+                  :headers="
+                    activeTypeRecette === 'Insc-Réinsc'
+                      ? headersInscReinc
+                      : headersEcolage
+                  "
+                  :items="recettesToShow"
+                  :search="search"
+                  type="button"
+                  @click:row="recetteClicked"
+                ></v-data-table>
+              </v-card>
+            </v-form>
+          </v-card>
+        </v-alert>
+
+        <v-alert
+          :value="alertAutres"
+          color="cyan"
+          elevation="2"
+          border="top"
+          transition="scale-transition"
+        >
+          <v-data-table
+            :headers="MyHeaders"
+            :items="recettes"
+            item-key="type"
+            @click:row="showDetailsRecette(type)"
+            class="elevation-1"
+          >
+            <template v-slot:top>
+              <v-toolbar flat>
+                <v-toolbar-title
+                  >Toutes les autres recettes de l'éole</v-toolbar-title
+                >
+
+                <v-divider class="mx-4" inset vertical></v-divider>
+                <!-- {{ selected }} -->
+                <v-spacer></v-spacer>
+
+                <!-- boite de dialog pour ajout et modif classe -->
+                <v-dialog
+                  transition="fab-transition"
+                  persistent
+                  dark
+                  width="800px"
+                  v-model="dialog"
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      color="primary"
+                      dark
+                      class="mb-2"
+                      v-bind="attrs"
+                      v-on="on"
+                    >
+                      Nouvelle Recette
+                    </v-btn>
+                  </template>
+                  <v-card>
+                    <v-card-title>
+                      <span class="headline">{{ formTitle }}</span>
+                    </v-card-title>
+
+                    <v-card-text>
+                      <v-container>
+                        <v-row>
+                          <v-col cols="12" sm="6" md="4">
+                            <v-combobox
+                              v-model="editRecette.type"
+                              :items="[
+                                'Ecolage',
+                                'Inscription',
+                                'Reinscription',
+                                'Assurance',
+                                'Dossier d\'examen',
+                                'Macaron',
+                              ]"
+                              filled
+                              label="Type de Recette"
+                              shaped
+                              outlined
+                              hint="Choisissez un type de recette ou créez en un"
+                              persistent-hint
+                              small-chips
+                            >
+                            </v-combobox>
+                          </v-col>
+
+                          <v-col cols="12" sm="6" md="4">
+                            <v-text-field
+                              v-model="editRecette.periodePaiement"
+                              label="Période de recouvrement"
+                              shaped
+                              outlined
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="12" sm="6" md="6">
+                            <v-select
+                              v-model="editRecette.obligatoire"
+                              :items="['Oui', 'Non']"
+                              filled
+                              label="Obligatoire ?"
+                              shaped
+                              outlined
+                            >
+                            </v-select>
+                          </v-col>
+
+                          <v-col cols="12" sm="6" md="4">
+                            <v-text-field
+                              disabled
+                              readonly
+                              v-model="editRecette.annee_scolaire"
+                              label="Année scolaire"
+                              shaped
+                              outlined
+                            ></v-text-field>
+                          </v-col>
+                          <v-col cols="12" sm="6" md="6">
+                            <v-text-field
+                              type="number"
+                              v-model="editRecette.montant"
+                              label="Montant de la recette"
+                              shaped
+                              outlined
+                            ></v-text-field>
+                          </v-col>
+                        </v-row>
+                      </v-container>
+                    </v-card-text>
+
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn
+                        color="blue darken-1"
+                        text
+                        @click="cancelEditOrUpdateRecette"
+                      >
+                        Annulez et fermer
+                      </v-btn>
+                      <v-btn
+                        color="blue darken-1"
+                        text
+                        @click="saveEditOrUpdateRecette"
+                      >
+                        Enregistrez
+                      </v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+
+                <!-- suppression recette -->
+                <v-dialog
+                  dark
+                  v-model="dialogForDelete"
+                  transition="fab-transition"
+                  persistent
+                  max-width="500px"
+                >
+                  <v-card>
+                    <v-card-title class="headline"
+                      >Voulez-vous vraiment supprimer la recette
+
+                      <span style="color: red; margin: 3px 0px 0px 100px "
+                        >{{ recetteCliquee }} ?</span
+                      >
+                    </v-card-title>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn color="blue darken-1" text @click="closeDelete"
+                        >Annuler</v-btn
+                      >
+                      <v-btn
+                        color="blue darken-1"
+                        text
+                        @click="deleteItemConfirm"
+                        >OK</v-btn
+                      >
+                      <v-spacer></v-spacer>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+              </v-toolbar>
+            </template>
+
+            <template v-slot:item.actions="{ item }">
+              <v-icon small class="mr-2" @click="editerRecette(item)">
+                🏚
+              </v-icon>
+              <v-icon @click="deleteRecette(item)">
+                ❎
+              </v-icon>
+            </template>
+          </v-data-table>
+        </v-alert>
+      </v-col>
+    </v-row>
+  </div>
+</template>
+
+<script>
+import axios from "axios";
+export default {
+  data() {
+    return {
+      search: "",
+      valid: false,
+      loading: false,
+      alert1: false,
+      model: 0,
+      Finances: ["Ecolage", "Insc-Réinsc", "Autres"],
+      classeRecette: null,
+      allEcolageAutresFrais: null,
+      ConfigInscReinsc: null,
+      contentBtn: "Enregistrez",
+      anneeScolaireActuelle: null,
+      recettesToShow: [],
+      headersInscReinc: [
+        { text: "Classe", value: "classe", sortable: true },
+
+        { text: "Inscription", value: "fraisInscription" },
+        {
+          text: "Reinscription",
+          value: "fraisReinscription",
+          sortable: true,
+        },
+        { text: "Année scolaire", value: "AnneeScolaire", sortable: true },
+      ],
+      headersEcolage: [
+        { text: "Identifiant", value: "typeFrais", sortable: true },
+
+        { text: "Montant", value: "montant" },
+        {
+          text: "Période de recouvrement",
+          value: "periodePaiement",
+          sortable: true,
+        },
+        { text: "Année scolaire", value: "AnneeScolaire", sortable: true },
+        { text: "Crée le", value: "cree_le" },
+      ],
+
+      recettes: [
+        {
+          type: "Frais mensuels",
+          obligatoire: false,
+          periodePaiement: null,
+          annee_scolaire: null,
+          montant: null,
+          classesSpeciales: [],
+          onlyFor: false,
+        },
+        {
+          type: "Macaron",
+          obligatoire: false,
+          periodePaiement: null,
+          annee_scolaire: null,
+          montant: null,
+          classesSpeciales: [],
+          onlyFor: false,
+        },
+      ],
+      dialog: false,
+      dialogForDelete: false,
+      recetteCliquee: null,
+      MyHeaders: [
+        { text: "Identifiant", value: "type", sortable: true },
+        { text: "Obligatoire", value: "obligatoire" },
+        {
+          text: "Période de recouvrement",
+          value: "periodePaiement",
+          sortable: true,
+        },
+        { text: "Année scolaires", value: "annee_scolaire", sortable: true },
+        { text: "Montant", value: "montant", sortable: true },
+        {
+          text: "Classes Speciales",
+          value: "classesSpeciales",
+          sortable: false,
+        },
+        { text: "Actions", value: "actions", sortable: false },
+      ],
+
+      editedIndex: -1,
+      defaultItem: {
+        type: null,
+        obligatoire: false,
+        periodePaiement: null,
+        annee_scolaire: null,
+        montant: null,
+        classesSpeciales: [],
+        onlyFor: false,
+      },
+      editRecette: {
+        type: null,
+        obligatoire: true,
+        periodePaiement: null,
+        annee_scolaire: null,
+        montant: null,
+        classesSpeciales: [],
+        onlyFor: false,
+        fraisReinscription: null,
+        fraisInscription: null,
+      },
+      activeTypeRecette: null,
+      Cycles: null,
+      classes: [],
+      alertAutres: false,
+    };
+  },
+  computed: {
+    formTitle() {
+      return this.editedIndex === -1
+        ? "Nouvelle Recette"
+        : "Modification Recette";
+    },
+
+    /* recettesToShow() {
+      if (this.activeTypeRecette === "Insc-Réinsc") {
+        if (localStorage.getItem("Config inscReinsc").length > 0) {
+          let configInscReinsc = JSON.parse(
+            localStorage.getItem("Config inscReinsc")
+          );
+          return configInscReinsc.filter(
+            (inscReinc) => inscReinc.classe === this.classeRecette
+          );
+        } else {
+          return [];
+        }
+      } else {
+        if (localStorage.getItem("Config_Ecolage_et_Autres").length > 0) {
+          let configEcolageAutres = JSON.parse(
+            localStorage.getItem("Config_Ecolage_et_Autres")
+          );
+          return configEcolageAutres.filter(
+            (ecolageAutres) => ecolageAutres.classe === this.classeRecette
+          );
+        } else {
+          return [];
+        }
+      }
+    },*/
+  },
+  beforeMount() {
+    this.contentBtn = "Enregistrez";
+    this.getEcolageAutresFrais();
+    this.getConfigInscReinsc();
+    if (typeof localStorage.getItem("année_scolaire") === "string") {
+      this.anneeScolaireActuelle = localStorage.getItem("année_scolaire");
+      console.log("this.annee_scolaire " + this.anneeScolaireActuelle);
+    } else {
+      this.anneeScolaireActuelle = JSON.parse(
+        localStorage.getItem("année_scolaire")
+      ).anneeScolaire;
+    }
+
+    let classes = JSON.parse(localStorage.getItem("All Classes"));
+    classes.forEach((classe) => {
+      this.classes.push(classe);
+    });
+  },
+  updated() {
+    this.classeRecette = this.classes[this.model].identifiant;
+    console.log("classeRecette dans updated = " + this.classeRecette);
+    //this.recettesToShow = [];
+
+    /**/
+  },
+  watch: {
+    classeRecette(newValue, oldValue) {
+      this.recettesToShow = [];
+      this.editRecette = {};
+
+      if (this.activeTypeRecette && this.activeTypeRecette !== "Autres") {
+        console.log(this.activeTypeRecette + " teeeeest hééé");
+        this.recettesToShow = this.allEcolageAutresFrais.filter(
+          (frais) => frais.classe === this.classeRecette
+        );
+        console.log(
+          this.recettesToShow + " classeRecette " + this.classeRecette
+        );
+      }
+
+      if (this.recettesToShow === "Autres") {
+        this.recettesToShow = this.allEcolageAutresFrais.filter(
+          (frais) => frais.frais !== "Frais mensuels"
+        );
+        console.log(
+          this.recettesToShow + " classeRecette " + this.classeRecette
+        );
+      }
+      newValue || oldValue;
+    },
+    recettesToShow(newValue, oldValue) {
+      newValue || oldValue;
+    },
+  },
+
+  methods: {
+    validate() {
+      this.$refs.form.validate();
+      // console.log("this.editRecette " + this.editRecette);
+    },
+    async getEcolageAutresFrais() {
+      const token = "Token " + localStorage.getItem("token");
+
+      if (localStorage.getItem("token") != null) {
+        var config = {
+          method: "get",
+          url: "api/finances/ecolageAutresFrais/",
+          headers: {
+            Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
+          },
+        };
+        await axios(config)
+          .then((response) => {
+            const result = response.data;
+
+            console.log(result);
+
+            let element = [];
+
+            for (const key in result) {
+              element.push(result[key]);
+            }
+
+            this.allEcolageAutresFrais = element;
+            console.log(
+              "😃😃😃 this.paiementFrais => " +
+                this.allEcolageAutresFrais +
+                "this.response.data = " +
+                JSON.stringify(element)
+            );
+          })
+          .catch(function(error) {
+            console.log("😢😢😢" + error);
+          });
+      }
+    },
+    async getConfigInscReinsc() {
+      const token = "Token " + localStorage.getItem("token");
+
+      if (localStorage.getItem("token") != null) {
+        var config = {
+          method: "get",
+          url: "api/finances/ConfigFraisInscReinsc/",
+          headers: {
+            Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
+          },
+        };
+        await axios(config)
+          .then((response) => {
+            const result = response.data;
+
+            console.log(result);
+
+            let element = [];
+
+            for (const key in result) {
+              element.push(result[key]);
+            }
+
+            this.ConfigInscReinsc = element;
+            console.log(
+              "😃😃😃 this.ConfigInscReinsc => " +
+                this.ConfigInscReinsc +
+                "this.response.data = " +
+                JSON.stringify(element)
+            );
+          })
+          .catch(function(error) {
+            console.log("😢😢😢" + error);
+          });
+      }
+    },
+
+    onLogin() {
+      let configFraisToSend = {
+        typeFrais: null,
+        periodePaiement: this.editRecette.periodePaiement,
+        montant: this.editRecette.montant,
+        classe: null,
+        obligatoire: this.editRecette.obligatoire,
+        AnneeScolaire: this.anneeScolaireActuelle,
+      };
+      let inscReinsToSend = {
+        fraisInscription: null,
+        fraisReinscription: null,
+        classe: null,
+        AnneeScolaire: this.anneeScolaireActuelle,
+      };
+
+      if (
+        this.activeTypeRecette === "Ecolage" ||
+        this.activeTypeRecette === "Autres"
+      ) {
+        if (this.activeTypeRecette === "Ecolage") {
+          configFraisToSend.typeFrais = "Frais mensuels";
+          configFraisToSend.classe = this.classeRecette;
+        } else {
+          configFraisToSend.typeFrais = "";
+        }
+
+        console.log(
+          "Recette " +
+            JSON.stringify(this.editRecette) +
+            "\nthis.classeRecette " +
+            this.classeRecette
+        );
+
+        this.$store.dispatch("actionNewConfigEcolage", configFraisToSend);
+        setTimeout(() => {
+          this.allEcolageAutresFrais = JSON.parse(
+            localStorage.getItem("Config_Ecolage_et_Autres")
+          );
+          this.recettesToShow = this.allEcolageAutresFrais.filter(
+            (frais) => frais.classe === this.classeRecette
+          );
+        }, 2000);
+      } else {
+        console.log("Config Inscriptions ou reinscriptions");
+
+        inscReinsToSend.fraisInscription = this.editRecette.fraisInscription;
+        inscReinsToSend.fraisReinscription = this.editRecette.fraisReinscription;
+        inscReinsToSend.classe = this.classeRecette;
+
+        this.$store.dispatch("actionNewConfigInscReinsc", inscReinsToSend);
+        setTimeout(() => {
+          this.ConfigInscReinsc = JSON.parse(
+            localStorage.getItem("Config inscReinsc")
+          );
+          this.recettesToShow = this.ConfigInscReinsc.filter(
+            (frais) => frais.classe === this.classeRecette
+          );
+        }, 2000);
+      }
+    },
+
+    recetteClicked: function(item, row) {
+      row.select(true);
+      console.log("item cliqué" + JSON.stringify(item));
+      console.log(
+        "anneesScolaire de mapGetters " +
+          JSON.stringify(this.anneesScolaire) +
+          "\nallYears => " +
+          this.allYears
+      );
+      this.contentBtn = "Confirmez les modifications";
+      this.$vuetify.goTo(document.body.scrollTop);
+
+      this.editRecette.cree_le = item.cree_le;
+
+      /*editRecette: {
+        type: null,
+        obligatoire: false,
+        periodePaiement: null,
+        annee_scolaire: null,
+        montant: null,
+        classesSpeciales: [],
+        onlyFor: false,
+      },
+*/
+      this.editRecette.obligatoire = item.obligatoire;
+      this.editRecette.periodePaiement = item.periodePaiement;
+      this.editRecette.annee_scolaire = item.annee_scolaire;
+      this.editRecette.montant = item.montant;
+    },
+
+    showAlert(item) {
+      console.log(item);
+      this.activeTypeRecette = item;
+      this.recettesToShow = [];
+
+      if (item === "Ecolage") {
+        console.log(
+          this.recettesToShow + " classeRecette " + this.classeRecette
+        );
+        this.recettesToShow = this.allEcolageAutresFrais.filter(
+          (frais) => frais.classe === this.classeRecette
+        );
+      }
+
+      if (item === "Autres") {
+        this.recettesToShow = this.allEcolageAutresFrais.filter(
+          (frais) => frais.frais !== "Frais mensuels"
+        );
+        this.alert1 = false;
+
+        setTimeout(() => {
+          this.alertAutres = true;
+        }, 200);
+      } else {
+        if (this.alert1) {
+          this.alertAutres = false;
+          this.alert1 = false;
+          setTimeout(() => {
+            this.alert1 = true;
+          }, 200);
+        } else {
+          this.alertAutres = false;
+          this.alert1 = true;
+        }
+      }
+    },
+    showDetailsRecette(type) {
+      console.log("Type recette cliquée " + type);
+    },
+    editerRecette(item) {
+      console.log("classe cliquée " + JSON.stringify(item));
+
+      this.editedIndex = this.classes.indexOf(item);
+      this.editRecette = Object.assign({}, item);
+
+      // this.Garderie.nbreSites > 1 ? this.sites : "Site unique";
+
+      this.dialog = true;
+    },
+
+    deleteRecette(item) {
+      console.log("delete " + item.identifiant);
+      this.classeCliquee = item.identifiant;
+      this.editedIndex = this.classes.indexOf(item);
+      this.editRecette = Object.assign({}, item);
+      this.dialogForDelete = true;
+    },
+
+    deleteItemConfirm() {
+      this.classes.splice(this.editedIndex, 1);
+      this.closeDelete();
+    },
+
+    cancelEditOrUpdateRecette() {
+      this.dialog = false;
+      this.$nextTick(() => {
+        this.editRecette = Object.assign({}, this.defaultClasse);
+        this.editedIndex = -1;
+      });
+    },
+
+    closeDelete() {
+      this.dialogForDelete = false;
+      this.$nextTick(() => {
+        this.editRecette = Object.assign({}, this.defaultClasse);
+        this.editedIndex = -1;
+      });
+    },
+    saveEditOrUpdateRecette() {
+      console.log("Coucou");
+    },
+  },
+};
+</script>
+
+<style></style>

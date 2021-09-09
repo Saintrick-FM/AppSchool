@@ -70,7 +70,7 @@
           </div>
 
           <v-card-title primary-title>
-            Sélectionnez les matières à affecter en {{ classeMatiere }}. Vous
+            Sélectionnez les matières à affecter au {{ classeMatiere }}. Vous
             pouvez en créer si besoin.
           </v-card-title>
 
@@ -110,7 +110,7 @@ export default {
         { text: "Vague", value: "vague" },
         { text: "Nmbre de Salles", value: "nbreSalle" },
         { text: "Capacité totale", value: "contenance" },
-        { text: "Actions", align: "center", value: "actions" },
+        { text: "Acti0ons", align: "center", value: "actions" },
       ],
 
       classeColors: [

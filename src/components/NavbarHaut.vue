@@ -63,7 +63,13 @@ export default {
     },
   },
   beforeMount() {
-    this.annee_scolaire = localStorage.getItem("année scolaire");
+    if (typeof localStorage.getItem("année_scolaire") === "string") {
+      this.annee_scolaire = localStorage.getItem("année_scolaire");
+    } else {
+      this.annee_scolaire = JSON.parse(
+        localStorage.getItem("année_scolaire")
+      ).anneeScolaire;
+    }
     //this.annee_scolaire = this.$store.state.annee_scolaire;
   },
   computed: {

@@ -807,7 +807,7 @@ export default {
     },
     advancedMonthStyle() {
       let taille = this.moisAvance.length;
-      return 4 <= taille <= 7 ? "margin:0px 5px 0px 175px" : "margin-left:15px";
+      return 4 <= taille <= 7  ? "margin:0px 5px 0px 175px" : "margin-left:15px";
     },
     monthToPayStyle() {
       let taille = this.moisToPay.length;
