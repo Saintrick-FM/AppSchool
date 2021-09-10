@@ -149,7 +149,9 @@
                 type="submit"
                 hidden
                 block
-                :disabled="!recettesToShow"
+                :disabled="
+                  recettesToShow.length > 0 && contentBtn === 'Enregistrez'
+                "
                 :loading="loading"
                 color="purple darken-4"
                 class="mr-4 text"
