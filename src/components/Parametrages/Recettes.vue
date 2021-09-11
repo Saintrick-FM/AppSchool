@@ -57,6 +57,7 @@
             <v-divider color="purple" class="mt-2"></v-divider>
 
             <v-form
+              v-if="activeTypeRecette === 'Ecolage'"
               @submit.prevent="onLogin()"
               ref="form"
               v-model="valid"
@@ -76,7 +77,9 @@
                 </v-col>
                 <v-col md="2" width="70px">
                   <v-switch
-                    v-model="editRecette.obligatoire"
+                    disabled
+                    input-value="true"
+                    v-model="obligatoire"
                     filled
                     label="Obligatoire ?"
                     shaped
@@ -167,8 +170,139 @@
                   <v-spacer></v-spacer>
                   <v-text-field
                     v-model="search"
+                    readonly
+                    disabled
                     append-icon="mdi-magnify"
-                    label="Recherche"
+                    label="Cliquez sur la recette pour modifier celle-ci"
+                    single-line
+                    hide-details
+                  ></v-text-field>
+                </v-card-title>
+
+                <!-- Table pour Ecolage -->
+                <v-data-table
+                  hide-default-footer
+                  :headers="
+                    activeTypeRecette === 'Insc-Réinsc'
+                      ? headersInscReinc
+                      : headersEcolage
+                  "
+                  :items="recettesToShow"
+                  no-data-text="Aucune recette enregistrée pour cette classe."
+                  :search="search"
+                  type="button"
+                  @click:row="recetteClicked"
+                ></v-data-table>
+              </v-card>
+            </v-form>
+            <!-- Formulaire pour Inscriptions Réinscriptions  -->
+            <v-form
+              v-else
+              @submit.prevent="onLogin()"
+              ref="form"
+              v-model="valid"
+              lazy-validation
+              class="mt-10 mb-6 pr-8 pl-8 pb-8 pt-4"
+            >
+              <v-row>
+                <v-col md="5">
+                  <v-text-field
+                    v-model="editRecette.periodePaiement"
+                    :label="
+                      activeTypeRecette === 'Ecolage'
+                        ? 'Date limite de recouvrement'
+                        : 'Periode de recouvrement'
+                    "
+                    :placeholder="
+                      activeTypeRecette === 'Ecolage'
+                        ? 'Ex: 07 jours après la fin du mois en cours '
+                        : 'Du 01/01/2021 au 01/05/2021'
+                    "
+                    :hint="
+                      activeTypeRecette === 'Ecolage'
+                        ? 'Ex: 07 jours après la fin du mois en cours '
+                        : 'Du 01/01/2021 au 01/05/2021'
+                    "
+                    append-icon=""
+                    persistent-hint
+                    shaped
+                    outlined
+                  ></v-text-field>
+                </v-col>
+                <v-col md="2" width="70px">
+                  <v-switch
+                    v-model="obligatoire"
+                    disabled
+                    input-value="true"
+                    filled
+                    label="Obligatoire ?"
+                    shaped
+                    outlined
+                  >
+                  </v-switch>
+                </v-col>
+
+                <v-col md="5">
+                  <v-text-field
+                    readonly
+                    v-model="anneeScolaireActuelle"
+                    label="Année scolaire"
+                    shaped
+                    outlined
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+
+              <v-row>
+                <v-col md="6">
+                  <v-text-field
+                    v-if="activeTypeRecette === 'Insc-Réinsc'"
+                    type="number"
+                    v-model="editRecette.fraisInscription"
+                    label="frais Inscription"
+                    shaped
+                    outlined
+                  ></v-text-field>
+                </v-col>
+                <v-col md="6">
+                  <v-text-field
+                    v-if="activeTypeRecette === 'Insc-Réinsc'"
+                    type="number"
+                    v-model="editRecette.fraisReinscription"
+                    label="Frais Reinscription"
+                    shaped
+                    outlined
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+
+              <v-btn
+                x-large
+                type="submit"
+                hidden
+                block
+                :disabled="
+                  recettesToShow.length > 0 && contentBtn === 'Enregistrez'
+                "
+                :loading="loading"
+                color="purple darken-4"
+                class="mr-4 text"
+                @click="validate"
+              >
+                <span class="white--text">{{ contentBtn }}</span>
+                <v-icon light>mdi-cached</v-icon>
+              </v-btn>
+
+              <v-card>
+                <v-card-title>
+                  {{ activeTypeRecette }} {{ classeRecette }}
+                  <v-spacer></v-spacer>
+                  <v-text-field
+                    v-model="search"
+                    readonly
+                    disabled
+                    append-icon="mdi-magnify"
+                    label="Cliquez sur la recette pour modifier celle-ci"
                     single-line
                     hide-details
                   ></v-text-field>
@@ -181,6 +315,7 @@
                       : headersEcolage
                   "
                   :items="recettesToShow"
+                  no-data-text="Aucune recette enregistrée pour cette classe."
                   :search="search"
                   type="button"
                   @click:row="recetteClicked"
@@ -273,7 +408,7 @@
                           </v-col>
                           <v-col cols="12" sm="6" md="6">
                             <v-select
-                              v-model="editRecette.obligatoire"
+                              v-model="obligatoire"
                               :items="['Oui', 'Non']"
                               filled
                               label="Obligatoire ?"
@@ -392,6 +527,8 @@ export default {
       contentBtn: "Enregistrez",
       anneeScolaireActuelle: null,
       recettesToShow: [],
+      obligatoire: true,
+
       headersInscReinc: [
         { text: "Classe", value: "classe", sortable: true },
 
@@ -402,6 +539,7 @@ export default {
           sortable: true,
         },
         { text: "Année scolaire", value: "AnneeScolaire", sortable: true },
+        { text: "Crée le", value: "cree_le" },
       ],
       headersEcolage: [
         { text: "Identifiant", value: "typeFrais", sortable: true },
@@ -460,7 +598,7 @@ export default {
       editedIndex: -1,
       defaultItem: {
         type: null,
-        obligatoire: false,
+        obligatoire: true,
         periodePaiement: null,
         annee_scolaire: null,
         montant: null,
@@ -490,32 +628,6 @@ export default {
         ? "Nouvelle Recette"
         : "Modification Recette";
     },
-
-    /* recettesToShow() {
-      if (this.activeTypeRecette === "Insc-Réinsc") {
-        if (localStorage.getItem("Config inscReinsc").length > 0) {
-          let configInscReinsc = JSON.parse(
-            localStorage.getItem("Config inscReinsc")
-          );
-          return configInscReinsc.filter(
-            (inscReinc) => inscReinc.classe === this.classeRecette
-          );
-        } else {
-          return [];
-        }
-      } else {
-        if (localStorage.getItem("Config_Ecolage_et_Autres").length > 0) {
-          let configEcolageAutres = JSON.parse(
-            localStorage.getItem("Config_Ecolage_et_Autres")
-          );
-          return configEcolageAutres.filter(
-            (ecolageAutres) => ecolageAutres.classe === this.classeRecette
-          );
-        } else {
-          return [];
-        }
-      }
-    },*/
   },
   beforeMount() {
     this.contentBtn = "Enregistrez";
@@ -549,11 +661,22 @@ export default {
 
       if (this.activeTypeRecette && this.activeTypeRecette !== "Autres") {
         console.log(this.activeTypeRecette + " teeeeest hééé");
-        this.recettesToShow = this.allEcolageAutresFrais.filter(
-          (frais) => frais.classe === this.classeRecette
-        );
+
+        // affecte this.recetteToShow par rapport au type recette cliqué(Ecolage ou Insc-Réinsc)
+        this.activeTypeRecette === "Ecolage"
+          ? (this.recettesToShow = this.allEcolageAutresFrais.filter(
+              (frais) => frais.classe === this.classeRecette
+            ))
+          : (this.recettesToShow = this.ConfigInscReinsc.filter(
+              (frais) => frais.classe === this.classeRecette
+            ));
+        this.recettesToShow
+          ? (this.contentBtn = "Enregistrez")
+          : (this.contentBtn = "Enregistrez");
         console.log(
-          this.recettesToShow + " classeRecette " + this.classeRecette
+          JSON.stringify(this.recettesToShow) +
+            " classeRecette " +
+            this.classeRecette
         );
       }
 
@@ -562,7 +685,9 @@ export default {
           (frais) => frais.frais !== "Frais mensuels"
         );
         console.log(
-          this.recettesToShow + " classeRecette " + this.classeRecette
+          JSON.stringify(this.recettesToShow) +
+            " classeRecette " +
+            this.classeRecette
         );
       }
       newValue || oldValue;
@@ -656,12 +781,13 @@ export default {
         periodePaiement: this.editRecette.periodePaiement,
         montant: this.editRecette.montant,
         classe: null,
-        obligatoire: this.editRecette.obligatoire,
+        obligatoire: this.obligatoire,
         AnneeScolaire: this.anneeScolaireActuelle,
       };
       let inscReinsToSend = {
         fraisInscription: null,
         fraisReinscription: null,
+        periodePaiement: null,
         classe: null,
         AnneeScolaire: this.anneeScolaireActuelle,
       };
@@ -699,6 +825,7 @@ export default {
         inscReinsToSend.fraisInscription = this.editRecette.fraisInscription;
         inscReinsToSend.fraisReinscription = this.editRecette.fraisReinscription;
         inscReinsToSend.classe = this.classeRecette;
+        inscReinsToSend.periodePaiement = this.editRecette.periodePaiement;
 
         this.$store.dispatch("actionNewConfigInscReinsc", inscReinsToSend);
         setTimeout(() => {
@@ -723,8 +850,20 @@ export default {
       );
       this.contentBtn = "Confirmez les modifications";
       this.$vuetify.goTo(document.body.scrollTop);
-
-      this.editRecette.cree_le = item.cree_le;
+      if (this.activeTypeRecette === "Ecolage") {
+        this.editRecette.cree_le = item.cree_le;
+        this.obligatoire = item.obligatoire;
+        this.editRecette.periodePaiement = item.periodePaiement;
+        this.editRecette.annee_scolaire = item.annee_scolaire;
+        this.editRecette.montant = item.montant;
+      } else if (this.activeTypeRecette === "Insc-Réinsc") {
+        this.editRecette.annee_scolaire = item.annee_scolaire;
+        this.editRecette.periodePaiement = item.periodePaiement;
+        this.editRecette.fraisInscription = item.fraisInscription;
+        this.editRecette.fraisReinscription = item.fraisReinscription;
+      } else {
+        console.log("Autres frais à gérer");
+      }
 
       /*editRecette: {
         type: null,
@@ -736,23 +875,29 @@ export default {
         onlyFor: false,
       },
 */
-      this.editRecette.obligatoire = item.obligatoire;
-      this.editRecette.periodePaiement = item.periodePaiement;
-      this.editRecette.annee_scolaire = item.annee_scolaire;
-      this.editRecette.montant = item.montant;
     },
 
     showAlert(item) {
       console.log(item);
+
       this.activeTypeRecette = item;
       this.recettesToShow = [];
+      this.contentBtn = "Enregistrez";
+      this.editRecette = {};
 
-      if (item === "Ecolage") {
+      if (item !== "Autres") {
+        // affecte this.recetteToShow par rapport au type recette cliqué(Ecolage ou Insc-Réinsc)
+        item === "Ecolage"
+          ? (this.recettesToShow = this.allEcolageAutresFrais.filter(
+              (frais) => frais.classe === this.classeRecette
+            ))
+          : (this.recettesToShow = this.ConfigInscReinsc.filter(
+              (frais) => frais.classe === this.classeRecette
+            ));
         console.log(
-          this.recettesToShow + " classeRecette " + this.classeRecette
-        );
-        this.recettesToShow = this.allEcolageAutresFrais.filter(
-          (frais) => frais.classe === this.classeRecette
+          JSON.stringify(this.recettesToShow) +
+            " classeRecette " +
+            this.classeRecette
         );
       }
 

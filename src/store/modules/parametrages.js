@@ -154,14 +154,15 @@ const actions = {
                 }
             })
             .then((response) => {
-                console.log("new Config Ecolage sent to Database " + body)
+                console.log("new Config Ecolage sent to Database " + JSON.stringify(response.data))
 
                 let initArrayOfEcolages = [];
-                initArrayOfEcolages.push(ecolage)
+                response.data.cree_le = response.data.cree_le.slice(0, 16).replace("T", " à ");
+                initArrayOfEcolages.push(response.data)
 
                 if (localStorage.getItem("Config_Ecolage_et_Autres")) {
                     let previousEcolages = JSON.parse(localStorage.getItem("Config_Ecolage_et_Autres"));
-                    previousEcolages.push(ecolage);
+                    previousEcolages.push(response.data);
 
                     console.log("newClasses to send in loacalStorage " + JSON.stringify(previousEcolages))
                     localStorage.setItem("Config_Ecolage_et_Autres", JSON.stringify(previousEcolages));
@@ -191,14 +192,16 @@ const actions = {
                 }
             })
             .then((response) => {
-                console.log("new Config Insc Reinsc sent to Database " + inscReinsc)
+                console.log("new Config Insc Reinsc sent to Database " + JSON.stringify(response.data))
 
                 let initArrayOfInscReinsc = [];
-                initArrayOfInscReinsc.push(inscReinsc)
+                response.data.cree_le = response.data.cree_le.slice(0, 16).replace("T", " à ");
+                initArrayOfInscReinsc.push(response.data)
 
                 if (localStorage.getItem("Config inscReinsc")) {
                     let previousInscReinsc = JSON.parse(localStorage.getItem("Config inscReinsc"));
-                    previousInscReinsc.push(inscReinsc);
+
+                    previousInscReinsc.push(response.data);
 
                     console.log("newClasses to send in localStorage " + JSON.stringify(previousInscReinsc))
                     localStorage.setItem("Config inscReinsc", JSON.stringify(previousInscReinsc));
