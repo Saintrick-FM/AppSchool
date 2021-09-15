@@ -7,6 +7,74 @@ const state = {
 
 };
 const actions = {
+    actionNewConfigDepense({ commit }, newDepense) {
+        console.log("newDepense recu dans le store " + JSON.stringify(newDepense))
+        const token = "Token " + localStorage.getItem("token");
+
+        let body = newDepense; //attention ne jamais oublié d'assigner les valeurs recues dans body car axios l'exige
+        axios
+            .post('api/finances/configDepense/', body, {
+                headers: {
+                    'Authorization': token,
+                }
+            })
+            .then((response) => {
+                console.log("new Config_Dépenses sent to Database " + JSON.stringify(response.data))
+
+                let initArrayOfNewDepenses = [];
+                response.data.cree_le = response.data.cree_le.slice(0, 16).replace("T", " à ");
+                initArrayOfNewDepenses.push(response.data)
+
+                if (localStorage.getItem("Config_Dépenses")) {
+                    let previousDepenses = JSON.parse(localStorage.getItem("Config_Dépenses"));
+
+                    console.log("previous dépenses " + JSON.stringify(previousDepenses))
+                    previousDepenses.push(response.data);
+
+                    console.log("new dépenses to send in localStorage " + JSON.stringify(previousDepenses))
+                    localStorage.setItem("Config_Dépenses", JSON.stringify(previousDepenses));
+
+                } else {
+                    localStorage.setItem("Config_Dépenses", JSON.stringify(initArrayOfNewDepenses));
+                }
+
+                commit("newDepense", response.data);
+            })
+            .catch(function(error) {
+                console.log('new Config Autre Frais in catch action =>' + JSON.stringify(body))
+                console.log("😢😢😢" + error);
+
+            });
+
+    },
+    actionUpdateConfigDepense({ commit }, depenseUpdated) {
+        const token = "Token " + localStorage.getItem('token');
+
+        var body = depenseUpdated;
+        console.log(typeof body)
+
+        axios
+            .put(`api/finances/configDepense/${body.identifiant}/`, body, {
+                headers: {
+                    'Authorization': token,
+                }
+            })
+            .then((response) => {
+
+                console.log("😍😍😍 update Dépense " + JSON.stringify(body) + '\n' + response.data);
+                let allDepenses = JSON.parse(localStorage.getItem('Config_Dépenses'));
+
+                allDepenses.splice(allDepenses.indexOf(body.identifiant), 1, body)
+
+                localStorage.setItem("Config_Dépenses", JSON.stringify(allDepenses))
+
+                commit("updateDepense", response.data);
+
+            })
+            .catch(function(error) {
+                console.log("😢😢😢 errors" + error);
+            })
+    },
     actionNewAnneeScolaire({ commit }, anneeScolaire) {
         const token = "Token " + localStorage.getItem("token");
 
@@ -148,7 +216,7 @@ const actions = {
 
         let body = ecolage; //attention ne jamais oublié d'assigner les valeurs recues dans body car axios l'exige
         axios
-            .post('api/finances/ecolageAutresFrais/', body, {
+            .post('api/finances/configEcolage/', body, {
                 headers: {
                     'Authorization': token,
                 }
@@ -175,6 +243,84 @@ const actions = {
             })
             .catch(function(error) {
                 console.log('new Config Ecolage in catch action =>' + JSON.stringify(body))
+                console.log("😢😢😢" + error);
+
+            });
+
+    },
+
+    async actionInitialiseFraisDeBase({ commit }, frais) {
+        const token = "Token " + localStorage.getItem("token");
+        let body = frais; //attention ne jamais oublié d'assigner les valeurs recues dans body car axios l'exige
+        await axios
+            .post('api/finances/configFraisEleve/', body, {
+                headers: {
+                    'Authorization': token,
+                }
+            })
+            .then((response) => {
+
+                console.log("😃😃😃" + JSON.stringify(response.data));
+
+                let initArrayFraisDeBase = [];
+                initArrayFraisDeBase.push(response.data)
+
+                if (localStorage.getItem("Frais_de_base")) {
+                    let previousFraisDebase = JSON.parse(localStorage.getItem("Frais_de_base"));
+                    console.log("previousFraisdebase => " + JSON.parse(localStorage.getItem("Frais_de_base")));
+
+                    previousFraisDebase.push(response.data);
+
+                    console.log("new frais de base to send in localStorage " + JSON.stringify(previousFraisDebase))
+                    localStorage.setItem("Frais_de_base", JSON.stringify(previousFraisDebase));
+
+                } else {
+                    localStorage.setItem("Frais_de_base", JSON.stringify(initArrayFraisDeBase));
+                }
+                commit("InititialiseFraisDeBase", response.data);
+            })
+            .catch(function(error) {
+                console.log('frais de base in catch action =>' + JSON.stringify(body))
+                console.log("😢😢😢" + error);
+
+            });
+
+    },
+    actionNewConfigAutresFrais({ commit }, autreFrais) {
+        console.log("autreFrais recu dans le store " + JSON.stringify(autreFrais))
+        const token = "Token " + localStorage.getItem("token");
+
+        let body = autreFrais; //attention ne jamais oublié d'assigner les valeurs recues dans body car axios l'exige
+        axios
+            .post('api/finances/configAutresFrais/', body, {
+                headers: {
+                    'Authorization': token,
+                }
+            })
+            .then((response) => {
+                console.log("new Config Autres Frais sent to Database " + JSON.stringify(response.data))
+
+                let initArrayOfAutresFrais = [];
+                response.data.cree_le = response.data.cree_le.slice(0, 16).replace("T", " à ");
+                initArrayOfAutresFrais.push(response.data)
+
+                if (localStorage.getItem("Config_Autres_Frais")) {
+                    let previousAutresFrais = JSON.parse(localStorage.getItem("Config_Autres_Frais"));
+
+                    console.log("previous AutreFrais " + JSON.stringify(previousAutresFrais))
+                    previousAutresFrais.push(response.data);
+
+                    console.log("new Autres Frais to send in localStorage " + JSON.stringify(previousAutresFrais))
+                    localStorage.setItem("Config_Autres_Frais", JSON.stringify(previousAutresFrais));
+
+                } else {
+                    localStorage.setItem("Config_Autres_Frais", JSON.stringify(initArrayOfAutresFrais));
+                }
+
+                commit("newConfigAutresFrais", response.data);
+            })
+            .catch(function(error) {
+                console.log('new Config Autre Frais in catch action =>' + JSON.stringify(body))
                 console.log("😢😢😢" + error);
 
             });
@@ -217,49 +363,55 @@ const actions = {
 
             });
     },
-    actionNewConfigAutresFrais({ commit }, autreFrais) {
-        console.log("Classe à sauvegarder " + JSON.stringify(autreFrais))
-        const token = "Token " + localStorage.getItem("token");
+    actionUpdateConfigAutresFrais({ commit }, autrefrais) {
+        const token = "Token " + localStorage.getItem('token');
 
-        let body = autreFrais; //attention ne jamais oublié d'assigner les valeurs recues dans body car axios l'exige
+        var body = autrefrais;
+        console.log(typeof body)
+
         axios
-            .post('api/finances/ecolageAutresFrais/', body, {
+            .put(`api/finances/configAutresFrais/${autrefrais.identifiant}/`, body, {
                 headers: {
                     'Authorization': token,
                 }
             })
             .then((response) => {
-                console.log("new Config Autre frais sent to Database " + autreFrais)
-                    /*    let initArrayOfEcolages = [];
-                       initArrayOfEcolages.push(autreFrais)
 
-                      if (localStorage.getItem("Config Ecolage")) {
-                           let previousEcolages = JSON.parse(localStorage.getItem("Config Ecolage"));
-                           previousEcolages.push(autreFrais);
+                console.log("😍😍😍 update Autre frais " + JSON.stringify(body) + '\n' + response.data);
+                let Config_Autres_Frais = JSON.parse(localStorage.getItem('Config_Autres_Frais'));
 
-                           console.log("newClasses to send in loacalStorage " + JSON.stringify(previousEcolages))
-                          // localStorage.setItem("Config Ecolages", JSON.stringify(previousEcolages));
+                Config_Autres_Frais.splice(Config_Autres_Frais.indexOf(body.identifiant), 1, body)
 
-                       } else {
-                           localStorage.setItem("Config Ecolage", JSON.stringify(initArrayOfEcolages));
-                       }*/
+                localStorage.setItem("Config_Autres_Frais", JSON.stringify(Config_Autres_Frais))
 
-                commit("newConfigAutresFrais", response.data);
+                commit("updateAutreFrais", response.data);
+
             })
             .catch(function(error) {
-                console.log('newClasse in catch action =>' + JSON.stringify(body))
-                console.log("😢😢😢" + error);
-
-            });
-
+                console.log("😢😢😢 errors" + error);
+            })
     }
+
 }
 const mutations = {
 
     newAnneeScolaire(state, anneeScolaire) {
         state.newAnneeScolaire = anneeScolaire
     },
+    InititialiseFraisDeBase(fraisDebase) {
+        console.log("Attention il faudra bien gérer le state de " + JSON.stringify(fraisDebase))
+
+    },
+    newDepense(fraisDebase) {
+        console.log("Attention il faudra bien gérer le state " + JSON.stringify(fraisDebase))
+    },
+    updateDepense(response) {
+        console.log("A gerer en tout cas" + response)
+    },
     newConfigAutresFrais(response) {
+        console.log("A gerer en tout cas" + response)
+    },
+    updateAutreFrais(response) {
         console.log("A gerer en tout cas" + response)
     },
     newConfigInscReinsc(response) {

@@ -18,12 +18,12 @@ export default {
     };
   },
   beforeMount() {
-    if (localStorage.getItem("allParamsDone") === "true") {
+    if (localStorage.getItem("allParamsDone") === "Vrai") {
       console.log("Paramètres finalisés");
       // document.getElementById("btn-right").addEventListener("mouseover");
     } else {
       console.log("Paramètres à définir");
-      // this.disabled = true;
+      this.disabled = true;
     }
   },
 };

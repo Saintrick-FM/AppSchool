@@ -73,22 +73,84 @@ const actions = {
     },
     async actionPaiementInscReinsc({ commit }, donnees) {
         const token = "Token " + localStorage.getItem('token');
+
         let body = donnees
-
         await axios
-
             .post('api/finances/PaiementInscriptionReinscription/', body, {
                 headers: {
                     'Authorization': token,
                 }
             })
-            .then((response) => {
+            .then((responsePaieInscReins) => {
+                console.log("😃😃😃" + JSON.stringify(responsePaieInscReins));
 
-                console.log("😃😃😃" + JSON.stringify(response));
+                let initArrayOfNewPaiementInscReinsc = [];
+                responsePaieInscReins.data.cree_le = responsePaieInscReins.data.cree_le.slice(0, 16).replace("T", " à ");
+                initArrayOfNewPaiementInscReinsc.push(responsePaieInscReins.data)
+
+                // Gestion envoie dans le localStorage de all_Eleves_Payed_InscReinsc
+                if (localStorage.getItem("all_Eleves_Payed_InscReinsc")) {
+                    let previousElevesPayedInscReinsc = JSON.parse(localStorage.getItem("all_Eleves_Payed_InscReinsc"));
+
+                    console.log("previous eleves payed InscReinsc " + JSON.stringify(previousElevesPayedInscReinsc))
+                    previousElevesPayedInscReinsc.push(responsePaieInscReins.data);
+
+                    console.log("new eleve payed InscReinsc to send in localStorage " + JSON.stringify(previousElevesPayedInscReinsc))
+                    localStorage.setItem("all_Eleves_Payed_InscReinsc", JSON.stringify(previousElevesPayedInscReinsc));
+
+                } else {
+                    localStorage.setItem("all_Eleves_Payed_InscReinsc", JSON.stringify(initArrayOfNewPaiementInscReinsc));
+                }
+                localStorage.setItem("AllFraisPayedByEleve", JSON.stringify([responsePaieInscReins.data]))
+
                 commit("PaiementInscReinsc", donnees);
-                this.$store.dispatch('actionInitialiseEleve')
+            })
+            .catch(function(error) {
+                console.log('Erreur Inscription_Reinscription=>' + JSON.stringify(donnees))
+                console.log("😢😢😢" + error);
 
+            })
 
+        // Gestion de AllFraisPayedByEleve afin de palier au pb de BD survenu
+        let everyFrais = {
+            montantFrais: donnees.montantFrais,
+            mois: null,
+            montantApayer: donnees.montantFrais,
+            montantDejaPaye: donnees.montantFrais,
+            montantRestant: 0,
+            statut: "payé",
+            eleve: donnees.eleve,
+            classe: donnees.classe,
+            typeFrais: donnees.typeFrais,
+            AnneeScolaire: donnees.AnneeScolaire
+        }
+
+        body = everyFrais
+        await axios
+            .post('api/finances/paiementEveryFrais/', body, {
+                headers: {
+                    'Authorization': token,
+                }
+            })
+            .then((responsePaieEveryFrais) => {
+                console.log("😃😃😃" + JSON.stringify(body));
+                // Gestion envoie dans le localStorage de AllFraisPayedByEleve
+                let initArrayOfNewFraisPayedByEeleve = [];
+                if (localStorage.getItem("AllFraisPayedByEleve")) {
+                    let previousAllFraisPayedByEeleve = JSON.parse(localStorage.getItem("AllFraisPayedByEleve"));
+
+                    console.log("previous AllFraisPayedByEeleve " + JSON.stringify(previousAllFraisPayedByEeleve))
+                    previousAllFraisPayedByEeleve.push(responsePaieEveryFrais.data);
+
+                    console.log("new AllFraisPayedByEeleve to send in localStorage " + JSON.stringify(previousAllFraisPayedByEeleve))
+                    localStorage.setItem("AllFraisPayedByEleve", JSON.stringify(previousAllFraisPayedByEeleve));
+
+                } else {
+                    localStorage.setItem("AllFraisPayedByEleve", JSON.stringify(initArrayOfNewFraisPayedByEeleve));
+                }
+                localStorage.setItem("AllFraisPayedByEleve", JSON.stringify([responsePaieEveryFrais.data]))
+
+                commit("PaiementEveryFrais", responsePaieEveryFrais.data);
             })
             .catch(function(error) {
                 console.log('Erreur Inscription_Reinscription=>' + JSON.stringify(body))
@@ -116,7 +178,6 @@ const actions = {
 
                     console.log("😃😃😃" + JSON.stringify(response));
                     commit("fraisPayed", fraisPayed[0]);
-
 
                 })
                 .catch(function(error) {
@@ -167,7 +228,6 @@ const actions = {
         }
     },
 
-
     async actionUpdatePayedFrais({ commit }, donnees) {
         const token = "Token " + localStorage.getItem('token');
         var body = donnees[1];
@@ -204,6 +264,9 @@ const mutations = {
     },
     PaiementInscReinsc(state, frais) {
         state.fraisInscReinsc = frais
+    },
+    PaiementEveryFrais(everyFrais) {
+        console.log("Agérer plus tard " + JSON.stringify(everyFrais))
     },
 
     updatetypeFrais(state, newFrais) {

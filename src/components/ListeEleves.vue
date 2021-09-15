@@ -83,10 +83,18 @@
                         <v-row>
                           <v-col cols="12" sm="6" md="5">
                             <v-text-field
+                              style="display:none"
+                              v-model="eleveNumber"
+                              label="eleveNumber"
+                            ></v-text-field>
+
+                            <v-text-field
                               v-model="editedItem.nom"
                               :rules="nameRules"
                               label="Noms"
                               required
+                              shaped
+                              outlined
                             ></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" md="3">
@@ -98,6 +106,8 @@
                                 (v) => !!v || 'Vous devez renseigner ce champs',
                               ]"
                               required
+                              shaped
+                              outlined
                             ></v-select>
                           </v-col>
 
@@ -111,6 +121,8 @@
                                 (v) => !!v || 'Vous devez renseigner ce champs',
                               ]"
                               required
+                              shaped
+                              outlined
                             ></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
@@ -121,36 +133,18 @@
                                 (v) => !!v || 'Vous devez renseigner ce champs',
                               ]"
                               required
+                              shaped
+                              outlined
                             ></v-text-field>
                           </v-col>
-                          <!-- <v-col cols="12" sm="6" md="4">
-                            <v-autocomplete
-                              :items="[
-                                'Célibataire',
-                                'Marié(e)',
-                                'Fiancé(e)',
-                                'Veuf(ve)',
-                                'Divorcé(e)',
-                              ]"
-                              label="Statut sociale"
-                              v-model="editedItem.situationSociale"
-                              required
-                            ></v-autocomplete>
-                          </v-col>
-                          <v-col cols="12" sm="6" md="4">
-                            <v-text-field
-                              v-model="editedItem.nationalite"
-                              label="nationalite"
-                               :rules="[(v) => !!v || 'Ce champ est requis']"
-                              required
 
-                            ></v-text-field>
-                          </v-col> -->
                           <v-col cols="12" sm="6" md="4">
                             <v-text-field
                               v-model="editedItem.ecoleDorigine"
                               label="Ecole d'origine"
                               required
+                              shaped
+                              outlined
                             ></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
@@ -162,6 +156,8 @@
                                 (v) => !!v || 'Vous devez renseigner ce champs',
                               ]"
                               required
+                              shaped
+                              outlined
                             ></v-select>
                           </v-col>
 
@@ -174,6 +170,8 @@
                                 (v) => !!v || 'Vous devez renseigner ce champs',
                               ]"
                               required
+                              shaped
+                              outlined
                             ></v-select>
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
@@ -185,6 +183,8 @@
                               required
                               v-model="editedItem.classe"
                               label="Classe*"
+                              shaped
+                              outlined
                             ></v-autocomplete>
                           </v-col>
                         </v-row>
@@ -248,6 +248,8 @@
                             :rules="nameRules"
                             :counter="10"
                             required
+                            shaped
+                            outlined
                           ></v-text-field>
                         </v-col>
                         <v-col cols="12" sm="6" md="5">
@@ -255,6 +257,8 @@
                             v-model="editedItem.telPapa"
                             label="Téléphone du père"
                             :rules="telephoneRules"
+                            shaped
+                            outlined
                           ></v-text-field>
                         </v-col>
                       </v-row>
@@ -269,6 +273,8 @@
                               (v) => !!v || 'You must agree to continue!',
                             ]"
                             required
+                            shaped
+                            outlined
                           ></v-text-field>
                         </v-col>
                         <v-col cols="12" sm="6" md="5">
@@ -276,6 +282,8 @@
                             v-model="editedItem.telMaman"
                             label="Téléphone de la mère"
                             :rules="telephoneRules"
+                            shaped
+                            outlined
                           ></v-text-field>
                         </v-col>
                       </v-row>
@@ -288,6 +296,8 @@
                             label="Noms et prénoms du tuteur"
                             :rules="nameRules"
                             required
+                            shaped
+                            outlined
                           ></v-text-field>
                         </v-col>
                         <v-col cols="12" sm="6" md="3">
@@ -296,6 +306,8 @@
                             label="Téléphone du tuteur"
                             :rules="telephoneRules"
                             required
+                            shaped
+                            outlined
                           ></v-text-field>
                         </v-col>
 
@@ -304,6 +316,8 @@
                             v-model="editedItem.emailTuteur"
                             label="Email du tuteur"
                             email
+                            shaped
+                            outlined
                           ></v-text-field>
                         </v-col>
                       </v-row>
@@ -381,9 +395,6 @@
         <v-icon small class="mr-2" @click="editItem(item)">
           mdi-pencil
         </v-icon>
-        <v-icon small @click="deleteItem(item)">
-          mdi-delete
-        </v-icon>
       </template>
 
       <template v-slot:no-data>
@@ -405,10 +416,12 @@ export default {
     search: "",
     erreur: false,
     message_erreur: "",
+    eleveNumber: null,
     dialog: false,
     dialogDelete: false,
     loader: false,
     eleveActuel: "",
+    anneeScolaireActuelle: null,
     MyHeaders: [
       { text: "Nom", value: "nom", sortable: true },
       { text: "Sexe", value: "sexe" },
@@ -486,7 +499,7 @@ export default {
         : "Modification d'un(e) élève";
     },
 
-    ...mapGetters(["allTeachers", "allMatieres"]),
+    ...mapGetters(["allTeachers", "allMatieres", "alleleves"]),
   },
 
   watch: {
@@ -501,22 +514,36 @@ export default {
   beforeMount() {
     let id_classes = [localStorage.getItem("Id_classes")];
     let classe = null;
-    
+
+    if (typeof localStorage.getItem("année_scolaire") === "string") {
+      this.anneeScolaireActuelle = localStorage.getItem("année_scolaire");
+      console.log("this.annee_scolaire " + this.anneeScolaireActuelle);
+    } else {
+      this.anneeScolaireActuelle = JSON.parse(
+        localStorage.getItem("année_scolaire")
+      ).anneeScolaire;
+    }
+
     id_classes.forEach((eleves) => {
       classe = eleves.split(",");
       console.log(classe);
     });
 
     this.classes = classe;
-   // this.$store.dispatch("actionInitialiseEleve");
-    this.eleves = JSON.parse(localStorage.getItem("ElèvesToStore"));
-   // console.log(this.eleves);
+    // this.$store.dispatch("actionInitialiseEleve");
+
+    this.eleves = JSON.parse(localStorage.getItem("Inscrits_Annee_Actuel"));
+    //this.$store.commit("InititialiseEleves", );
+    this.alleleves=this.eleves
+
+    console.log("allEves du store " + JSON.stringify(this.alleleves));
   },
 
   methods: {
     rowClick: function(item, row) {
       row.select(true);
-      console.log("Eleve cliké " + item.nom);
+      console.log("number Eleve cliké " + item.eleveNumber);
+      this.eleveNumber = item.eleveNumber;
       this.editItem(item);
       //item  - selected item
     },
@@ -527,7 +554,9 @@ export default {
     getEleves() {},
 
     editItem(item) {
+      console.log("test");
       this.editedIndex = this.eleves.indexOf(item);
+      // this.nameDisabled= true;
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
@@ -586,7 +615,13 @@ export default {
           //update du eleve
           let index = this.editedIndex;
           console.log("contenu de editedIndex => " + index);
-          let eleveToUpdate = this.editedItem.eleveNumber;
+          let AllEleves = JSON.parse(
+            localStorage.getItem("Inscrits_Annee_Actuel")
+          );
+
+          let eleveToUpdate = AllEleves.find(
+            (eleve) => eleve.eleveNumber == this.eleveNumber
+          ).eleveNumber;
           let donnees = [];
 
           donnees.push(eleveToUpdate, this.editedItem);
@@ -603,6 +638,8 @@ export default {
           //creer un eleve
         } else {
           console.log("eleve selectionné " + this.editedItem.nom);
+          this.editedItem.AnneeScolaire = this.anneeScolaireActuelle;
+          console.log("this.editedItem " + JSON.stringify(this.editedItem));
           this.$store.dispatch("actionCreateEleve", this.editedItem);
           this.eleves.push(this.editedItem);
           this.close();
@@ -654,8 +691,10 @@ export default {
         console.log(
           "classe Associée de l'élève créé =>" + this.editedItem.classe
         );
-
-        this.$store.dispatch("actionCreateEleve", this.editedItem);
+        this.editedItem.AnneeScolaire = this.this.$store.dispatch(
+          "actionCreateEleve",
+          this.editedItem
+        );
         this.eleves.push(this.editedItem);
       }
       this.close();

@@ -14,7 +14,7 @@
       :headers="MyHeaders"
       type="button"
       @click:row="rowClick"
-      :items="eleves"
+      :items="JSON.parse(alleleves)"
     >
       <template v-slot:top>
         <v-toolbar flat>
@@ -29,6 +29,7 @@
 
 <script>
 import axios from "axios";
+import { mapGetters, mapActions } from "vuex";
 
 export default {
   name: "ListeEleves",
@@ -61,20 +62,30 @@ export default {
     },
   },
 
+  computed: {
+    ...mapGetters(["alleleves"]),
+  },
+
   beforeMount() {
     let id_classes = [localStorage.getItem("Id_classes")];
     let classe = null;
-
     id_classes.forEach((eleves) => {
       classe = eleves.split(",");
-      console.log(classe);
+      console.log("tableau des classes " + JSON.stringify(classe));
     });
 
     this.classes = classe;
-    this.initializeEleve();
+    // console.log("tableau des elèves " + JSON.stringify(this.alleleves));
+    if (this.alleleves) {
+      this.actionInitialiseEleve(localStorage.getItem("année_scolaire"));
+      this.eleves = JSON.parse(this.alleleves);
+    } else {
+      this.eleves = JSON.parse(this.alleleves);
+    }
   },
 
   methods: {
+    ...mapActions(["actionInitialiseEleve"]),
     initializeEleve() {
       //   this.$store.dispatch("actionInitialiseMatiere");
       const token = "Token " + localStorage.getItem("token");
@@ -107,12 +118,12 @@ export default {
               eleve.dateEmbauche = String(eleve.dateEmbauche).slice(0, 10);
             });
 
-            this.$store.state.eleves = eleves;
-
             this.eleves = eleves;
+
+            //this.eleves = eleves;
             console.log(
               "😃😃😃 this.eleves => " +
-                JSON.stringify(eleves) +
+                JSON.stringify(this.alleleves) +
                 "this.response.data = " +
                 response.data
             );
@@ -122,6 +133,7 @@ export default {
           });
       }
     },
+
     rowClick: function(item, row) {
       row.select(true);
       console.log("Type item " + item);

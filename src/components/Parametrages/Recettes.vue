@@ -333,10 +333,10 @@
           transition="scale-transition"
         >
           <v-data-table
-            :headers="MyHeaders"
-            :items="recettes"
-            item-key="type"
-            @click:row="showDetailsRecette(type)"
+            :headers="autresRecettesHeaders"
+            :items="autresRecettes"
+            item-key="identifiant"
+            no-data-text="Pas de recettes enregistrées pour l'instant"
             class="elevation-1"
           >
             <template v-slot:top>
@@ -376,67 +376,80 @@
                     <v-card-text>
                       <v-container>
                         <v-row>
-                          <v-col cols="12" sm="6" md="4">
-                            <v-combobox
-                              v-model="editRecette.type"
-                              :items="[
-                                'Ecolage',
-                                'Inscription',
-                                'Reinscription',
-                                'Assurance',
-                                'Dossier d\'examen',
-                                'Macaron',
-                              ]"
-                              filled
-                              label="Type de Recette"
-                              shaped
-                              outlined
-                              hint="Choisissez un type de recette ou créez en un"
-                              persistent-hint
-                              small-chips
-                            >
-                            </v-combobox>
-                          </v-col>
+                          <v-row>
+                            <v-col md="4">
+                              <v-combobox
+                                v-model="editAutreRecette.identifiant"
+                                :items="[
+                                  'Assurance',
+                                  'Dossier d\'examen',
+                                  'Macaron',
+                                ]"
+                                required
+                                filled
+                                label="Nom de la Recette"
+                                shaped
+                                outlined
+                                hint="Choisissez un type de recette ou créez en un"
+                                persistent-hint
+                              >
+                              </v-combobox>
+                            </v-col>
+                            <v-col md="3">
+                              <v-switch
+                                input-value="true"
+                                v-model="editAutreRecette.obligatoire"
+                                filled
+                                label="Obligatoire ?"
+                                shaped
+                                outlined
+                              >
+                              </v-switch>
+                            </v-col>
 
-                          <v-col cols="12" sm="6" md="4">
-                            <v-text-field
-                              v-model="editRecette.periodePaiement"
-                              label="Période de recouvrement"
-                              shaped
-                              outlined
-                            ></v-text-field>
-                          </v-col>
-                          <v-col cols="12" sm="6" md="6">
-                            <v-select
-                              v-model="obligatoire"
-                              :items="['Oui', 'Non']"
-                              filled
-                              label="Obligatoire ?"
-                              shaped
-                              outlined
-                            >
-                            </v-select>
-                          </v-col>
-
-                          <v-col cols="12" sm="6" md="4">
-                            <v-text-field
-                              disabled
-                              readonly
-                              v-model="editRecette.annee_scolaire"
-                              label="Année scolaire"
-                              shaped
-                              outlined
-                            ></v-text-field>
-                          </v-col>
-                          <v-col cols="12" sm="6" md="6">
-                            <v-text-field
-                              type="number"
-                              v-model="editRecette.montant"
-                              label="Montant de la recette"
-                              shaped
-                              outlined
-                            ></v-text-field>
-                          </v-col>
+                            <v-col md="5">
+                              <v-text-field
+                                v-model="editAutreRecette.periodePaiement"
+                                label="Période de recouvrement"
+                                hint="Du 01/01/2021 au 01/05/2021"
+                                persistent-hint
+                                shaped
+                                outlined
+                              ></v-text-field>
+                            </v-col>
+                          </v-row>
+                          <v-row>
+                            <v-col md="3">
+                              <v-text-field
+                                type="number"
+                                v-model="editAutreRecette.montant"
+                                label="Montant de la recette"
+                                shaped
+                                outlined
+                              ></v-text-field>
+                            </v-col>
+                            <v-col md="3">
+                              <v-text-field
+                                disabled
+                                readonly
+                                v-model="editAutreRecette.AnneeScolaire"
+                                label="Année scolaire"
+                                shaped
+                                outlined
+                              ></v-text-field>
+                            </v-col>
+                            <v-col md="6">
+                              <v-autocomplete
+                                label="Réservé aux classes"
+                                :items="classesReservedForAutresFrais"
+                                v-model="editAutreRecette.classesSpeciales"
+                                multiple
+                                auto-select-first
+                                chips
+                                deletable-chips
+                              ></v-autocomplete>
+                            </v-col>
+                          </v-row>
                         </v-row>
                       </v-container>
                     </v-card-text>
@@ -499,9 +512,9 @@
               <v-icon small class="mr-2" @click="editerRecette(item)">
                 🏚
               </v-icon>
-              <v-icon @click="deleteRecette(item)">
-                ❎
-              </v-icon>
+              <!-- <v-icon @click="deleteRecette(item)">
+                
+              </v-icon> -->
             </template>
           </v-data-table>
         </v-alert>
@@ -542,7 +555,7 @@ export default {
         { text: "Crée le", value: "cree_le" },
       ],
       headersEcolage: [
-        { text: "Identifiant", value: "typeFrais", sortable: true },
+        { text: "Identifiant", value: "identifiant", sortable: true },
 
         { text: "Montant", value: "montant" },
         {
@@ -554,46 +567,27 @@ export default {
         { text: "Crée le", value: "cree_le" },
       ],
 
-      recettes: [
-        {
-          type: "Frais mensuels",
-          obligatoire: false,
-          periodePaiement: null,
-          annee_scolaire: null,
-          montant: null,
-          classesSpeciales: [],
-          onlyFor: false,
-        },
-        {
-          type: "Macaron",
-          obligatoire: false,
-          periodePaiement: null,
-          annee_scolaire: null,
-          montant: null,
-          classesSpeciales: [],
-          onlyFor: false,
-        },
-      ],
       dialog: false,
       dialogForDelete: false,
       recetteCliquee: null,
-      MyHeaders: [
-        { text: "Identifiant", value: "type", sortable: true },
+      autresRecettesHeaders: [
+        { text: "Identifiant", value: "identifiant", sortable: true },
         { text: "Obligatoire", value: "obligatoire" },
         {
           text: "Période de recouvrement",
           value: "periodePaiement",
           sortable: true,
         },
-        { text: "Année scolaires", value: "annee_scolaire", sortable: true },
+
         { text: "Montant", value: "montant", sortable: true },
         {
-          text: "Classes Speciales",
+          text: "Reservé pour les classes:",
           value: "classesSpeciales",
           sortable: false,
         },
         { text: "Actions", value: "actions", sortable: false },
       ],
+      autresRecettes: [],
 
       editedIndex: -1,
       defaultItem: {
@@ -604,6 +598,15 @@ export default {
         montant: null,
         classesSpeciales: [],
         onlyFor: false,
+      },
+      classesReservedForAutresFrais: ["Toutes les classes"],
+      editAutreRecette: {
+        identifiant: null,
+        obligatoire: true,
+        periodePaiement: null,
+        AnneeScolaire: null,
+        montant: null,
+        classesSpeciales: [],
       },
       editRecette: {
         type: null,
@@ -631,8 +634,28 @@ export default {
   },
   beforeMount() {
     this.contentBtn = "Enregistrez";
-    this.getEcolageAutresFrais();
+    this.getEcolage();
     this.getConfigInscReinsc();
+    if (localStorage.getItem("Config_Autres_Frais")) {
+      this.autresRecettes = JSON.parse(
+        localStorage.getItem("Config_Autres_Frais")
+      );
+    }
+
+    let allClasses1 = JSON.parse(localStorage.getItem("All Classes"));
+    let allClasses2 = [];
+
+    allClasses1.forEach((element) => {
+      allClasses2.push(element.identifiant);
+    });
+
+    this.classesReservedForAutresFrais = this.classesReservedForAutresFrais.concat(
+      allClasses2
+    );
+
+    console.log(
+      "xxxxxxxxx " + JSON.stringify(this.classesReservedForAutresFrais)
+    );
     if (typeof localStorage.getItem("année_scolaire") === "string") {
       this.anneeScolaireActuelle = localStorage.getItem("année_scolaire");
       console.log("this.annee_scolaire " + this.anneeScolaireActuelle);
@@ -648,6 +671,7 @@ export default {
     });
   },
   updated() {
+    console.log("vrai bug 2");
     this.classeRecette = this.classes[this.model].identifiant;
     console.log("classeRecette dans updated = " + this.classeRecette);
     //this.recettesToShow = [];
@@ -702,13 +726,13 @@ export default {
       this.$refs.form.validate();
       // console.log("this.editRecette " + this.editRecette);
     },
-    async getEcolageAutresFrais() {
+    async getEcolage() {
       const token = "Token " + localStorage.getItem("token");
 
       if (localStorage.getItem("token") != null) {
         var config = {
           method: "get",
-          url: "api/finances/ecolageAutresFrais/",
+          url: "api/finances/configEcolage/",
           headers: {
             Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
           },
@@ -777,7 +801,7 @@ export default {
 
     onLogin() {
       let configFraisToSend = {
-        typeFrais: null,
+        identifiant: null,
         periodePaiement: this.editRecette.periodePaiement,
         montant: this.editRecette.montant,
         classe: null,
@@ -797,10 +821,10 @@ export default {
         this.activeTypeRecette === "Autres"
       ) {
         if (this.activeTypeRecette === "Ecolage") {
-          configFraisToSend.typeFrais = "Frais mensuels";
+          configFraisToSend.identifiant = "Frais mensuels";
           configFraisToSend.classe = this.classeRecette;
         } else {
-          configFraisToSend.typeFrais = "";
+          configFraisToSend.identifiant = "";
         }
 
         console.log(
@@ -900,8 +924,12 @@ export default {
             this.classeRecette
         );
       }
-
+      // permet de fermer rapidement d'abord l'alertAutres avant de la reouvrir pour simuler l'animation
+      if (this.alertAutres && item === "Autres") {
+        this.alertAutres = false;
+      }
       if (item === "Autres") {
+        this.editAutreRecette.AnneeScolaire = this.anneeScolaireActuelle;
         this.recettesToShow = this.allEcolageAutresFrais.filter(
           (frais) => frais.frais !== "Frais mensuels"
         );
@@ -929,8 +957,8 @@ export default {
     editerRecette(item) {
       console.log("classe cliquée " + JSON.stringify(item));
 
-      this.editedIndex = this.classes.indexOf(item);
-      this.editRecette = Object.assign({}, item);
+      this.editedIndex = this.autresRecettes.indexOf(item);
+      this.editAutreRecette = Object.assign({}, item);
 
       // this.Garderie.nbreSites > 1 ? this.sites : "Site unique";
 
@@ -940,13 +968,13 @@ export default {
     deleteRecette(item) {
       console.log("delete " + item.identifiant);
       this.classeCliquee = item.identifiant;
-      this.editedIndex = this.classes.indexOf(item);
+      this.editedIndex = this.autresRecettes.indexOf(item);
       this.editRecette = Object.assign({}, item);
       this.dialogForDelete = true;
     },
 
     deleteItemConfirm() {
-      this.classes.splice(this.editedIndex, 1);
+      this.autresRecettes.splice(this.editedIndex, 1);
       this.closeDelete();
     },
 
@@ -966,6 +994,38 @@ export default {
       });
     },
     saveEditOrUpdateRecette() {
+      if (this.editedIndex > -1) {
+        Object.assign(
+          this.autresRecettes[this.editedIndex],
+          this.editAutreRecette
+        );
+        console.log("Teeessst exact");
+        this.$store.dispatch(
+          "actionUpdateConfigAutresFrais",
+          this.editAutreRecette
+        );
+      } else {
+        this.autresRecettes.push(this.editAutreRecette);
+        console;
+        /*   {
+    "identifiant": "",
+    "periodePaiement": "",
+    "obligatoire": false,
+    "montant": null,
+    "AnneeScolaire": null,
+    "classe": []
+}*/
+        this.$store.dispatch(
+          "actionNewConfigAutresFrais",
+          this.editAutreRecette
+        );
+        setTimeout(() => {
+          this.$store.dispatch("actionInitialiseFraisDeBase", {
+            frais: this.editAutreRecette.identifiant,
+          });
+        }, 2000);
+      }
+      this.cancelEditOrUpdateRecette();
       console.log("Coucou");
     },
   },

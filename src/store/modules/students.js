@@ -6,23 +6,23 @@ const state = {
 };
 const actions = {
 
-    async actionInitialiseEleve({ commit }) {
+    async actionInitialiseEleve({ commit }, annee_scolaire) {
         //   this.$store.dispatch("actionInitialiseMatiere");
         const token = "Token " + localStorage.getItem("token");
 
+        // const annee = new Date()
+        //const year = annee.getFullYear() + '-' + (annee.getFullYear() + 1)
         if (localStorage.getItem("token") != null) {
             var config = {
                 method: "get",
-                url: `api/inscriptions/?annee_scolaire=${year}`,
+                url: `api/inscriptions/?annee_scolaire=${annee_scolaire}`,
                 headers: {
                     Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
                 },
             };
-            const annee = new Date()
-            const year = annee.getFullYear() + '-' + (annee.getFullYear() + 1)
             var config2 = {
                 method: "get",
-                url: `api/finances/PaiementInscriptionReinscription/?annee_scolaire=${year}`,
+                url: `api/finances/PaiementInscriptionReinscription/?annee_scolaire=${annee_scolaire}`,
                 headers: {
                     Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
                 },
@@ -30,7 +30,7 @@ const actions = {
             await axios.all([axios(config),
                     axios(config2)
                 ]).then(axios.spread((firstResponse, secondResponse) => {
-                    console.log("console.log des requetes doubles " + firstResponse.data, secondResponse.data)
+                    console.log("console.log des requetes doubles " + JSON.stringify(firstResponse.data), JSON.stringify(secondResponse.data))
 
                     const result1 = firstResponse.data;
                     const result2 = secondResponse.data;
@@ -43,10 +43,12 @@ const actions = {
                     let elevesToStore = JSON.stringify(eleves)
                     console.log(
                         "😃😃😃 ElevesTostore => " +
-                        elevesToStore + " \nInscitsAnneeActuel => " + result2
+                        elevesToStore + " \nInscritsAnneeActuel => " + result2
 
                     );
-                    localStorage.setItem("ElèvesToStore", elevesToStore);
+                    localStorage.setItem("Inscrits_Annee_Actuel", elevesToStore);
+                    localStorage.setItem("all_Eleves_Payed_InscReinsc", JSON.stringify(result2))
+
                     commit('InititialiseEleves', elevesToStore)
                     commit("InitialiseInscitsAnneeActuel", result2)
 
@@ -71,7 +73,24 @@ const actions = {
             .then((response) => {
 
                 console.log("😃😃😃" + response);
-                commit("createEleve", eleveCreate);
+                let initArrayOfNewEleves = [];
+                //  response.data.cree_le = response.data.cree_le.slice(0, 16).replace("T", " à ");
+                initArrayOfNewEleves.push(response.data)
+
+                if (localStorage.getItem("Inscrits_Annee_Actuel")) {
+                    let previousEleves = JSON.parse(localStorage.getItem("Inscrits_Annee_Actuel"));
+
+                    console.log("previous élèves " + JSON.stringify(previousEleves))
+                    previousEleves.push(response.data);
+
+                    console.log("new élève to send in localStorage " + JSON.stringify(previousEleves))
+                    localStorage.setItem("Inscrits_Annee_Actuel", JSON.stringify(previousEleves));
+
+                } else {
+                    localStorage.setItem("Inscrits_Annee_Actuel", JSON.stringify(initArrayOfNewEleves));
+                }
+
+                commit("createEleve", response.data);
             })
             .catch(function(error) {
                 console.log('eleveCreate in catch action =>' + JSON.stringify(body))
@@ -99,10 +118,17 @@ const actions = {
                     'Authorization': token,
                 }
             })
-            .then((response) => {
-                let newEleve = [donnees[0], donnees[1]]
-                console.log("😍😍😍 new data sent =>" + JSON.stringify(donnees[1]) + '\n' + response);
-                commit("updateEleve", newEleve);
+            .then(() => {
+                //let newEleve = [donnees[0], donnees[1]]
+                console.log("😍😍😍 new data sent =>" + JSON.stringify(donnees[1]));
+
+                let allEleves = JSON.parse(localStorage.getItem('Inscrits_Annee_Actuel'));
+
+                allEleves.splice(allEleves.indexOf(donnees[1]), 1, body)
+                localStorage.setItem("Inscrits_Annee_Actuel", JSON.stringify(allEleves))
+
+
+                commit("updateEleve");
 
             })
             .catch(function(error) {
@@ -144,22 +170,19 @@ const mutations = {
     },
     InitialiseInscitsAnneeActuel(state, InscitsAnneeActuel) {
         state.inscitsAnneeActuel = InscitsAnneeActuel
-        localStorage.setItem("Inscits_Annee_Actuel", JSON.stringify(InscitsAnneeActuel))
+
     },
     createEleve(state, eleve) {
-        state.eleves = eleve
+        state.eleves.push(eleve)
 
     },
 
-    updateEleve(state, neweleve) {
-        console.log('🐶  attention j\'essaie de gérer le state.Eleves du updateMatiere')
-        let id = []
-        for (const iterator of this.state.eleves) {
-            id.push(iterator.id)
-        }
-        console.log(' Le tableau des id =>' + id + '\n Le eleve avec l\'id ' +
-            neweleve[0] + ' est à la ' + id.indexOf(neweleve[0]) + ' eme place')
-        state.eleves[id.indexOf(neweleve[0])] = neweleve[1]
+    updateEleve(state) {
+        let allEleves = JSON.parse(localStorage.getItem('Inscrits_Annee_Actuel'));
+        console.log('🐶  attention j\'essaie de gérer le state.Eleves du updateEleve')
+
+        state.eleves = allEleves
+        console.log(' state eleves après update eleve => ' + JSON.stringify(state.eleves))
     },
 
     deleteEleve(index) {

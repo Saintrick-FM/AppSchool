@@ -3,7 +3,7 @@
     <v-container class="grey lighten-5">
       <v-row no gutters style="padding-bottom: 110px;">
         <v-col>
-          <router-link to="/">
+          <router-link :to="!disabled ? '/eleves' : '/'">
             <button class="learn-more" :disabled="disabled">
               <v-avatar color="#b18597" outlined class="mb-4 mr-11 mt-n6 ml-n9">
                 <v-icon dark class="mb-4">
@@ -15,19 +15,21 @@
           </router-link>
         </v-col>
         <v-col order="12" id="col-right">
-          <button id="btn-right" class="learn-more" :disabled="disabled">
-            <v-avatar color="#b18597" outlined class="mb-4 mr-11 mt-n6 ml-n9">
-              <v-icon dark class="mb-4">
-                mdi-account-circle
-              </v-icon>
-            </v-avatar>
-            <span style="margin-left:-7px">Classes</span>
-          </button>
+          <router-link :to="!disabled ? '/eleves' : '/'">
+            <button id="btn-right" class="learn-more" :disabled="disabled">
+              <v-avatar color="#b18597" outlined class="mb-4 mr-11 mt-n6 ml-n9">
+                <v-icon dark class="mb-4">
+                  mdi-account-circle
+                </v-icon>
+              </v-avatar>
+              <span style="margin-left:-7px">Classes</span>
+            </button>
+          </router-link>
         </v-col>
       </v-row>
       <v-row no gutters>
         <v-col>
-          <router-link to="/pedagogie">
+          <router-link :to="!disabled ? '/pedagogie' : '/'">
             <button class="learn-more" :disabled="disabled">
               <v-avatar color="#b18597" outlined class="mb-4 mr-11 mt-n6 ml-n9">
                 <v-icon dark class="mb-4">
@@ -39,14 +41,14 @@
           </router-link>
         </v-col>
         <v-col order="12" id="col-right">
-          <router-link to="/finances">
+          <router-link :to="!disabled ? '/parametrages' : '/'">
             <button id="btn-right" class="learn-more" :disabled="disabled">
               <v-avatar color="#b18597" outlined class="mb-4 mr-11 mt-n6 ml-n9">
                 <v-icon dark class="mb-4">
                   mdi-account-circle
                 </v-icon>
               </v-avatar>
-              Comptabilité
+              <span style="margin-left:-18px">Réglages</span>
             </button>
           </router-link>
         </v-col>
@@ -61,7 +63,7 @@ export default {
   data() {
     return {
       show: false,
-      disabled: false,
+      disabled: null,
     };
   },
   computed: {
@@ -77,9 +79,11 @@ export default {
     },
   },
   beforeMount() {
-    if (localStorage.getItem("allParamsDone") === "false") {
+    if (localStorage.getItem("allParamsDone") === "Non") {
       this.disabled = true;
       // document.getElementById("btn-right").addEventListener("mouseover");
+    } else {
+      this.disabled = false;
     }
   },
 };

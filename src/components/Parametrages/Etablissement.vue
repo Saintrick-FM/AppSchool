@@ -567,6 +567,7 @@ export default {
     valid: true,
     show1: false,
     show2: false,
+    paramsDone: null,
     email: "",
     emailRules: [
       (v) => !!v || "Vous devez renseigner ce champs",
@@ -595,6 +596,7 @@ export default {
   },
   beforeMount() {
     if (localStorage.getItem("Ecole")) {
+      this.paramsDone = 20;
       let ecole = JSON.parse(localStorage.getItem("Ecole"));
       let vraiCycles = JSON.parse(localStorage.getItem("Cycles"));
       let Cycles = null;
@@ -786,6 +788,8 @@ export default {
         this.editEcole.nbreSalleGarderie
       );
       this.$store.dispatch("actionCreateEcole", this.editEcole);
+      this.paramsDone = 20;
+
       // création autant de sites que le nombre de sites entré
       if (this.editEcole.nbreSites >= 1) {
         let index = 0;

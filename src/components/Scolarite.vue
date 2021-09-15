@@ -1,7 +1,7 @@
 <template>
   <v-row>
     <v-col md="2" scrollable>
-      <mini-liste-eleves @eleveChoisi="AfficheEleve" />
+      <mini-liste-eleves @eleveChoisi="AfficheEleveVrai" />
     </v-col>
     <v-col elevation="5" md="10">
       <v-row>
@@ -330,7 +330,7 @@
                     :items="paiementFrais"
                     :single-select="singleSelect"
                     hide-default-footer
-                    item-key="frais"
+                    item-key="identifiant"
                     show-select
                     loading="true"
                   >
@@ -665,6 +665,8 @@
 <script>
 import MiniListeEleves from "@/components/MiniListeEleves.vue";
 import axios from "axios";
+import { mapGetters } from "vuex";
+
 export default {
   data() {
     return {
@@ -683,7 +685,7 @@ export default {
       AffichePaiementMois: false,
       fraisMensuels: null,
       fraisChoisi: [],
-      anneeActuelle:null,
+      anneeActuelle: null,
       scolariteTotal: null,
       allFraisInscReinsc: null,
       paiement_Inscription_Reinscription: ["Inscription", "Réinscription"],
@@ -721,7 +723,7 @@ export default {
       },
 
       HeadersFrais: [
-        { text: "Frais communs à tous", value: "frais", sortable: true },
+        { text: "Frais communs à tous", value: "identifiant", sortable: true },
         { text: "Montant Frais", value: "montant", sortable: true },
         { text: "Actions", value: "actions", sortable: false },
       ],
@@ -789,6 +791,7 @@ export default {
     MiniListeEleves,
   },
   computed: {
+    ...mapGetters(["alleleves"]),
     formTitle() {
       return this.editedIndex === -1 ? "Nouveau frais" : "Modification frais";
     },
@@ -807,7 +810,7 @@ export default {
     },
     advancedMonthStyle() {
       let taille = this.moisAvance.length;
-      return 4 <= taille <= 7  ? "margin:0px 5px 0px 175px" : "margin-left:15px";
+      return 4 <= taille <= 7 ? "margin:0px 5px 0px 175px" : "margin-left:15px";
     },
     monthToPayStyle() {
       let taille = this.moisToPay.length;
@@ -820,7 +823,11 @@ export default {
       if (this.moisToPay.length > 0) {
         return this.montantApayer;
       } else if (this.fraisChoisi.length > 0) {
+        // if (this.fraisChoisi[0].montantDejaPaye) {
         return this.fraisChoisi[0].montantDejaPaye;
+        /* } else {
+          return 0;
+        }*/
       } else {
         return 0;
       }
@@ -829,7 +836,11 @@ export default {
       if (this.moisToPay.length > 0) {
         return Number(this.scolariteTotal) - Number(this.montantDejaPaye);
       } else if (this.fraisChoisi.length > 0) {
+        //   if (this.fraisChoisi[0].montantRestant) {
         return this.fraisChoisi[0].montantRestant;
+        /*  } else {
+          return 0;
+        }*/
       } else {
         return 0;
       }
@@ -862,7 +873,16 @@ export default {
   created() {
     this.getFrais();
     this.getClasses();
-    this.anneeActuelle=localStorage.getItem("annee_scolaire")
+
+    if (typeof localStorage.getItem("année_scolaire") === "string") {
+      this.anneeActuelle = localStorage.getItem("année_scolaire");
+      console.log("this.annee_scolaire " + this.anneeActuelle);
+    } else {
+      this.anneeActuelle = JSON.parse(
+        localStorage.getItem("année_scolaire")
+      ).anneeScolaire;
+    }
+
     // this.getInscritsReinscritAnneeActuelle();
   },
 
@@ -941,7 +961,7 @@ export default {
       if (localStorage.getItem("token") != null) {
         var config = {
           method: "get",
-          url: "api/finances/configFraisEleve/",
+          url: "api/finances/configAutresFrais/",
           headers: {
             Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
           },
@@ -963,7 +983,7 @@ export default {
               obj.montantRestant = 0;
               // obj.cree_le.toString().slice(0, 16);
             });
-            this.paiementFrais = element;
+
             console.log(
               "😃😃😃 this.paiementFrais => " +
                 this.paiementFrais +
@@ -1013,10 +1033,29 @@ export default {
         return copiePaiementFrais;
       }
     },
-    AfficheEleve() {
-      let inscritsReinscrits = JSON.parse(
-        localStorage.getItem("Inscits_Annee_Actuel")
+    AfficheEleveVrai() {
+      let eleveChoisi = JSON.parse(localStorage.getItem("eleveChoisi"));
+      let allElevesPayedInscReinsc = JSON.parse(
+        localStorage.getItem("all_Eleves_Payed_InscReinsc")
       );
+      if (
+        allElevesPayedInscReinsc.find(
+          (eleve) => eleve.eleve === eleveChoisi.eleveNumber
+        )
+      ) {
+        this.moisToPay = this.moisToShowWithoutPayedMonths;
+        console.log("test moisToPay " + this.moisToPay);
+      } else {
+        this.paiementFrais = [];
+        this.moisToPay = [];
+        console.log("fin de test");
+      }
+    },
+    AfficheEleve() {
+      let allElevesPayedInscReinsc = JSON.parse(
+        localStorage.getItem("all_Eleves_Payed_InscReinsc")
+      );
+
       let AllFraisPayedByEleve = JSON.parse(
         localStorage.getItem("AllFraisPayedByEleve")
       );
@@ -1024,71 +1063,93 @@ export default {
       let Frais = JSON.parse(localStorage.getItem("Frais"));
       console.log("Frais ========= " + Frais);
       this.paiementFrais = Frais;
-      let inscrits = inscritsReinscrits.filter(this.trieInscrits);
-      let reinscrits = inscritsReinscrits.filter(this.trieReinscrits);
-      console.log("inscrits => " + inscrits);
-
-      console.log(this.MoisNonPaye.toString());
-      this.allFraisPayes = [];
-      this.allFraisImpayes = [];
-      this.resultat = null;
-
-      this.autresFraisPayesSaufInscReinsc = null;
-      // this.autresFraisPayesSaufInscReinsc = [];
-      this.MoisPaye = [];
-      this.MoisNonPaye = [];
-      this.moisAvance = [];
-      this.moisToShowWithoutPayedMonths = [];
-
       let eleveChoisi = JSON.parse(localStorage.getItem("eleveChoisi"));
-
-      let actuelInscrit = inscrits.find(
-        (x) => x.eleve === eleveChoisi.eleveNumber
-      );
-      let actuelReinscrit = reinscrits.find(
-        (x) => x.eleve === eleveChoisi.eleveNumber
+      let elevesDefinitlySuscribed = JSON.parse(
+        localStorage.getItem("Définitivement Inscrits")
       );
 
-      this.autresFraisPayesSaufInscReinsc = AllFraisPayedByEleve.filter(
-        this.trieAutresFraisPayes
-      );
-
-      if (actuelInscrit) {
-        this.shawInscription = true;
-        this.allFraisPayes.push(actuelInscrit);
-      }
-      // assignation frais communs payés et non payés s'il y a au moins un frais payé si non allFraisImpayés= Tous les frais de la BD
-      if (this.autresFraisPayesSaufInscReinsc) {
-        this.allFraisPayes = this.allFraisPayes.concat(
-          this.autresFraisPayesSaufInscReinsc
-        );
-
-        this.autresFraisPayesSaufInscReinsc.forEach((frais) => {
-          if (!this.resultat) {
-            console.log("1er tour");
-            this.resultat = this.trieAutresFraisImpaye(frais.typeFrais);
-          } else {
-            this.resultat = this.trieAutresFraisImpaye(
-              frais.typeFrais,
-              this.resultat
-            );
-          }
-        });
-
-        this.allFraisImpayes = this.resultat;
-        console.log(
-          "allFraisImpayes ***************" +
-            JSON.stringify(this.allFraisImpayes) +
-            "\nallFraisPayes => " +
-            JSON.stringify(this.allFraisPayes)
-        );
+      if (elevesDefinitlySuscribed) {
+        if (
+          !elevesDefinitlySuscribed.find(
+            (x) => x.eleve == eleveChoisi.eleveNumber
+          )
+        ) {
+          this.paiementFrais = [];
+          this.moisToPay = [];
+        } else {
+          this.moisToPay = this.moisToShowWithoutPayedMonths;
+        }
       } else {
-        this.allFraisImpayes = this.paiementFrais;
+        this.paiementFrais = [];
+        this.moisToPay = [];
       }
+      /////////////////beug
+      if (allElevesPayedInscReinsc) {
+        console.log("Interdit");
+        let inscrits = allElevesPayedInscReinsc.filter(this.trieInscrits);
+        let reinscrits = allElevesPayedInscReinsc.filter(this.trieReinscrits);
+        console.log("inscrits => " + inscrits + " reinscrits " + reinscrits);
 
-      if (actuelReinscrit) {
-        this.shawInscription = false;
-        this.allFraisPayes.push(actuelReinscrit);
+        console.log(this.MoisNonPaye.toString());
+        this.allFraisPayes = [];
+        this.allFraisImpayes = [];
+        this.resultat = null;
+
+        this.autresFraisPayesSaufInscReinsc = null;
+        // this.autresFraisPayesSaufInscReinsc = [];
+        this.MoisPaye = [];
+        this.MoisNonPaye = [];
+        this.moisAvance = [];
+        this.moisToShowWithoutPayedMonths = [];
+
+        let actuelInscrit = inscrits.find(
+          (x) => x.eleve === eleveChoisi.eleveNumber
+        );
+        let actuelReinscrit = reinscrits.find(
+          (x) => x.eleve === eleveChoisi.eleveNumber
+        );
+
+        this.autresFraisPayesSaufInscReinsc = AllFraisPayedByEleve.filter(
+          this.trieAutresFraisPayes
+        );
+
+        if (actuelInscrit) {
+          this.shawInscription = true;
+          this.allFraisPayes.push(actuelInscrit);
+        }
+        // assignation frais communs payés et non payés s'il y a au moins un frais payé si non allFraisImpayés= Tous les frais de la BD
+        if (this.autresFraisPayesSaufInscReinsc) {
+          this.allFraisPayes = this.allFraisPayes.concat(
+            this.autresFraisPayesSaufInscReinsc
+          );
+
+          this.autresFraisPayesSaufInscReinsc.forEach((frais) => {
+            if (!this.resultat) {
+              console.log("1er tour");
+              this.resultat = this.trieAutresFraisImpaye(frais.typeFrais);
+            } else {
+              this.resultat = this.trieAutresFraisImpaye(
+                frais.typeFrais,
+                this.resultat
+              );
+            }
+          });
+
+          this.allFraisImpayes = this.resultat;
+          console.log(
+            "allFraisImpayes ***************" +
+              JSON.stringify(this.allFraisImpayes) +
+              "\nallFraisPayes => " +
+              JSON.stringify(this.allFraisPayes)
+          );
+        } else {
+          this.allFraisImpayes = this.paiementFrais;
+        }
+
+        if (actuelReinscrit) {
+          this.shawInscription = false;
+          this.allFraisPayes.push(actuelReinscrit);
+        }
       }
 
       //attention ne jamais oublier de parses une variable JSON stringifié car elle ne ressemble à du JSON par la forme dans le fond c'est un Array oui mais pas d'objets mais de String
@@ -1241,16 +1302,17 @@ export default {
           "Autre Frais sélectionné" + JSON.stringify(this.fraisChoisi)
         );
         this.AffichePaiementAutresFrais = true;
-        let frais = this.fraisChoisi[0].frais;
-        let montantDejaPaye = this.fraisChoisi[0].montantDejaPaye;
-        let montantRestant = this.fraisChoisi[0].montantRestant;
+        let frais = this.fraisChoisi[0].identifiant;
+        // let montantDejaPaye = this.fraisChoisi[0].montantDejaPaye;
+        // let montantRestant = this.fraisChoisi[0].montantRestant;
         // let statut = this.fraisChoisi[0].statut;
         console.log("frais sélectionné => " + frais);
         this.fraisApayer = frais;
         this.scolariteTotal = this.fraisChoisi[0].montant;
         this.prixFraisApayer = this.fraisChoisi[0].montant;
-        this.montantDejaPaye = montantDejaPaye;
-        this.montantRestant = montantRestant;
+
+        this.montantDejaPaye = this.montantApayer;
+        this.montantRestant = this.scolariteTotal - this.montantDejaPaye;
 
         //this.statut = statut;
       }
@@ -1260,7 +1322,7 @@ export default {
         this.alert = true;
 
         console.log("alloooo ! prixInscription " + this.prixInscription);
-        this.fraisApayer = "Frais Inscription";
+        this.fraisApayer = "Inscriptions";
         this.scolariteTotal = this.prixInscription;
         this.alertInscriptionReinscription = true;
       }
@@ -1271,7 +1333,7 @@ export default {
         this.alert = true;
 
         console.log("alloooo ! prixReinscription " + this.prixReinscription);
-        this.fraisApayer = "Frais Reinscription";
+        this.fraisApayer = "Réinscriptions";
         this.scolariteTotal = this.prixReinscription;
         this.alertInscriptionReinscription = true;
       }
@@ -1307,7 +1369,11 @@ export default {
       let FraisAvancesWithDetails = [];
       let FraisPayesWithDetails = [];
 
-      if (localStorage.getItem("token") != null) {
+      let allElevesPayedInscReinsc = JSON.parse(
+        localStorage.getItem("all_Eleves_Payed_InscReinsc")
+      );
+
+      if (localStorage.getItem("token") != null && allElevesPayedInscReinsc) {
         axios
           .get(
             `api/finances/paiementFraisEleve/?annee_scolaire=${this.anneeActuelle}&id=${eleveChoisi.eleveNumber}`,
@@ -1390,10 +1456,12 @@ export default {
           .catch(function(error) {
             console.log("😢😢😢" + error);
           });
+
+        this.shawPayedMonths = true;
+        this.paiementFrais = this.allFraisImpayes.map((item) => item);
       }
 
-      this.shawPayedMonths = true;
-      this.paiementFrais = this.allFraisImpayes.map((item) => item);
+      //this.shawPayedMonths = true;
     },
     trieMoisVides(value) {
       return value != "";
@@ -1509,6 +1577,7 @@ export default {
         classe: eleveChoisi.classe,
         typeFrais: this.fraisApayer,
         montantFrais: Number(this.scolariteTotal),
+        AnneeScolaire: this.anneeActuelle,
       };
       let payedFrais = {
         eleve: eleveChoisi.eleveNumber,
@@ -1516,11 +1585,22 @@ export default {
         montantApayer: this.montantApayer,
         montantDejaPaye: this.montantDejaPaye,
         montantRestant: this.montantRestant,
+        AnneeScolaire: this.anneeActuelle,
       };
-
+      //Cas où c'est une inscription ou réinscription à payer
       if (this.alertErreurDuplicateTypeFrais === false && this.inscription) {
-        this.$store.dispatch("actionPaiementInscReinsc", inscReinscPaiement);
-        this.annulation();
+        if (this.montantApayer == this.scolariteTotal) {
+          let allInscReinscPaiement = [inscReinscPaiement];
+          this.$store.dispatch("actionPaiementInscReinsc", inscReinscPaiement);
+          localStorage.setItem(
+            "Définitivement Inscrits",
+            JSON.stringify(allInscReinscPaiement)
+          );
+          setTimeout(() => {
+            this.InitialiseFraisPayeImpaye(eleveChoisi.eleveNumber);
+            this.annulation();
+          }, 2000);
+        }
       } else if (
         this.alertErreurDuplicateTypeFrais === false &&
         this.reinscription
@@ -1537,11 +1617,11 @@ export default {
         console.log(
           "ultra test " +
             this.autresFraisPayesSaufInscReinsc.indexOf(
-              this.fraisChoisi[0].frais
+              this.fraisChoisi[0].identifiant
             ) +
             " " +
             typeof this.autresFraisPayesSaufInscReinsc.indexOf(
-              this.fraisChoisi[0].frais
+              this.fraisChoisi[0].identifiant
             )
         );
         // Si c'est un paiement frais communs à tous et que le montant à payer est  égale au montant du frais
@@ -1550,9 +1630,11 @@ export default {
           this.fraisChoisi.length > 0 &&
           Number(this.montantApayer) === Number(this.fraisChoisi[0].montant)
         ) {
-          payedFrais["typeFrais"] = this.fraisChoisi[0].frais;
+          payedFrais["typeFrais"] = this.fraisChoisi[0].identifiant;
           console.log(
-            "Frais communs à tous => " + this.fraisChoisi[0].frais + " payé"
+            "Frais communs à tous => " +
+              this.fraisChoisi[0].identifiant +
+              " payé"
           );
           payedFrais["statut"] = "payé";
           payedFrais["montantFrais"] = this.fraisChoisi[0].montant;
