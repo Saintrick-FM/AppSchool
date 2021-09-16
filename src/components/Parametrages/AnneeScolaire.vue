@@ -198,7 +198,7 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapMutations } from "vuex";
 
 mapGetters;
 export default {
@@ -269,6 +269,11 @@ export default {
     this.$store.dispatch("actionGetSchoolYears");
   },
   beforeMount() {
+    // je reinitialise le state de configNot Done à rien du tout
+    let details = {
+      message: null,
+    };
+    this.configNotDone(details);
     let annees_scolaires = JSON.parse(localStorage.getItem("annees_scolaires"));
     if (annees_scolaires) {
       setTimeout(() => {
@@ -310,6 +315,7 @@ export default {
   },
 
   methods: {
+    ...mapMutations(["configNotDone"]),
     //..validate inputs
     validate() {
       this.$refs.form.validate();

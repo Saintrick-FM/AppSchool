@@ -35,12 +35,13 @@
         border="bottom"
         color="pink darken-1"
         colored-border
-        v-if="show"
+        v-if="show || messageParamNotDone"
       >
         <h2
           style="color:#d81b60; margin-left:30px; position:absolute; margin-top:-2px"
         >
           {{ message }}
+          {{ messageParamNotDone }}
         </h2>
       </v-alert>
     </v-main>
@@ -51,6 +52,7 @@ import axios from "axios";
 import RubriqueNav from "@/components/RubriqueNav";
 import NavbarHaut from "@/components/NavbarHaut";
 import Parametrages from "@/views/Parametrages";
+import { mapGetters } from "vuex";
 
 export default {
   name: "App",
@@ -87,14 +89,9 @@ export default {
     if (!allParamsDone) {
       localStorage.setItem("allParamsDone", "Non");
     }
-    if (allParamsDone === "Non") {
+    if (allParamsDone !== "Vrai") {
       console.log("if " + allParamsDone);
       this.show = true;
-      this.message =
-        "Veuillez finaliser tous les parametrages du logiciel afin que vous en ayez un accès complet";
-    } else {
-      console.log("else " + allParamsDone);
-      this.show = false;
       this.message =
         "Veuillez finaliser tous les parametrages du logiciel afin que vous en ayez un accès complet";
     }
@@ -103,6 +100,7 @@ export default {
     checkedToken: function() {
       return localStorage.getItem("token");
     },
+    ...mapGetters(["messageParamNotDone"]),
   },
 
   methods: {

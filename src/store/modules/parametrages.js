@@ -3,7 +3,12 @@ import axios from 'axios'
 const state = {
     newAnneeScolaire: null,
     annees_scolaire: null,
-    classes: []
+    classes: [],
+    configEcolage: [],
+    configAutresFrais: [],
+    configInscReinsc: [],
+    depenses: [],
+    messageParamNotDone: ""
 
 };
 const actions = {
@@ -390,11 +395,18 @@ const actions = {
             .catch(function(error) {
                 console.log("😢😢😢 errors" + error);
             })
+    },
+    setParamsNotDone({ commit }, details) {
+
+        commit('configNotDone', details)
     }
 
 }
 const mutations = {
-
+    configNotDone(state, details) {
+        console.log(details.message)
+        state.messageParamNotDone = details.message
+    },
     newAnneeScolaire(state, anneeScolaire) {
         state.newAnneeScolaire = anneeScolaire
     },
@@ -402,39 +414,50 @@ const mutations = {
         console.log("Attention il faudra bien gérer le state de " + JSON.stringify(fraisDebase))
 
     },
-    newDepense(fraisDebase) {
+    newDepense(state, fraisDebase) {
         console.log("Attention il faudra bien gérer le state " + JSON.stringify(fraisDebase))
+        state.depenses = JSON.parse(localStorage.getItem("Config_Dépenses"));
+
     },
     updateDepense(response) {
         console.log("A gerer en tout cas" + response)
+        state.depenses = JSON.parse(localStorage.getItem("Config_Dépenses"));
     },
     newConfigAutresFrais(response) {
         console.log("A gerer en tout cas" + response)
+        state.configAutresFrais = JSON.parse(localStorage.getItem("Config_Autres_Frais"));
+
     },
     updateAutreFrais(response) {
         console.log("A gerer en tout cas" + response)
+        state.configAutresFrais = JSON.parse(localStorage.getItem("Config_Autres_Frais"));
+
     },
     newConfigInscReinsc(response) {
         console.log("A gerer en tout cas" + response)
+        state.configAutresFrais = JSON.parse(localStorage.getItem("Config inscReinsc"));
+
     },
-    newConfigEcolage(response) {
+    newConfigEcolage(state, response) {
         console.log("A gerer en tout cas " + response)
+        state.configEcolage = JSON.parse(localStorage.getItem("Config_Ecolage_et_Autres"));
+
     },
     newClasse(state, classe) {
         console.log("😃😃😃 new Classe" + JSON.stringify(classe));
         state.classes.push(classe)
 
     },
-    updateClasse() {
+    updateClasse(state) {
         //il faudra penser au state apres   
+
         let actualClasses = JSON.parse(localStorage.getItem('All Classes'));
+        state.classes = actualClasses
         console.log("actualClasses " + JSON.stringify(actualClasses))
     },
 
     InitialiseAnneesScolaire(state, anneesScolaire) {
-
         state.annees_scolaire = anneesScolaire
-
     },
 
     mutateYearSchool(state, anneeScolaire) {
@@ -452,6 +475,25 @@ const mutations = {
 const getters = {
     anneesScolaire: state => {
         return state.annees_scolaire
+    },
+    Classes: state => {
+        return state.classes
+    },
+    AllConfigEcolage: state => {
+        return state.configEcolage
+    },
+    AllConfigAutresFrais: state => {
+        return state.configAutresFrais
+    },
+    AllConfigInscReinsc: state => {
+        return state.configInscReinsc
+    },
+
+    Depenses: state => {
+        return state.depenses
+    },
+    messageParamNotDone: state => {
+        return state.messageParamNotDone
     }
 }
 export default {

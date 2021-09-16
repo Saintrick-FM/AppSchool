@@ -605,7 +605,7 @@ export default {
 
       console.log("cycles filtrés " + JSON.stringify(Cycles));
       // this.editEcole = ecole;
-      Object.assign(this.editEcole, ecole);
+      Object.assign(this.editEcole, ecole[0]);
       this.editedMidi = true;
 
       this.nbreSalleGarderie = 2;

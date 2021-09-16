@@ -1034,22 +1034,106 @@ export default {
       }
     },
     AfficheEleveVrai() {
+      this.allFraisPayes = [];
+      this.allFraisImpayes = [];
+      this.resultat = null;
+
+      this.autresFraisPayesSaufInscReinsc = null;
+      // this.autresFraisPayesSaufInscReinsc = [];
+      this.MoisPaye = [];
+      this.MoisNonPaye = [];
+      this.moisAvance = [];
+      this.moisToShowWithoutPayedMonths = [];
+
       let eleveChoisi = JSON.parse(localStorage.getItem("eleveChoisi"));
       let allElevesPayedInscReinsc = JSON.parse(
         localStorage.getItem("all_Eleves_Payed_InscReinsc")
       );
-      if (
-        allElevesPayedInscReinsc.find(
-          (eleve) => eleve.eleve === eleveChoisi.eleveNumber
-        )
-      ) {
+       this.montantFraisMensuel = JSON.parse(this.classes).find(
+        (x) => x.identifiant == eleveChoisi.classe
+      ).scolarite;
+      
+      console.log("test2");
+      this.eleve.nom = eleveChoisi.nom;
+      this.eleve.sexe = eleveChoisi.sexe;
+      this.eleve.dateLieuNaissance = eleveChoisi.dateLieuNaissance;
+      this.eleve.adresse = eleveChoisi.adresse;
+      this.eleve.tuteur = eleveChoisi.tuteur;
+      this.eleve.telTuteur = eleveChoisi.telTuteur;
+      this.eleve.redoublant = eleveChoisi.redoublant;
+      this.eleve.classe = eleveChoisi.classe;
+      this.allFraisInscReinsc = localStorage.getItem(
+        "frais_Inscript_Reinscript"
+      );
+      this.prixInscription = JSON.parse(this.allFraisInscReinsc).find(
+        (x) => x.classe == eleveChoisi.classe
+      ).fraisInscription;
+      this.prixReinscription = JSON.parse(this.allFraisInscReinsc).find(
+        (x) => x.classe == eleveChoisi.classe
+      ).fraisReinscription;
+     
+      // s'il y'a déja au moins 1 inscrit ou reinscrit définitivement
+      if (allElevesPayedInscReinsc) {
+      // si l'élève cliqué a déja payé son incription
+      if (allElevesPayedInscReinsc.find(this.trieInscrits).eleve === eleveChoisi.eleveNumber){
+        var inscrit= allElevesPayedInscReinsc.filter(this.trieInscrits).eleve; 
+        this.shawInscription=false   
+        console.log("Considéré comme inscrit preuve => " + inscrit)
+      }
+      // si l'élève cliqué a déja payé sareinscription
+      if (allElevesPayedInscReinsc.find(this.trieReinscrits).eleve === eleveChoisi.eleveNumber){
+         var reinscrit = allElevesPayedInscReinsc.find(this.trieReinscrits).eleve;
+         console.log("Considéré comme reinscrit preuve => " + reinscrit);
+         this.shawInscription= true
+      }
+      }
+     
+      if (inscrit || reinscrit) {  
+        this.allFraisPayes.push(
+          allElevesPayedInscReinsc.find(
+            (eleve) => eleve.eleve === eleveChoisi.eleveNumber
+          )
+        );
         this.moisToPay = this.moisToShowWithoutPayedMonths;
         console.log("test moisToPay " + this.moisToPay);
+
+         // assignation frais communs payés et non payés s'il y a au moins un frais payé si non allFraisImpayés= Tous les frais de la BD
+        if (this.autresFraisPayesSaufInscReinsc) {
+          this.allFraisPayes = this.allFraisPayes.concat(
+            this.autresFraisPayesSaufInscReinsc
+          );
+
+          this.autresFraisPayesSaufInscReinsc.forEach((frais) => {
+            if (!this.resultat) {
+              console.log("1er tour");
+              this.resultat = this.trieAutresFraisImpaye(frais.typeFrais);
+            } else {
+              this.resultat = this.trieAutresFraisImpaye(
+                frais.typeFrais,
+                this.resultat
+              );
+            }
+          });
+
+          this.allFraisImpayes = this.resultat;
+          console.log(
+            "allFraisImpayes ***************" +
+              JSON.stringify(this.allFraisImpayes) +
+              "\nallFraisPayes => " +
+              JSON.stringify(this.allFraisPayes)
+          );
+        } else {
+          this.allFraisImpayes = this.paiementFrais;
+        }
+
+      this.InitialiseFraisPayeImpaye()
       } else {
         this.paiementFrais = [];
         this.moisToPay = [];
         console.log("fin de test");
       }
+      
+
     },
     AfficheEleve() {
       let allElevesPayedInscReinsc = JSON.parse(
@@ -1083,6 +1167,7 @@ export default {
         this.paiementFrais = [];
         this.moisToPay = [];
       }
+
       /////////////////beug
       if (allElevesPayedInscReinsc) {
         console.log("Interdit");

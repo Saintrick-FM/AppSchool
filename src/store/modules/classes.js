@@ -40,12 +40,12 @@ const actions = {
                         IdClasses.push(firstResponse.data[classe].identifiant);
                     }
                     let classes = JSON.stringify(matieres)
-                    let fraisInscREsc = JSON.stringify(secondResponse.data)
+
                     console.log("identifiants classes => " + IdClasses);
                     console.log("😃😃😃 this.classes => " + this.classes);
-
+                    localStorage.setItem("frais_Inscript_Reinscript", JSON.stringify(secondResponse.data));
                     commit("InitialiseClasse", [classes, IdClasses])
-                    commit("InitialisefraisInscREsc", fraisInscREsc)
+                    commit("InitialisefraisInscREsc", secondResponse.data)
 
                 }))
                 .catch(function(error) {
@@ -99,7 +99,7 @@ const mutations = {
     },
     InitialisefraisInscREsc(state, fraisInscReinsc) {
         state.fraisInscREsc = fraisInscReinsc
-        localStorage.setItem("frais_Inscript_Reinscript", fraisInscReinsc);
+
     },
     InitialiseMatieres(state, matieres) {
         state.matieres = matieres

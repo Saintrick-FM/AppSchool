@@ -372,6 +372,9 @@ export default new Vuex.Store({
         allMatieres: state => {
             return state.matieres
         },
+        Ecole: state => {
+            return state.ecole
+        },
 
     },
     modules: {
