@@ -169,7 +169,7 @@ const actions = {
             console.log("fraiPayed[0] === " + JSON.stringify(fraisPayed[0]) +
                 "\nfraisPayed[1]=== " + JSON.stringify(fraisPayed[1]))
             await axios
-                .post('api/finances/paiementFraisEleve/', body, {
+                .post('api/finances/paiementEveryFrais/', body, {
                     headers: {
                         'Authorization': token,
                     }
@@ -188,7 +188,7 @@ const actions = {
 
             body = fraisPayed[1]
             await axios
-                .post('api/finances/paiementFraisEleve/', body, {
+                .post('api/finances/paiementEveryFrais/', body, {
                     headers: {
                         'Authorization': token,
                     }
@@ -208,7 +208,7 @@ const actions = {
         } else {
             let body = fraisPayed
             await axios
-                .post('api/finances/paiementFraisEleve/', body, {
+                .post('api/finances/paiementEveryFrais/', body, {
                     headers: {
                         'Authorization': token,
                     }

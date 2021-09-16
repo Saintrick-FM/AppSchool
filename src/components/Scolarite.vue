@@ -6,26 +6,37 @@
     <v-col elevation="5" md="10">
       <v-row>
         <v-card>
-          <v-card-title class="headline">
-            <v-chip label color="primary" text-color="white">
-              <v-icon left>mdi-account</v-icon>
-              <h2>{{ eleve.nom }}</h2>
-            </v-chip>
+          <v-row>
+            <v-card-title class="headline">
+              <v-chip
+                label
+                color="primary"
+                style="margin:20px 0px 0px 15px"
+                text-color="white"
+              >
+                <v-icon left>mdi-account</v-icon>
+                <h2>{{ eleve.nom }}</h2>
+              </v-chip>
 
-            <v-chip
-              label
-              color="primary"
-              style="margin-left:900px"
-              text-color="white"
-            >
-              <v-icon left>mdi-book-variant</v-icon>
-              <h3>{{ eleve.classe }}</h3>
-            </v-chip>
-          </v-card-title>
+              <v-chip
+                label
+                color="primary"
+                :style="
+                  this.MoisNonPaye.length === 12
+                    ? 'margin:-42px 0px 0px 1100px'
+                    : 'margin-left: 900px'
+                "
+                text-color="white"
+              >
+                <v-icon left>mdi-book-variant</v-icon>
+                <h3>{{ eleve.classe }}</h3>
+              </v-chip>
+            </v-card-title>
+          </v-row>
 
           <v-row>
             <!-- rubriaue infos civiles de l'élève qui paie -->
-            <v-col :md="tailleMoisPaye">
+            <v-col v-if="tailleMoisImpaye !== 12" :md="tailleMoisPaye">
               <v-card-text>
                 <v-container grid-list-md>
                   <!-- raw affichant les mois payés ou impayés -->
@@ -107,7 +118,7 @@
             </v-col>
 
             <!-- rubriaue gestion des mois payés -->
-            <v-col :md="tailleMoisAvance">
+            <v-col v-if="tailleMoisImpaye !== 12" :md="tailleMoisAvance">
               <v-card-text>
                 <v-container grid-list-md>
                   <!-- raw affichant les mois payés ou impayés -->
@@ -266,7 +277,7 @@
                           style="color:black; font-weight: bold; text-decoration: underline;"
                           >Année académique:</span
                         >
-                        {{ item.anneeAcademique }}
+                        {{ item.AnneeScolaire }}
                       </v-card-text>
                     </v-card>
                   </v-tab-item>
@@ -282,7 +293,7 @@
 
                 <v-tabs v-model="tab2" background-color="primary" dark>
                   <v-tab v-for="item2 in allFraisImpayes" :key="item2.frais">
-                    {{ item2.frais }}
+                    {{ item2.identifiant }}
                   </v-tab>
                 </v-tabs>
 
@@ -397,12 +408,12 @@
                         </v-dialog>
                       </v-toolbar>
                     </template>
-
+                    <!-- 
                     <template v-slot:item.actions="{ item }">
                       <v-icon small class="mr-2" @click="editItem(item)">
                         mdi-pencil
                       </v-icon>
-                    </template>
+                    </template> -->
                   </v-data-table>
                   <v-divider></v-divider>
                   <v-divider></v-divider>
@@ -423,7 +434,7 @@
                     >Frais mensuels</v-autocomplete
                   >
 
-                  <v-layout align-center v-if="!shawInscription">
+                  <v-layout align-center v-if="shawInscription">
                     <v-checkbox
                       v-model="inscription"
                       hide-details
@@ -691,7 +702,7 @@ export default {
       paiement_Inscription_Reinscription: ["Inscription", "Réinscription"],
       inscription: null,
       reinscription: null,
-      shawInscription: false,
+      shawInscription: true,
       choiceBetweenInscReinsc: null,
       prixInscription: null,
       prixReinscription: null,
@@ -866,6 +877,9 @@ export default {
     allFraisImpayes(newValue, oldValue) {
       newValue || oldValue;
     },
+    shawInscription(newValue, oldValue) {
+      newValue || oldValue;
+    },
     dialog(val) {
       val || this.close();
     },
@@ -983,10 +997,10 @@ export default {
               obj.montantRestant = 0;
               // obj.cree_le.toString().slice(0, 16);
             });
-
+            // this.paiementFrais = element;
             console.log(
               "😃😃😃 this.paiementFrais => " +
-                this.paiementFrais +
+                JSON.stringify(element) +
                 "this.response.data = " +
                 JSON.stringify(element)
             );
@@ -1010,10 +1024,10 @@ export default {
     },
 
     trieInscrits(value) {
-      return value.typeFrais === "Frais Inscription";
+      return value.typeFrais === "Frais Inscriptions";
     },
     trieReinscrits(value) {
-      return value.typeFrais === "Frais Reinscription";
+      return value.typeFrais === "Frais Reinscriptions";
     },
     trieAutresFraisPayes(x) {
       return x.typeFrais !== "Frais mensuel";
@@ -1049,11 +1063,10 @@ export default {
       let allElevesPayedInscReinsc = JSON.parse(
         localStorage.getItem("all_Eleves_Payed_InscReinsc")
       );
-       this.montantFraisMensuel = JSON.parse(this.classes).find(
+      this.montantFraisMensuel = JSON.parse(this.classes).find(
         (x) => x.identifiant == eleveChoisi.classe
       ).scolarite;
-      
-      console.log("test2");
+
       this.eleve.nom = eleveChoisi.nom;
       this.eleve.sexe = eleveChoisi.sexe;
       this.eleve.dateLieuNaissance = eleveChoisi.dateLieuNaissance;
@@ -1062,47 +1075,51 @@ export default {
       this.eleve.telTuteur = eleveChoisi.telTuteur;
       this.eleve.redoublant = eleveChoisi.redoublant;
       this.eleve.classe = eleveChoisi.classe;
-      this.allFraisInscReinsc = localStorage.getItem(
-        "frais_Inscript_Reinscript"
+      this.allFraisInscReinsc = JSON.parse(
+        localStorage.getItem("Config inscReinsc")
       );
-      this.prixInscription = JSON.parse(this.allFraisInscReinsc).find(
-        (x) => x.classe == eleveChoisi.classe
-      ).fraisInscription;
-      this.prixReinscription = JSON.parse(this.allFraisInscReinsc).find(
-        (x) => x.classe == eleveChoisi.classe
-      ).fraisReinscription;
-     
-      // s'il y'a déja au moins 1 inscrit ou reinscrit définitivement
-      if (allElevesPayedInscReinsc) {
-      // si l'élève cliqué a déja payé son incription
-      if (allElevesPayedInscReinsc.find(this.trieInscrits).eleve === eleveChoisi.eleveNumber){
-        var inscrit= allElevesPayedInscReinsc.filter(this.trieInscrits).eleve; 
-        this.shawInscription=false   
-        console.log("Considéré comme inscrit preuve => " + inscrit)
-      }
-      // si l'élève cliqué a déja payé sareinscription
-      if (allElevesPayedInscReinsc.find(this.trieReinscrits).eleve === eleveChoisi.eleveNumber){
-         var reinscrit = allElevesPayedInscReinsc.find(this.trieReinscrits).eleve;
-         console.log("Considéré comme reinscrit preuve => " + reinscrit);
-         this.shawInscription= true
-      }
-      }
-     
-      if (inscrit || reinscrit) {  
-        this.allFraisPayes.push(
-          allElevesPayedInscReinsc.find(
-            (eleve) => eleve.eleve === eleveChoisi.eleveNumber
-          )
-        );
-        this.moisToPay = this.moisToShowWithoutPayedMonths;
-        console.log("test moisToPay " + this.moisToPay);
 
-         // assignation frais communs payés et non payés s'il y a au moins un frais payé si non allFraisImpayés= Tous les frais de la BD
-        if (this.autresFraisPayesSaufInscReinsc) {
+      let inscritOuReinscrit = allElevesPayedInscReinsc.find(
+        (x) => x.eleve === eleveChoisi.eleveNumber
+      );
+      //  console.log("test important " + inscritOuReinscrit.typeFrais);
+      // si l'élève choisi est déja inscrit
+      if (inscritOuReinscrit) {
+        if (inscritOuReinscrit.typeFrais === "Inscriptions") {
+          this.shawInscription = false;
+          console.log("Considéré comme inscrit preuve => ");
+        }
+      }
+      // si l'élève cliqué a déja payé sa reinscription
+      if (inscritOuReinscrit) {
+        if (inscritOuReinscrit.typeFrais === "Reinscriptions") {
+          console.log("Considéré comme reinscrit preuve");
+          this.shawInscription = true;
+        }
+      }
+      if (inscritOuReinscrit) {
+        this.prixReinscription = this.allFraisInscReinsc.find(
+          (x) => x.classe == eleveChoisi.classe
+        ).fraisReinscription;
+
+        this.prixInscription = this.allFraisInscReinsc.find(
+          (x) => x.classe === eleveChoisi.classe
+        ).fraisInscription;
+
+        console.log("test allFraisPayes " + JSON.stringify(this.allFraisPayes));
+
+        let AllFraisPayedByEleve = JSON.parse(
+          localStorage.getItem("AllFraisPayedByEleve")
+        );
+        // assignation frais communs payés et non payés s'il y a au moins un frais payé si non allFraisImpayés= Tous les frais de la BD
+        if (AllFraisPayedByEleve) {
           this.allFraisPayes = this.allFraisPayes.concat(
             this.autresFraisPayesSaufInscReinsc
           );
-
+          this.autresFraisPayesSaufInscReinsc = AllFraisPayedByEleve.filter(
+            this.trieAutresFraisPayes
+          );
+          console.log("test 33 " + this.allFraisPayes);
           this.autresFraisPayesSaufInscReinsc.forEach((frais) => {
             if (!this.resultat) {
               console.log("1er tour");
@@ -1122,19 +1139,29 @@ export default {
               "\nallFraisPayes => " +
               JSON.stringify(this.allFraisPayes)
           );
+          this.InitialiseFraisPayeImpaye(eleveChoisi);
         } else {
-          this.allFraisImpayes = this.paiementFrais;
-        }
+          this.allFraisPayes.push(inscritOuReinscrit);
 
-      this.InitialiseFraisPayeImpaye()
+          this.paiementFrais = JSON.parse(localStorage.getItem("Frais"));
+          this.allFraisImpayes = this.paiementFrais;
+          this.moisToShowWithoutPayedMonths = this.mois;
+          this.MoisNonPaye = this.mois;
+          this.MoisPaye = [];
+          this.moisAvance = [];
+          this.autresFraisPayesSaufInscReinsc = [];
+
+          // this.allFraisImpayes = this.paiementFrais;
+          console.log(" dooomage on est dans le else");
+        }
       } else {
         this.paiementFrais = [];
         this.moisToPay = [];
         console.log("fin de test");
       }
-      
-
     },
+
+    /*
     AfficheEleve() {
       let allElevesPayedInscReinsc = JSON.parse(
         localStorage.getItem("all_Eleves_Payed_InscReinsc")
@@ -1264,8 +1291,9 @@ export default {
       // this.getfinanceEleveDetail(eleveChoisi);
       //this.MoisPayedToShow = this.MoisPaye.toString().split(",");
       // console.log("Mois Payés dans AfficheEleve " + this.MoisPayedToShow);
+      console.log("eleve avant initialiseFraisPaye " + eleveChoisi);
       this.InitialiseFraisPayeImpaye(eleveChoisi);
-    },
+    },*/
 
     proceedToPaiement: function() {
       console.log("naza");
@@ -1457,11 +1485,12 @@ export default {
       let allElevesPayedInscReinsc = JSON.parse(
         localStorage.getItem("all_Eleves_Payed_InscReinsc")
       );
+      console.log("⏰ ⏰ ⏰ eleveChoisi " + JSON.stringify(eleveChoisi));
 
-      if (localStorage.getItem("token") != null && allElevesPayedInscReinsc) {
+      if (token && allElevesPayedInscReinsc) {
         axios
           .get(
-            `api/finances/paiementFraisEleve/?annee_scolaire=${this.anneeActuelle}&id=${eleveChoisi.eleveNumber}`,
+            `api/finances/paiementEveryFrais/?annee_scolaire=${this.anneeActuelle}&id=${eleveChoisi.eleveNumber}`,
             {
               headers: {
                 Authorization: token,
@@ -1469,26 +1498,20 @@ export default {
             }
           )
           .then((response) => {
-            const result = response.data;
-            // localStorage.setItem("Frais", result);
-            let AllFraisPayedByEleve = [];
-            for (const key in result) {
-              AllFraisPayedByEleve.push(result[key]);
-            }
-
-            let AllFraisPayedbyEleve = JSON.stringify(result);
             console.log(
               "😃😃😃 tous les frais payés de l'élève => " +
-                AllFraisPayedbyEleve
+                JSON.stringify(response.data)
             );
-
-            localStorage.setItem("AllFraisPayedByEleve", AllFraisPayedbyEleve);
+            localStorage.setItem(
+              "AllFraisPayedByEleve",
+              JSON.parse(response.data)
+            );
             //commit('InititialiseElevesPayed', AllFraisPayedByEleve)
-            let fraisPayés = result;
+            let fraisPayés = JSON.parse(response.data);
             //s'il y'a une avance dans au moins un des paiements de l'élève
             fraisPayés.forEach((frais) => {
               if (
-                frais.typeFrais === "Frais mensuel" &&
+                frais.typeFrais === "Frais mensuels" &&
                 frais.statut === "avancé"
               ) {
                 allMonthsPayed.push(
@@ -1543,7 +1566,7 @@ export default {
           });
 
         this.shawPayedMonths = true;
-        this.paiementFrais = this.allFraisImpayes.map((item) => item);
+        // this.paiementFrais = this.allFraisImpayes.map((item) => item);
       }
 
       //this.shawPayedMonths = true;
@@ -1723,146 +1746,158 @@ export default {
           );
           payedFrais["statut"] = "payé";
           payedFrais["montantFrais"] = this.fraisChoisi[0].montant;
+          console.log("test 8");
+          // this.$storestore.dispatch("action", payload);
         }
         //Cas où c'est un frais mensuel à payer
-        if (this.moisToPay.length > 0) {
-          payedFrais["typeFrais"] = "Frais mensuel";
-          // Si dans la liste des mois a payer il y'a un mois avancé
+        if (this.AffichePaiementMois) {
+          if (this.moisToPay.length > 0) {
+            payedFrais["typeFrais"] = "Frais mensuel";
+            // Si dans la liste des mois a payer il y'a un mois avancé
 
-          if (this.monthsAlreadySolve.length > 0) {
+            if (this.monthsAlreadySolve.length > 0) {
+              if (
+                this.montantApayer ==
+                Number(this.montantFraisMensuel.slice(0, -1)) *
+                  Number(this.moisToPay.length) -
+                  totalMonthsToSolve
+              ) {
+                payedFrais["mois"] = this.moisToPay.toString();
+                payedFrais["montantApayer"] = this.montantApayer;
+                payedFrais["montantRestant"] = this.montantRestant;
+                payedFrais["statut"] = "Avance solvée";
+                payedFrais["moisAsolver"] = this.monthsAlreadySolve.toString();
+                payedFrais["montantFrais"] = this.montantFraisMensuel.slice(
+                  0,
+                  -1
+                );
+              }
+              // S'il n'y a pas de mois avancés dans la liste et règlement total
+            } else if (this.monthsAlreadySolve.length == 0) {
+              console.log("désolé!!!" + this.montantApayer);
+              if (
+                this.montantApayer ==
+                Number(this.montantFraisMensuel.slice(0, -1)) *
+                  Number(this.moisToPay.length)
+              ) {
+                console.log(
+                  "Frais mensuels " + this.moisToPay.toString() + " payé"
+                );
+                payedFrais["statut"] = "payé";
+                payedFrais["mois"] = this.moisToPay.toString();
+                payedFrais["moisAsolver"] = "null";
+                payedFrais["montantFrais"] =
+                  Number(this.montantFraisMensuel.slice(0, -1)) *
+                  this.moisToPay.length;
+              }
+            } else {
+              console.log("En tout cas tu es têtu");
+            }
+
+            // S'il n'y a pas de mois avancés dans la liste et paiement avance
             if (
-              this.montantApayer ==
-              Number(this.montantFraisMensuel.slice(0, -1)) *
-                Number(this.moisToPay.length) -
-                totalMonthsToSolve
+              this.monthsAlreadySolve.length == 0 &&
+              Number(this.montantFraisMensuel.slice(0, -1)) <
+                this.montantApayer <
+                Number(this.montantFraisMensuel.slice(0, -1)) *
+                  this.moisToPay.length
             ) {
+              if (this.moisToPay.length > 1) {
+                localStorage.setItem(
+                  "MoisAvanceToStoreInDB",
+                  this.moisToPay.splice(-1, 1)
+                );
+              }
+              if (this.moisToPay.length === 1) {
+                localStorage.setItem(
+                  "MoisAvanceToStoreInDB",
+                  this.moisToPay.toString()
+                );
+              }
+              payedFrais["statut"] = "payé";
               payedFrais["mois"] = this.moisToPay.toString();
-              payedFrais["montantApayer"] = this.montantApayer;
-              payedFrais["montantRestant"] = this.montantRestant;
-              payedFrais["statut"] = "Avance solvée";
-              payedFrais["moisAsolver"] = this.monthsAlreadySolve.toString();
               payedFrais["montantFrais"] = this.montantFraisMensuel.slice(
                 0,
                 -1
               );
-            }
-            // S'il n'y a pas de mois avancés dans la liste et règlement total
-          } else if (this.monthsAlreadySolve.length == 0) {
-            console.log("désolé!!!" + this.montantApayer);
-            if (
-              this.montantApayer ==
-              Number(this.montantFraisMensuel.slice(0, -1)) *
-                Number(this.moisToPay.length)
-            ) {
+              payedFrais["montantApayer"] =
+                Number(this.montantFraisMensuel.slice(0, -1)) *
+                this.moisToPay.length;
+              payedFrais["montantDejaPaye"] =
+                Number(this.montantFraisMensuel.slice(0, -1)) *
+                this.moisToPay.length;
+              payedFrais["montantRestant"] = 0;
+
               console.log(
                 "Frais mensuels " + this.moisToPay.toString() + " payé"
               );
-              payedFrais["statut"] = "payé";
-              payedFrais["mois"] = this.moisToPay.toString();
-              payedFrais["moisAsolver"] = "null";
-              payedFrais["montantFrais"] =
-                Number(this.montantFraisMensuel.slice(0, -1)) *
-                this.moisToPay.length;
             }
-          } else {
-            console.log("En tout cas tu es têtu");
           }
-
-          // S'il n'y a pas de mois avancés dans la liste et paiement avance
-          if (
-            this.monthsAlreadySolve.length == 0 &&
-            Number(this.montantFraisMensuel.slice(0, -1)) <
-              this.montantApayer <
-              Number(this.montantFraisMensuel.slice(0, -1)) *
-                this.moisToPay.length
-          ) {
-            if (this.moisToPay.length > 1) {
-              localStorage.setItem(
-                "MoisAvanceToStoreInDB",
-                this.moisToPay.splice(-1, 1)
-              );
-            }
-            if (this.moisToPay.length === 1) {
-              localStorage.setItem(
-                "MoisAvanceToStoreInDB",
-                this.moisToPay.toString()
-              );
-            }
-            payedFrais["statut"] = "payé";
-            payedFrais["mois"] = this.moisToPay.toString();
-            payedFrais["montantFrais"] = this.montantFraisMensuel.slice(0, -1);
-            payedFrais["montantApayer"] =
-              Number(this.montantFraisMensuel.slice(0, -1)) *
-              this.moisToPay.length;
-            payedFrais["montantDejaPaye"] =
-              Number(this.montantFraisMensuel.slice(0, -1)) *
-              this.moisToPay.length;
-            payedFrais["montantRestant"] = 0;
-
-            console.log(
-              "Frais mensuels " + this.moisToPay.toString() + " payé"
+          console.log("test 9");
+          if (this.monthsAlreadySolve.length > 0) {
+            let AllFraisPayedByEleve = JSON.parse(
+              localStorage.getItem("AllFraisPayedByEleve")
             );
-          }
-        }
-
-        if (this.monthsAlreadySolve.length > 0) {
-          let AllFraisPayedByEleve = JSON.parse(
-            localStorage.getItem("AllFraisPayedByEleve")
-          );
-
-          // Je recherche l'id du frais qui possède parmi ses frais le/les mois avancés sélectionnés
-          let payedFraisToUpdate = AllFraisPayedByEleve.find((x) =>
-            x.mois.indexOf(this.monthsAlreadySolve != -1)
-          );
-          console.log(
-            "le frais à solver ===> " +
-              JSON.stringify(payedFraisToUpdate) +
-              "le frais solvé ===> " +
-              JSON.stringify(payedFrais)
-          );
-          this.$store.dispatch("actionUpdatePayedFrais", [
-            payedFraisToUpdate.id,
-            payedFrais,
-          ]);
-        } else {
-          let payeAvanceMois = {
-            eleve: payedFrais.eleve,
-            classe: payedFrais.classe,
-            montantApayer: 0.0,
-            montantRestant: this.montantRestant,
-            montantDejaPaye:
-              Number(this.montantFraisMensuel.slice(0, -1)) -
-              this.montantRestant,
-            typeFrais: payedFrais.typeFrais,
-            statut: "avancé",
-            mois: localStorage.getItem("MoisAvanceToStoreInDB"),
-            montantFrais: Number(this.montantFraisMensuel.slice(0, -1)),
-          };
-
-          if (
-            localStorage.getItem("MoisAvanceToStoreInDB") != null &&
-            this.moisToPay.length > 1
-          ) {
+            console.log("test 9 second");
+            // Je recherche l'id du frais qui possède parmi ses frais le/les mois avancés sélectionnés
+            let payedFraisToUpdate = AllFraisPayedByEleve.find((x) =>
+              x.mois.indexOf(this.monthsAlreadySolve != -1)
+            );
+            console.log("test 9 prime");
             console.log(
-              "payeAvanceMois === " +
-                JSON.stringify(payeAvanceMois) +
-                "\npayedFrais=== " +
+              "le frais à solver ===> " +
+                JSON.stringify(payedFraisToUpdate) +
+                "le frais solvé ===> " +
                 JSON.stringify(payedFrais)
             );
-            this.$store.dispatch("actionPayedFrais", [
+            this.$store.dispatch("actionUpdatePayedFrais", [
+              payedFraisToUpdate.id,
               payedFrais,
-              payeAvanceMois,
             ]);
-          } else if (
-            localStorage.getItem("MoisAvanceToStoreInDB") != null &&
-            this.moisToPay.length === 1
-          ) {
-            console.log("payeAvanceMois seul");
-            this.$store.dispatch("actionPayedFrais", payeAvanceMois);
           } else {
-            this.$store.dispatch("actionPayedFrais", payedFrais);
+            console.log("test attent attend");
+            let payeAvanceMois = {
+              eleve: payedFrais.eleve,
+              classe: payedFrais.classe,
+              montantApayer: 0.0,
+              montantRestant: this.montantRestant,
+              montantDejaPaye:
+                Number(this.montantFraisMensuel.slice(0, -1)) -
+                this.montantRestant,
+              typeFrais: payedFrais.typeFrais,
+              statut: "avancé",
+              mois: localStorage.getItem("MoisAvanceToStoreInDB"),
+              montantFrais: Number(this.montantFraisMensuel.slice(0, -1)),
+            };
+
+            console.log("test 10 test");
+            if (
+              localStorage.getItem("MoisAvanceToStoreInDB") != null &&
+              this.moisToPay.length > 1
+            ) {
+              console.log(
+                "payeAvanceMois === " +
+                  JSON.stringify(payeAvanceMois) +
+                  "\npayedFrais=== " +
+                  JSON.stringify(payedFrais)
+              );
+              this.$store.dispatch("actionPayedFrais", [
+                payedFrais,
+                payeAvanceMois,
+              ]);
+            } else if (
+              localStorage.getItem("MoisAvanceToStoreInDB") != null &&
+              this.moisToPay.length === 1
+            ) {
+              console.log("payeAvanceMois seul");
+              this.$store.dispatch("actionPayedFrais", payeAvanceMois);
+            } else {
+              console.log("test 10 test2");
+              this.$store.dispatch("actionPayedFrais", payedFrais);
+            }
           }
         }
+
         // Si c'est un paiement frais communs à tous et que le montant à payer n'est pas égale au montant du frais
         if (
           this.fraisChoisi.length > 0 &&
@@ -1871,7 +1906,7 @@ export default {
           this.AssignMessageErreur("noAvanceAllowed");
         }
         // Si c'est un paiement frais communs à tous et que le frais est déjà payé
-
+        console.log("test 10");
         this.alert = false;
         this.fraisApayer = null;
         this.fraisChoisi = [];
