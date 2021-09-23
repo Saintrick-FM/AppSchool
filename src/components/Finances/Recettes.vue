@@ -132,6 +132,9 @@
 </template>
 
 <script>
+//import axios from 'axios';
+//import { mapGetters,} from 'vuex';
+
 export default {
   name: "Recettes",
   data() {
@@ -139,18 +142,31 @@ export default {
       expanded: [],
       singleExpand: false,
       search: null,
+      page: 1,
+      itemsPerPage: 4,
+      sortBy: "name",
+      keys: [
+        "Name",
+        "Calories",
+        "Fat",
+        "Carbs",
+        "Protein",
+        "Sodium",
+        "Calcium",
+        "Iron",
+      ],
       dessertHeaders: [
         {
           text: "Caisse",
           align: "start",
           sortable: true,
-          value: "name",
+          value: "caisse",
         },
-        { text: "Attendus", value: "calories" },
-        { text: "Perçus", value: "fat" },
-        { text: "Reste", value: "carbs" },
-        { text: "Report", value: "protein" },
-        { text: "Total actuel", value: "iron" },
+        { text: "Attendus", value: "totalAttendu" },
+        { text: "Perçus", value: "totalPercu" },
+        { text: "Reste", value: "resteApercevoir" },
+        { text: "Total actuel", value: "totalActuel" },
+        { text: "Report", value: "iron" },
         //{ text: "", value: "data-table-expand" },
       ],
       messages: [
@@ -178,21 +194,12 @@ export default {
           exceprt: "New excerprt",
         },
       ],
+      Config_Ecolage_et_Autres: null,
+      Config_Autres_Frais: null,
+      Config_InscReinsc: null,
       lorem:
         "Lorem ipsum dolor sit amet, at aliquam vivendum vel, everti delicatissimi cu eos. Dico iuvaret debitis mel an, et cum zril menandri. Eum in consul legimus accusam.",
-      page: 1,
-      itemsPerPage: 4,
-      sortBy: "name",
-      keys: [
-        "Name",
-        "Calories",
-        "Fat",
-        "Carbs",
-        "Protein",
-        "Sodium",
-        "Calcium",
-        "Iron",
-      ],
+
       periode: ["Cette semaine", "Ce mois", "Ce trimestre"],
       categorie: [
         "Caisse ayant le plus de perçus",
@@ -201,77 +208,240 @@ export default {
       ],
       items: [
         {
-          name: "Inscriptions/Réinscriptions",
-          calories: 159,
-          fat: 6.0,
-          carbs: 24,
-          protein: 4.0,
-          sodium: 87,
-          calcium: "14%",
-          iron: "1%",
+          caisse: "Ecolage",
+          totalAttendu: null,
+          totalPercu: null,
+          resteApercevoir: null,
+          totalActuel: null,
+          Report: null,
         },
         {
-          name: "Frais Scolaires",
-          calories: 237,
-          fat: 9.0,
-          carbs: 37,
-          protein: 4.3,
-          sodium: 129,
-          calcium: "8%",
-          iron: "1%",
+          caisse: "Inscriptions",
+          totalAttendu: null,
+          totalPercu: null,
+          resteApercevoir: null,
+          totalActuel: null,
+          Report: null,
         },
         {
-          name: "Assurances",
-          calories: 262,
-          fat: 16.0,
-          carbs: 23,
-          protein: 6.0,
-          sodium: 337,
-          calcium: "6%",
-          iron: "7%",
-        },
-        {
-          name: "Tenu EPS",
-          calories: 305,
-          fat: 3.7,
-          carbs: 67,
-          protein: 4.3,
-          sodium: 413,
-          calcium: "3%",
-          iron: "8%",
-        },
-        {
-          name: "Macarons",
-          calories: 356,
-          fat: 16.0,
-          carbs: 49,
-          protein: 3.9,
-          sodium: 327,
-          calcium: "7%",
-          iron: "16%",
-        },
-        {
-          name: "Dossiers Examens",
-          calories: 375,
-          fat: 0.0,
-          carbs: 94,
-          protein: 0.0,
-          sodium: 50,
-          calcium: "0%",
-          iron: "0%",
+          caisse: "Réinscriptions",
+          totalAttendu: null,
+          totalPercu: null,
+          resteApercevoir: null,
+          totalActuel: null,
+          Report: null,
         },
       ],
     };
   },
   computed: {
+    /* ...mapGetters([
+      '',
+    ]),*/
+
     numberOfPages() {
       return Math.ceil(this.items.length / this.itemsPerPage);
     },
   },
   beforeMount() {
-    this.getAllFraisForComptabilite();
+    this.Config_Ecolage_et_Autres = JSON.parse(
+      localStorage.getItem("Config_Ecolage_et_Autres")
+    );
+    this.Config_Autres_Frais = JSON.parse(
+      localStorage.getItem("Config_Autres_Frais")
+    );
+    this.Config_Autres_Frais.forEach((el) => {
+      this.items.push({
+        caisse: el.identifiant,
+        totalAttendu: null,
+        totalPercu: null,
+        resteApercevoir: null,
+        totalActuel: null,
+        Report: null,
+      });
+    });
+
+    let tableEcolages = [];
+    let tableContenanceParClasse = [];
+
+    this.Config_Ecolage_et_Autres.forEach((ecolage) => {
+      tableEcolages.push(ecolage.montant);
+    });
+    let Classes = JSON.parse(localStorage.getItem("Classes"));
+
+    if (Classes) {
+      Classes.forEach((classe) => {
+        tableContenanceParClasse.push(classe.contenance);
+      });
+    }
+    this.getAttendusEcolage(tableContenanceParClasse, tableEcolages);
+
+    // préparation filtage inscrits récupération de tous leur montants et envoie pour le calcul
+    let all_Eleves_Payed_InscReinsc = JSON.parse(
+      localStorage.getItem("all_Eleves_Payed_InscReinsc")
+    );
+    console.log("test final");
+    let AllMontantsInsc = [];
+    let Inscrits = all_Eleves_Payed_InscReinsc.filter(
+      (x) => x.typeFrais === "Inscriptions"
+    );
+    console.log("test final 2");
+    if (Inscrits) {
+      console.log("test final 3");
+      Inscrits.forEach((eleve) => {
+        AllMontantsInsc.push([eleve.montantFrais]);
+      });
+    }
+    console.log("test final 4");
+    this.items[
+      this.items.findIndex((x) => x.caisse === "Inscriptions")
+    ].totalAttendu = AllMontantsInsc.reduce((x, y) => x + y);
+    console.log("test final 5");
+    // préparation filtage réinscrits récupération de tous leur montants et envoie pour le calcul
+    let AllMontantsReinsc = [];
+    let Reinscrits = all_Eleves_Payed_InscReinsc.filter(
+      (x) => x.typeFrais === "Réinscriptions"
+    );
+
+    if (Reinscrits.length > 0) {
+      console.log("Réinscrit " + typeof Reinscrits);
+      Reinscrits.forEach((eleve) => {
+        AllMontantsReinsc.push([eleve.montantFrais]);
+      });
+
+      this.items[
+        this.items.findIndex((x) => x.caisse === "Réinscriptions")
+      ].totalAttendu = AllMontantsReinsc.reduce((x, y) => x + y);
+    } else {
+      this.items[
+        this.items.findIndex((x) => x.caisse === "Réinscriptions")
+      ].totalAttendu = "Pas de réinscrits";
+    }
+
+    let listeAutresFrais = JSON.parse(
+      localStorage.getItem("Config_Autres_Frais")
+    );
+    this.getAttendusAutresFrais(listeAutresFrais, Classes);
+
+    this.Config_InscReinsc = JSON.parse(
+      localStorage.getItem("Config inscReinsc")
+    );
+    // this.getAllFraisForComptabilite();
   },
   methods: {
+    //...mapActions(['',]),
+    getAttendusEcolage(totalInscritsParClasses, allEcolages) {
+      console.log(
+        "totalInscritsParClasses = " +
+          JSON.stringify(totalInscritsParClasses) +
+          "\n allEcolages = " +
+          JSON.stringify(allEcolages)
+      );
+      let total = totalInscritsParClasses.map(
+        (x, index) => allEcolages[index] * x
+      );
+      console.log("total " + total);
+
+      this.items[
+        this.items.findIndex((x) => x.caisse === "Ecolage")
+      ].totalAttendu = total.reduce((x, y) => x + y);
+      // ecolage.totalAttendu =
+      console.log("Yes");
+    },
+
+    getAttendusAutresFrais(listeAutresFrais, Classes) {
+      // recup AutresFrais, affectation montantsFrais avec les effectifs des élèves qui doivent les payer
+      console.log("AutresFrais " + JSON.stringify(listeAutresFrais));
+
+      let contenancesPropresAuxIdsClasses = [];
+
+      console.log("test final");
+
+      listeAutresFrais.forEach((element) => {
+        if (element.classesSpeciales.length > 1) {
+          element.classesSpeciales.forEach((element) => {
+            contenancesPropresAuxIdsClasses.push(
+              Classes.find((classe) => classe.identifiant === element)
+                .contenance
+            );
+          });
+        } else {
+          contenancesPropresAuxIdsClasses.push(
+            Classes.find(
+              (classe) => classe.identifiant === element.classesSpeciales[0]
+            ).contenance
+          );
+        }
+
+        console.log(
+          "identifiant = " +
+            element.identifiant +
+            "\nmontant =" +
+            element.montant +
+            "\ncontenancesPropresAuxIdsClasses" +
+            JSON.stringify(contenancesPropresAuxIdsClasses)
+        );
+        let resultats = [];
+        if (contenancesPropresAuxIdsClasses.length > 1) {
+          contenancesPropresAuxIdsClasses.forEach((el2) => {
+            resultats.push(el2 * element.montant);
+          });
+        } else {
+          resultats.push(contenancesPropresAuxIdsClasses[0] * element.montant);
+        }
+        console.log(
+          "resultats for " +
+            element.identifiant +
+            " = " +
+            JSON.stringify(resultats)
+        );
+        this.items[
+          this.items.findIndex((x) => x.caisse === element.identifiant)
+        ].totalAttendu = resultats.reduce((x, y) => x + y);
+      });
+
+      /* console.log(
+        "montantAvecSesContenances ========== " +
+          JSON.stringify(montantAvecSesContenances)
+      );
+      let resultats = [];
+      montantAvecSesContenances.forEach((element) => {
+        if (element[2].length > 1) {
+          element[2].forEach((el2) => {
+            resultats.push({
+              identifiant: element[0],
+              totalAttendu: el2 * element[1],
+            });
+          });
+        } else {
+          resultats.push({
+            identifiant: element[0],
+            totalAttendu: element[1] * element[2],
+          });
+        }
+      });
+
+      console.log(
+        "Tableau contenant le calcul qui se rapporte à chaque Autre frais " +
+          JSON.stringify(resultats) +
+          "\t Resultat total " //+
+        // JSON.stringify(resultats.reduce((x, y) => x + y))
+      );
+
+      const sumallAssurance = resultats
+        .map((item) => item.totalAttendu)
+        .reduce((prev, curr) => prev + curr, 0);
+      console.log(sumallAssurance);
+
+      // console.log(JSON.stringify(result));
+      // resultats.forEach(element => {
+
+      // });
+      this.items[
+        this.items.findIndex((x) => x.caisse === "Assurance")
+      ].totalAttendu = sumallAssurance;*/
+    },
+
     getAllFraisForComptabilite() {
       let configFrais = JSON.parse(localStorage.getItem("Frais"));
       let typesFrais = [];
@@ -280,7 +450,7 @@ export default {
       });
       console.log(typesFrais);
       configFrais.push();
-      this.$store.dispatch("actionGetAllFraisForCompta", typesFrais);
+      // this.$store.dispatch("actionGetAllFraisForCompta", typesFrais);
     },
   },
 };

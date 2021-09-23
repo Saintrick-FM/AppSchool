@@ -353,67 +353,8 @@
                         >
                         <v-divider class="mx-4" inset vertical></v-divider>
                         <v-spacer></v-spacer>
-
-                        <v-dialog v-model="dialog" max-width="500px">
-                          <template v-slot:activator="{ on, attrs }">
-                            <v-btn
-                              color="primary"
-                              dark
-                              class="mb-2"
-                              v-bind="attrs"
-                              v-on="on"
-                            >
-                              Ajouter un frais
-                            </v-btn>
-                          </template>
-                          <v-card max-width="2000px">
-                            <v-card-title>
-                              <span class="headline">{{ formTitle }}</span>
-                            </v-card-title>
-
-                            <v-card-text>
-                              <v-container>
-                                <v-row>
-                                  <v-col md="6">
-                                    <v-text-field
-                                      v-model="editedItem.frais"
-                                      label="Intitulé"
-                                    ></v-text-field>
-                                  </v-col>
-                                  <v-col cols="12" sm="6" md="6">
-                                    <v-text-field
-                                      type="number"
-                                      v-model="editedItem.montant"
-                                      label="Montant du frais"
-                                    ></v-text-field>
-                                  </v-col>
-                                </v-row>
-                              </v-container>
-                            </v-card-text>
-
-                            <v-card-actions>
-                              <v-spacer></v-spacer>
-                              <v-btn color="blue darken-1" text @click="close">
-                                Cancel
-                              </v-btn>
-                              <v-btn
-                                color="blue darken-1"
-                                text
-                                @click="saveNewOrUpdateFrais"
-                              >
-                                Enregistrer
-                              </v-btn>
-                            </v-card-actions>
-                          </v-card>
-                        </v-dialog>
                       </v-toolbar>
                     </template>
-                    <!-- 
-                    <template v-slot:item.actions="{ item }">
-                      <v-icon small class="mr-2" @click="editItem(item)">
-                        mdi-pencil
-                      </v-icon>
-                    </template> -->
                   </v-data-table>
                   <v-divider></v-divider>
                   <v-divider></v-divider>
@@ -434,7 +375,7 @@
                     >Frais mensuels</v-autocomplete
                   >
 
-                  <v-layout align-center v-if="shawInscription">
+                  <v-layout align-center v-if="showInscription === 'true'">
                     <v-checkbox
                       v-model="inscription"
                       hide-details
@@ -452,7 +393,7 @@
                     ></v-text-field>
                   </v-layout>
 
-                  <v-layout align-center v-else>
+                  <v-layout align-center v-if="showInscription === 'false'">
                     <v-checkbox
                       v-model="reinscription"
                       hide-details
@@ -703,6 +644,7 @@ export default {
       inscription: null,
       reinscription: null,
       shawInscription: true,
+      showInscription: "",
       choiceBetweenInscReinsc: null,
       prixInscription: null,
       prixReinscription: null,
@@ -736,7 +678,6 @@ export default {
       HeadersFrais: [
         { text: "Frais communs à tous", value: "identifiant", sortable: true },
         { text: "Montant Frais", value: "montant", sortable: true },
-        { text: "Actions", value: "actions", sortable: false },
       ],
       editedIndex: -1,
       editedItem: {
@@ -834,11 +775,7 @@ export default {
       if (this.moisToPay.length > 0) {
         return this.montantApayer;
       } else if (this.fraisChoisi.length > 0) {
-        // if (this.fraisChoisi[0].montantDejaPaye) {
         return this.fraisChoisi[0].montantDejaPaye;
-        /* } else {
-          return 0;
-        }*/
       } else {
         return 0;
       }
@@ -877,7 +814,7 @@ export default {
     allFraisImpayes(newValue, oldValue) {
       newValue || oldValue;
     },
-    shawInscription(newValue, oldValue) {
+    showInscription(newValue, oldValue) {
       newValue || oldValue;
     },
     dialog(val) {
@@ -984,7 +921,6 @@ export default {
           .then((response) => {
             const result = response.data;
 
-            console.log(result);
             localStorage.setItem("Frais", JSON.stringify(result));
 
             let element = [];
@@ -997,7 +933,7 @@ export default {
               obj.montantRestant = 0;
               // obj.cree_le.toString().slice(0, 16);
             });
-            // this.paiementFrais = element;
+            this.paiementFrais = element;
             console.log(
               "😃😃😃 this.paiementFrais => " +
                 JSON.stringify(element) +
@@ -1018,7 +954,6 @@ export default {
 
     editItem(item) {
       this.editedIndex = this.paiementFrais.indexOf(item);
-
       this.editedItem = Object.assign({}, item);
       this.dialog = true;
     },
@@ -1075,6 +1010,7 @@ export default {
       this.eleve.telTuteur = eleveChoisi.telTuteur;
       this.eleve.redoublant = eleveChoisi.redoublant;
       this.eleve.classe = eleveChoisi.classe;
+      this.showInscription = "true";
       this.allFraisInscReinsc = JSON.parse(
         localStorage.getItem("Config inscReinsc")
       );
@@ -1086,7 +1022,7 @@ export default {
       // si l'élève choisi est déja inscrit
       if (inscritOuReinscrit) {
         if (inscritOuReinscrit.typeFrais === "Inscriptions") {
-          this.shawInscription = false;
+          this.showInscription = "false";
           console.log("Considéré comme inscrit preuve => ");
         }
       }
@@ -1094,7 +1030,7 @@ export default {
       if (inscritOuReinscrit) {
         if (inscritOuReinscrit.typeFrais === "Reinscriptions") {
           console.log("Considéré comme reinscrit preuve");
-          this.shawInscription = true;
+          this.showInscription = "true";
         }
       }
       if (inscritOuReinscrit) {
@@ -1113,11 +1049,11 @@ export default {
         );
         // assignation frais communs payés et non payés s'il y a au moins un frais payé si non allFraisImpayés= Tous les frais de la BD
         if (AllFraisPayedByEleve) {
-          this.allFraisPayes = this.allFraisPayes.concat(
-            this.autresFraisPayesSaufInscReinsc
-          );
           this.autresFraisPayesSaufInscReinsc = AllFraisPayedByEleve.filter(
             this.trieAutresFraisPayes
+          );
+          this.allFraisPayes = this.allFraisPayes.concat(
+            this.autresFraisPayesSaufInscReinsc
           );
           console.log("test 33 " + this.allFraisPayes);
           this.autresFraisPayesSaufInscReinsc.forEach((frais) => {
@@ -1139,7 +1075,6 @@ export default {
               "\nallFraisPayes => " +
               JSON.stringify(this.allFraisPayes)
           );
-          this.InitialiseFraisPayeImpaye(eleveChoisi);
         } else {
           this.allFraisPayes.push(inscritOuReinscrit);
 
@@ -1151,149 +1086,14 @@ export default {
           this.moisAvance = [];
           this.autresFraisPayesSaufInscReinsc = [];
 
-          // this.allFraisImpayes = this.paiementFrais;
+          this.allFraisImpayes = this.paiementFrais;
           console.log(" dooomage on est dans le else");
         }
       } else {
-        this.paiementFrais = [];
-        this.moisToPay = [];
         console.log("fin de test");
       }
-    },
-
-    /*
-    AfficheEleve() {
-      let allElevesPayedInscReinsc = JSON.parse(
-        localStorage.getItem("all_Eleves_Payed_InscReinsc")
-      );
-
-      let AllFraisPayedByEleve = JSON.parse(
-        localStorage.getItem("AllFraisPayedByEleve")
-      );
-
-      let Frais = JSON.parse(localStorage.getItem("Frais"));
-      console.log("Frais ========= " + Frais);
-      this.paiementFrais = Frais;
-      let eleveChoisi = JSON.parse(localStorage.getItem("eleveChoisi"));
-      let elevesDefinitlySuscribed = JSON.parse(
-        localStorage.getItem("Définitivement Inscrits")
-      );
-
-      if (elevesDefinitlySuscribed) {
-        if (
-          !elevesDefinitlySuscribed.find(
-            (x) => x.eleve == eleveChoisi.eleveNumber
-          )
-        ) {
-          this.paiementFrais = [];
-          this.moisToPay = [];
-        } else {
-          this.moisToPay = this.moisToShowWithoutPayedMonths;
-        }
-      } else {
-        this.paiementFrais = [];
-        this.moisToPay = [];
-      }
-
-      /////////////////beug
-      if (allElevesPayedInscReinsc) {
-        console.log("Interdit");
-        let inscrits = allElevesPayedInscReinsc.filter(this.trieInscrits);
-        let reinscrits = allElevesPayedInscReinsc.filter(this.trieReinscrits);
-        console.log("inscrits => " + inscrits + " reinscrits " + reinscrits);
-
-        console.log(this.MoisNonPaye.toString());
-        this.allFraisPayes = [];
-        this.allFraisImpayes = [];
-        this.resultat = null;
-
-        this.autresFraisPayesSaufInscReinsc = null;
-        // this.autresFraisPayesSaufInscReinsc = [];
-        this.MoisPaye = [];
-        this.MoisNonPaye = [];
-        this.moisAvance = [];
-        this.moisToShowWithoutPayedMonths = [];
-
-        let actuelInscrit = inscrits.find(
-          (x) => x.eleve === eleveChoisi.eleveNumber
-        );
-        let actuelReinscrit = reinscrits.find(
-          (x) => x.eleve === eleveChoisi.eleveNumber
-        );
-
-        this.autresFraisPayesSaufInscReinsc = AllFraisPayedByEleve.filter(
-          this.trieAutresFraisPayes
-        );
-
-        if (actuelInscrit) {
-          this.shawInscription = true;
-          this.allFraisPayes.push(actuelInscrit);
-        }
-        // assignation frais communs payés et non payés s'il y a au moins un frais payé si non allFraisImpayés= Tous les frais de la BD
-        if (this.autresFraisPayesSaufInscReinsc) {
-          this.allFraisPayes = this.allFraisPayes.concat(
-            this.autresFraisPayesSaufInscReinsc
-          );
-
-          this.autresFraisPayesSaufInscReinsc.forEach((frais) => {
-            if (!this.resultat) {
-              console.log("1er tour");
-              this.resultat = this.trieAutresFraisImpaye(frais.typeFrais);
-            } else {
-              this.resultat = this.trieAutresFraisImpaye(
-                frais.typeFrais,
-                this.resultat
-              );
-            }
-          });
-
-          this.allFraisImpayes = this.resultat;
-          console.log(
-            "allFraisImpayes ***************" +
-              JSON.stringify(this.allFraisImpayes) +
-              "\nallFraisPayes => " +
-              JSON.stringify(this.allFraisPayes)
-          );
-        } else {
-          this.allFraisImpayes = this.paiementFrais;
-        }
-
-        if (actuelReinscrit) {
-          this.shawInscription = false;
-          this.allFraisPayes.push(actuelReinscrit);
-        }
-      }
-
-      //attention ne jamais oublier de parses une variable JSON stringifié car elle ne ressemble à du JSON par la forme dans le fond c'est un Array oui mais pas d'objets mais de String
-      this.montantFraisMensuel = JSON.parse(this.classes).find(
-        (x) => x.identifiant == eleveChoisi.classe
-      ).scolarite;
-      console.log("test2");
-      this.eleve.nom = eleveChoisi.nom;
-      this.eleve.sexe = eleveChoisi.sexe;
-      this.eleve.dateLieuNaissance = eleveChoisi.dateLieuNaissance;
-      this.eleve.adresse = eleveChoisi.adresse;
-      this.eleve.tuteur = eleveChoisi.tuteur;
-      this.eleve.telTuteur = eleveChoisi.telTuteur;
-      this.eleve.redoublant = eleveChoisi.redoublant;
-      this.eleve.classe = eleveChoisi.classe;
-      this.allFraisInscReinsc = localStorage.getItem(
-        "frais_Inscript_Reinscript"
-      );
-      this.prixInscription = JSON.parse(this.allFraisInscReinsc).find(
-        (x) => x.classe == eleveChoisi.classe
-      ).fraisInscription;
-      this.prixReinscription = JSON.parse(this.allFraisInscReinsc).find(
-        (x) => x.classe == eleveChoisi.classe
-      ).fraisReinscription;
-      // Reaffecté la liste si la sur la liste des frais communs recuperer de configFrais il y'a plus d'éléments que dans les frais impayés
-
-      // this.getfinanceEleveDetail(eleveChoisi);
-      //this.MoisPayedToShow = this.MoisPaye.toString().split(",");
-      // console.log("Mois Payés dans AfficheEleve " + this.MoisPayedToShow);
-      console.log("eleve avant initialiseFraisPaye " + eleveChoisi);
       this.InitialiseFraisPayeImpaye(eleveChoisi);
-    },*/
+    },
 
     proceedToPaiement: function() {
       console.log("naza");
@@ -1482,12 +1282,12 @@ export default {
       let FraisAvancesWithDetails = [];
       let FraisPayesWithDetails = [];
 
-      let allElevesPayedInscReinsc = JSON.parse(
+      /* let allElevesPayedInscReinsc = JSON.parse(
         localStorage.getItem("all_Eleves_Payed_InscReinsc")
-      );
+      );*/
       console.log("⏰ ⏰ ⏰ eleveChoisi " + JSON.stringify(eleveChoisi));
 
-      if (token && allElevesPayedInscReinsc) {
+      if (token) {
         axios
           .get(
             `api/finances/paiementEveryFrais/?annee_scolaire=${this.anneeActuelle}&id=${eleveChoisi.eleveNumber}`,
@@ -1498,17 +1298,32 @@ export default {
             }
           )
           .then((response) => {
+            // Ajouter du commit passé
+            const result = response.data;
+            // localStorage.setItem("Frais", result);
+            let AllFraisPayedByEleve = [];
+            for (const key in result) {
+              AllFraisPayedByEleve.push(result[key]);
+            }
+
+            let AllFraisPayedbyEleve = JSON.stringify(result);
+
+            // Ajouter du commit passé
             console.log(
               "😃😃😃 tous les frais payés de l'élève => " +
+                AllFraisPayedbyEleve +
+                " " +
                 JSON.stringify(response.data)
             );
             localStorage.setItem(
               "AllFraisPayedByEleve",
-              JSON.parse(response.data)
+              JSON.stringify(response.data)
             );
+            console.log("ici là");
             //commit('InititialiseElevesPayed', AllFraisPayedByEleve)
-            let fraisPayés = JSON.parse(response.data);
+            let fraisPayés = response.data;
             //s'il y'a une avance dans au moins un des paiements de l'élève
+            console.log("Ah c'est compliqué ");
             fraisPayés.forEach((frais) => {
               if (
                 frais.typeFrais === "Frais mensuels" &&
@@ -1548,9 +1363,14 @@ export default {
               // ce que j'affecte aux moisPaye vient du resultat de trie opéré par la methode //filter qui enlève les tableaux vides de MoisPaye car c'est un tableau de tableaux
               this.MoisPaye = allMonthsPayed.filter(this.trieMoisVides);
               this.MoisNonPaye = this.trieMoisImpaye("moisPaye");
-              localStorage.setItem("MoisPaye", this.MoisPaye);
-              localStorage.setItem("MoisNonPaye", this.MoisNonPaye);
+              console.log("non non non 2 ");
+              localStorage.setItem("MoisPaye", JSON.stringify(this.MoisPaye));
+              localStorage.setItem(
+                "MoisNonPaye",
+                JSON.stringiify(this.MoisNonPaye)
+              );
             }
+            console.log("Ah c'est compliqué 2");
             localStorage.setItem(
               "Frais_Avancés_With_Details",
               JSON.stringify(FraisAvancesWithDetails)
@@ -1559,14 +1379,14 @@ export default {
               "Frais_Payés_With_Details",
               JSON.stringify(FraisPayesWithDetails)
             );
-            localStorage.setItem("moisAvance", this.moisAvance);
+            localStorage.setItem("moisAvance", JSON.stringify(this.moisAvance));
           })
           .catch(function(error) {
             console.log("😢😢😢" + error);
           });
 
         this.shawPayedMonths = true;
-        // this.paiementFrais = this.allFraisImpayes.map((item) => item);
+        this.paiementFrais = this.allFraisImpayes.map((item) => item);
       }
 
       //this.shawPayedMonths = true;
@@ -1648,27 +1468,6 @@ export default {
       console.log("annulation fini");
     },
 
-    saveNewOrUpdateFrais() {
-      if (this.editedIndex > -1) {
-        let index = this.editedIndex;
-        console.log("contenu de editedIndex => " + index);
-        let fraisToUpdate = this.editedItem.frais;
-
-        let donnees = [];
-        donnees.push(fraisToUpdate, this.editedItem);
-
-        this.$store.dispatch("actionUpdateFrais", donnees);
-
-        //creer un frais
-      } else {
-        console.log("type frais à ajouter =>" + this.editedItem.frais);
-        this.editedItem.montant = Number(this.editedItem.montant);
-
-        this.$store.dispatch("actionCreateFrais", this.editedItem);
-      }
-      this.close();
-    },
-
     SavePayedFrais() {
       console.log(
         "fraisChoisi.length = " +
@@ -1746,8 +1545,13 @@ export default {
           );
           payedFrais["statut"] = "payé";
           payedFrais["montantFrais"] = this.fraisChoisi[0].montant;
-          console.log("test 8");
-          // this.$storestore.dispatch("action", payload);
+          payedFrais["montantRestant"] = 0;
+          console.log(
+            "test final pour savoir si cest ici qu'il gère le " +
+              JSON.stringify(payedFrais)
+          );
+
+          this.$store.dispatch("actionPayedFrais", payedFrais);
         }
         //Cas où c'est un frais mensuel à payer
         if (this.AffichePaiementMois) {
@@ -1892,7 +1696,6 @@ export default {
               console.log("payeAvanceMois seul");
               this.$store.dispatch("actionPayedFrais", payeAvanceMois);
             } else {
-              console.log("test 10 test2");
               this.$store.dispatch("actionPayedFrais", payedFrais);
             }
           }

@@ -1015,6 +1015,18 @@ export default {
     "AnneeScolaire": null,
     "classe": []
 }*/
+        let allClasses1 = JSON.parse(localStorage.getItem("All Classes"));
+        let allClasses2 = [];
+
+        allClasses1.forEach((element) => {
+          allClasses2.push(element.identifiant);
+        });
+        if (
+          this.editAutreRecette.classesSpeciales[0] === "Toutes les classes"
+        ) {
+          this.editAutreRecette.classesSpeciales = allClasses2;
+        }
+        console.log(JSON.stringify(this.editAutreRecette));
         this.$store.dispatch(
           "actionNewConfigAutresFrais",
           this.editAutreRecette

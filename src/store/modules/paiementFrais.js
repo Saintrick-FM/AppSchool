@@ -84,24 +84,24 @@ const actions = {
             .then((responsePaieInscReins) => {
                 console.log("😃😃😃" + JSON.stringify(responsePaieInscReins));
 
-                let initArrayOfNewPaiementInscReinsc = [];
-                responsePaieInscReins.data.cree_le = responsePaieInscReins.data.cree_le.slice(0, 16).replace("T", " à ");
-                initArrayOfNewPaiementInscReinsc.push(responsePaieInscReins.data)
+                /* let initArrayOfNewPaiementInscReinsc = [];
+                 responsePaieInscReins.data.cree_le = responsePaieInscReins.data.cree_le.slice(0, 16).replace("T", " à ");
+                 initArrayOfNewPaiementInscReinsc.push(responsePaieInscReins.data)
 
-                // Gestion envoie dans le localStorage de all_Eleves_Payed_InscReinsc
-                if (localStorage.getItem("all_Eleves_Payed_InscReinsc")) {
-                    let previousElevesPayedInscReinsc = JSON.parse(localStorage.getItem("all_Eleves_Payed_InscReinsc"));
+                 // Gestion envoie dans le localStorage de all_Eleves_Payed_InscReinsc
+                 if (localStorage.getItem("all_Eleves_Payed_InscReinsc")) {
+                     let previousElevesPayedInscReinsc = JSON.parse(localStorage.getItem("all_Eleves_Payed_InscReinsc"));
 
-                    console.log("previous eleves payed InscReinsc " + JSON.stringify(previousElevesPayedInscReinsc))
-                    previousElevesPayedInscReinsc.push(responsePaieInscReins.data);
+                     console.log("previous eleves payed InscReinsc " + JSON.stringify(previousElevesPayedInscReinsc))
+                     previousElevesPayedInscReinsc.push(responsePaieInscReins.data);
 
-                    console.log("new eleve payed InscReinsc to send in localStorage " + JSON.stringify(previousElevesPayedInscReinsc))
-                    localStorage.setItem("all_Eleves_Payed_InscReinsc", JSON.stringify(previousElevesPayedInscReinsc));
+                     console.log("new eleve payed InscReinsc to send in localStorage " + JSON.stringify(previousElevesPayedInscReinsc))
+                     localStorage.setItem("all_Eleves_Payed_InscReinsc", JSON.stringify(previousElevesPayedInscReinsc));
 
-                } else {
-                    localStorage.setItem("all_Eleves_Payed_InscReinsc", JSON.stringify(initArrayOfNewPaiementInscReinsc));
-                }
-                localStorage.setItem("AllFraisPayedByEleve", JSON.stringify([responsePaieInscReins.data]))
+                 } else {
+                     localStorage.setItem("all_Eleves_Payed_InscReinsc", JSON.stringify(initArrayOfNewPaiementInscReinsc));
+                 }
+                 localStorage.setItem("AllFraisPayedByEleve", JSON.stringify([responsePaieInscReins.data]))*/
 
                 commit("PaiementInscReinsc", donnees);
             })
@@ -135,20 +135,20 @@ const actions = {
             .then((responsePaieEveryFrais) => {
                 console.log("😃😃😃" + JSON.stringify(body));
                 // Gestion envoie dans le localStorage de AllFraisPayedByEleve
-                let initArrayOfNewFraisPayedByEeleve = [];
-                if (localStorage.getItem("AllFraisPayedByEleve")) {
-                    let previousAllFraisPayedByEeleve = JSON.parse(localStorage.getItem("AllFraisPayedByEleve"));
+                /* let initArrayOfNewFraisPayedByEeleve = [];
+                 if (localStorage.getItem("AllFraisPayedByEleve")) {
+                     let previousAllFraisPayedByEeleve = JSON.parse(localStorage.getItem("AllFraisPayedByEleve"));
 
-                    console.log("previous AllFraisPayedByEeleve " + JSON.stringify(previousAllFraisPayedByEeleve))
-                    previousAllFraisPayedByEeleve.push(responsePaieEveryFrais.data);
+                     console.log("previous AllFraisPayedByEeleve " + JSON.stringify(previousAllFraisPayedByEeleve))
+                     previousAllFraisPayedByEeleve.push(responsePaieEveryFrais.data);
 
-                    console.log("new AllFraisPayedByEeleve to send in localStorage " + JSON.stringify(previousAllFraisPayedByEeleve))
-                    localStorage.setItem("AllFraisPayedByEleve", JSON.stringify(previousAllFraisPayedByEeleve));
+                     console.log("new AllFraisPayedByEeleve to send in localStorage " + JSON.stringify(previousAllFraisPayedByEeleve))
+                     localStorage.setItem("AllFraisPayedByEleve", JSON.stringify(previousAllFraisPayedByEeleve));
 
-                } else {
-                    localStorage.setItem("AllFraisPayedByEleve", JSON.stringify(initArrayOfNewFraisPayedByEeleve));
-                }
-                localStorage.setItem("AllFraisPayedByEleve", JSON.stringify([responsePaieEveryFrais.data]))
+                 } else {
+                     localStorage.setItem("AllFraisPayedByEleve", JSON.stringify(initArrayOfNewFraisPayedByEeleve));
+                 }
+                 localStorage.setItem("AllFraisPayedByEleve", JSON.stringify([responsePaieEveryFrais.data]))*/
 
                 commit("PaiementEveryFrais", responsePaieEveryFrais.data);
             })
@@ -176,8 +176,23 @@ const actions = {
                 })
                 .then((response) => {
 
-                    console.log("😃😃😃" + JSON.stringify(response));
-                    commit("fraisPayed", fraisPayed[0]);
+                    console.log("😃😃😃" + JSON.stringify(response.data));
+                    /* let initArrayFraisPayed = [];
+                     response.data.cree_le = response.data.cree_le.slice(0, 16).replace("T", " à ");
+                     initArrayFraisPayed.push(response.data)
+
+                     if (localStorage.getItem("AllFraisPayedByEleve")) {
+                         let previousFraisPayed = JSON.parse(localStorage.getItem("AllFraisPayedByEleve"));
+
+                         previousFraisPayed.push(response.data);
+
+                         console.log("new list of FraisPayed to send in localStorage " + JSON.stringify(previousFraisPayed))
+                         localStorage.setItem("AllFraisPayedByEleve", JSON.stringify(previousFraisPayed));
+
+                     } else {
+                         localStorage.setItem("AllFraisPayedByEleve", JSON.stringify(initArrayFraisPayed));
+                     }*/
+                    commit("fraisPayed");
 
                 })
                 .catch(function(error) {
@@ -195,7 +210,22 @@ const actions = {
                 })
                 .then((response) => {
                     console.log("😃😃😃" + JSON.stringify(response));
-                    commit("fraisPayed", fraisPayed[1]);
+                    /*   let initArrayFraisPayed = [];
+                       response.data.cree_le = response.data.cree_le.slice(0, 16).replace("T", " à ");
+                       initArrayFraisPayed.push(response.data)
+
+                       if (localStorage.getItem("AllFraisPayedByEleve")) {
+                           let previousFraisPayed = JSON.parse(localStorage.getItem("AllFraisPayedByEleve"));
+
+                           previousFraisPayed.push(response.data);
+
+                           console.log("new list of FraisPayed to send in localStorage " + JSON.stringify(previousFraisPayed))
+                           localStorage.setItem("AllFraisPayedByEleve", JSON.stringify(previousFraisPayed));
+
+                       } else {
+                           localStorage.setItem("AllFraisPayedByEleve", JSON.stringify(initArrayFraisPayed));
+                       }*/
+                    commit("fraisPayed");
                     localStorage.setItem("MoisAvanceToStoreInDB", null)
 
                 })
@@ -215,8 +245,23 @@ const actions = {
                 })
                 .then((response) => {
 
-                    console.log("😃😃😃" + JSON.stringify(response));
-                    commit("fraisPayed", fraisPayed[0]);
+                    console.log("😃😃😃" + JSON.stringify(response.data));
+                    /* let initArrayFraisPayed = [];
+                     response.data.cree_le = response.data.cree_le.slice(0, 16).replace("T", " à ");
+                     initArrayFraisPayed.push(response.data)
+
+                     if (localStorage.getItem("AllFraisPayedByEleve")) {
+                         let previousFraisPayed = JSON.parse(localStorage.getItem("AllFraisPayedByEleve"));
+
+                         previousFraisPayed.push(response.data);
+
+                         console.log("new list of FraisPayed to send in localStorage " + JSON.stringify(previousFraisPayed))
+                         localStorage.setItem("AllFraisPayedByEleve", JSON.stringify(previousFraisPayed));
+
+                     } else {
+                         localStorage.setItem("AllFraisPayedByEleve", JSON.stringify(initArrayFraisPayed));
+                     }*/
+                    commit("fraisPayed");
 
 
                 })
@@ -280,8 +325,9 @@ const mutations = {
         state.typeFrais[id.indexOf(newFrais[0])] = newFrais[1]
     },
 
-    fraisPayed(state, fraisPayed) {
-        state.fraisPayed = fraisPayed
+    fraisPayed(state) {
+        let AllFraisPayedByEleve = JSON.parse(localStorage.getItem("AllFraisPayedByEleve"))
+        state.fraisPayed = AllFraisPayedByEleve
     },
     updatePayedFrais(state, updatedPayedFrais) {
         state.fraisPayed = updatedPayedFrais
@@ -290,6 +336,9 @@ const mutations = {
 };
 const getters = {
     alltypeFrais: state => {
+        return state.typeFrais
+    },
+    allFraisPayed: state => {
         return state.typeFrais
     },
 
