@@ -8,7 +8,9 @@ import axios from 'axios'
 axios.defaults.baseURL = "http://127.0.0.1:8000/"
 Vue.config.productionTip = false
 
-// export const bus = new Vue();
+//export const EventBus = new Vue();
+
+
 // // ici je renvois une liste des ids des matieres choisies pour le prof dans le formulaire
 /* if (this.editedItem.matiereEnseigne.length > 1) {
    this.editedItem.matiereEnseigne.forEach((matiere) => {

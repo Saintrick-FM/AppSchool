@@ -3,6 +3,10 @@ const state = {
     typeFrais: [],
     fraisPayed: undefined,
     AllFraisPayedByEleve: undefined,
+    reinscrits: null,
+    inscrits: null,
+    attenduReinscription: null,
+    attenduInscription: null,
 
 };
 const actions = {
@@ -310,6 +314,18 @@ const mutations = {
     PaiementInscReinsc(state, frais) {
         state.fraisInscReinsc = frais
     },
+    mutateInscrits(state, inscrits) {
+        state.inscrits = inscrits
+    },
+    mutateAttenduInscription(state, attenduInscription) {
+        state.attenduInscription = attenduInscription
+    },
+    mutateAttenduReinscription(state, attenduReinscription) {
+        state.attenduReinscription = attenduReinscription
+    },
+    mutateReinscrits(state, reinscrits) {
+        state.reinscrits = reinscrits
+    },
     PaiementEveryFrais(everyFrais) {
         console.log("Agérer plus tard " + JSON.stringify(everyFrais))
     },
@@ -341,6 +357,19 @@ const getters = {
     allFraisPayed: state => {
         return state.typeFrais
     },
+    allInscrits: state => {
+        return state.inscrits
+    },
+    allReinscrits: state => {
+        return state.reinscrits
+    },
+    attenduReinscription: state => {
+        return state.attenduReinscription
+    },
+    attenduInscription: state => {
+        return state.attenduInscription
+    },
+
 
 };
 

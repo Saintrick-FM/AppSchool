@@ -2,6 +2,7 @@ import axios from 'axios'
 const state = {
     autresFrais: null,
     fraisInscReinsc: null,
+    caisseClique: null
 };
 const actions = {
     async actionGetAllFraisForCompta({ commit }, complement) {
@@ -9,6 +10,15 @@ const actions = {
         const token = "Token " + localStorage.getItem("token");
         const annee_scolaire = localStorage.getItem("annee_scolaire");
         const config = [];
+        /* const configFraisInscReinsc= await axios.get(`api/finances/ConfigFraisInscReinsc/?annee_scolaire=${annee_scolaire}`)
+         console.log(configFraisInscReinsc.data)
+
+         const configEcolage= await axios.get(`api/finances/configEcolage/?annee_scolaire=${annee_scolaire}`)
+         console.log(configFraisInscReinsc.data)
+         localStorage.setItem()
+
+         const configAutresFrais= await axios.get(`api/finances/configAutresFrais/?annee_scolaire=${annee_scolaire}`)
+         console.log(configFraisInscReinsc.data)*/
 
         if (localStorage.getItem("token") != null) {
             complement.forEach(element => {
@@ -58,8 +68,12 @@ const actions = {
         }
     },
 
+
 };
 const mutations = {
+    mutateCaisseClique(state, caisse) {
+        state.caisseClique = caisse
+    },
     InititialiseAutresFrais(state, result) {
         state.autresFrais = result
         localStorage.setItem("Les autres Frais", JSON.stringify(result));
@@ -78,6 +92,9 @@ const getters = {
     allFraisInscReinsc: state => {
         return state.fraisInscReinsc
     },
+    caisseClique: state => {
+        return state.caisseClique
+    }
 
 };
 

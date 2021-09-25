@@ -49,6 +49,8 @@
       :search="search"
       hide-default-header
       item-key="name"
+      role="button"
+      @click:row="afficheAlertDetails"
       class="elevation-1"
     >
       <template v-slot:top>
@@ -75,56 +77,310 @@
       <template v-slot:expanded-item="{ headers, item }">
         <td :colspan="headers.length">More info about {{ item.name }}</td>
       </template>
+      <template v-slot:item.totalAttendu="{ item }">
+        <v-chip dark v-if="item.caisse === 'Ecolage'">
+          {{ item.totalAttendu.toLocaleString("fr") }} /mois</v-chip
+        >
+        <v-chip
+          dark
+          v-else-if="
+            item.caisse === 'Réinscriptions' &&
+              item.totalAttendu === 'Pas de réinscrits'
+          "
+        >
+          {{ item.totalAttendu }}</v-chip
+        >
+        <v-chip dark v-else>
+          {{ item.totalAttendu.toLocaleString("fr") }} /année</v-chip
+        >
+      </template>
     </v-data-table>
-    <!-- <v-card-title
-                class="subheading font-weight-bold"
-                style="flex-direction: column;"
-              >
-                {{ item.name }}
-              </v-card-title> -->
+    <!-- Alert pour détails recette Ecolage -->
 
-    <!-- <v-divider></v-divider> -->
+    <v-alert
+      type="info"
+      :value="alert"
+      color="cyan"
+      elevation="2"
+      border="top"
+      transition="scale-transition"
+      icon="mdi-home"
+      dismissible
+    >
+      <h2 class="black--text text-uppercase" style="margin-left:460px">
+        Détails de la caisse {{ nomCaisseClique }}
+      </h2>
+      <v-row class="text-center">
+        <v-col md="4">
+          <v-card elevation="11" class="pt-10">
+            <h2 class="purple--text text-uppercase">Attendus</h2>
+            <v-divider color="purple" class="mt-2"></v-divider>
+            <v-form
+              ref="form"
+              lazy-validation
+              class="mt-10 mb-6 pr-8 pl-8 pb-8 pt-4"
+            >
+              <v-row>
+                <!-- 1ere ligne affichant les   -->
+                <v-card>
+                  <v-chip label color="primary" text-color="white">
+                    <v-icon left>mdi-check</v-icon> Contenance par classe /
+                    Ecolage
+                  </v-chip>
 
-    <!-- <v-list dense>
-                <v-list-item v-for="(key, index) in filteredKeys" :key="index">
-                  <v-list-item-content
-                    :class="{ 'blue--text': sortBy === key }"
+                  <v-tabs
+                    v-model="tab"
+                    center-active
+                    background-color="primary"
+                    dark
                   >
-                    {{ key }}:
-                  </v-list-item-content>
-                  <v-list-item-content
-                    class="align-end"
-                    :class="{ 'blue--text': sortBy === key }"
-                  >
-                    {{ item[key.toLowerCase()] }}
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list> -->
+                    <v-tab v-for="item1 in Classes" :key="item1.identifiant">
+                      {{ item1.identifiant }}
+                    </v-tab>
+                  </v-tabs>
 
-    <v-row class="mt-3" align="center" justify="center">
+                  <v-tabs-items v-model="tab">
+                    <v-tab-item v-for="item in Classes" :key="item.identifiant">
+                      <v-card flat>
+                        <v-card-text>
+                          <span
+                            style="color:black;font-weight: bold; text-decoration: underline;"
+                            >Contenance :</span
+                          >
+
+                          {{ item.contenance }} élèves
+                          <span
+                            style="color:black;font-weight: bold; text-decoration: underline; padding-left:10px"
+                            >Frais mensuels:</span
+                          >
+                          {{ item.scolarite }} FCFA
+                        </v-card-text>
+
+                        <v-btn x-large block color="primary">
+                          <span
+                            class="white--text"
+                            style="text-transform: capitalize; width:380px"
+                          >
+                            {{ item.identifiant }} ({{ item.contenance }} *
+                            {{ item.scolarite }}) =
+                            {{
+                              (item.contenance * item.scolarite).toLocaleString(
+                                "fr"
+                              )
+                            }}
+                            FCFA
+                          </span>
+                        </v-btn>
+                      </v-card>
+                      <v-divider></v-divider>
+                      <v-divider></v-divider>
+                      <v-btn x-large block color="primary">
+                        <span
+                          class="white--text"
+                          style="text-transform: capitalize; width:400px; "
+                          >Somme totale =
+                          <v-chip color="green"
+                            >{{ totalAttenduForCliquedCaisse }} / mois</v-chip
+                          >
+                          FCFA
+                        </span>
+                      </v-btn>
+                    </v-tab-item>
+                  </v-tabs-items>
+                </v-card>
+              </v-row>
+            </v-form>
+          </v-card>
+        </v-col>
+
+        <v-col md="4">
+          <v-card elevation="11" class="pt-10">
+            <h2 class="purple--text text-uppercase">Perçus</h2>
+
+            <v-divider color="purple" class="mt-2"></v-divider>
+
+            <v-form
+              ref="form"
+              lazy-validation
+              class="mt-10 mb-6 pr-8 pl-8 pb-8 pt-4"
+            >
+              <v-row>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    label="Période congés 1er trimestre "
+                    outlined
+                    shaped
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    label="Période congés 2e trimestre"
+                    readonly
+                    disabled
+                    outlined
+                    shaped
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+
+              <v-row>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    label="Date début de vacances (élèves)"
+                    readonly
+                    disabled
+                    type="date"
+                    filled
+                    shaped
+                  ></v-text-field>
+                </v-col>
+
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    label="Date début de vacances (personnel)"
+                    readonly
+                    disabled
+                    type="date"
+                    filled
+                    shaped
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-form>
+          </v-card>
+        </v-col>
+        <v-col md="4">
+          <v-card elevation="11" class="pt-10">
+            <h2 class="purple--text text-uppercase">Reste</h2>
+
+            <v-divider color="purple" class="mt-2"></v-divider>
+
+            <v-form
+              ref="form"
+              lazy-validation
+              class="mt-10 mb-6 pr-8 pl-8 pb-8 pt-4"
+            >
+              <v-row>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    label="Période congés 1er trimestre "
+                    outlined
+                    shaped
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    label="Période congés 2e trimestre"
+                    readonly
+                    disabled
+                    outlined
+                    shaped
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+
+              <v-row>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    label="Date début de vacances (élèves)"
+                    readonly
+                    disabled
+                    type="date"
+                    filled
+                    shaped
+                  ></v-text-field>
+                </v-col>
+
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    label="Date début de vacances (personnel)"
+                    readonly
+                    disabled
+                    type="date"
+                    filled
+                    shaped
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-form>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-alert>
+    <AlertDetailsCaisseInscReinsc v-if="alertDetailsCaisseInscReinsc" />
+
+    <v-row
+      class="mt-3"
+      align="center"
+      justify="center"
+      style="padding:30px 2px 10px 2px"
+    >
       <v-toolbar color="primary" dark flat>
         <v-col>
-          <v-icon>mdi-silverware</v-icon>
-          <v-toolbar-title class="title-h6 font-weight-light pa-4 title-center"
-            >Local hotspots</v-toolbar-title
-          >
+          <!-- <v-icon>mdi-silverware</v-icon> -->
+          <v-list color="primary" dark flat style="margin-bottom:30px">
+            <v-list-item>
+              <v-list-item-content>
+                <v-list-item-subtitle color="green" style="margin-left:75px"
+                  >Pour toutes les caisses</v-list-item-subtitle
+                >
+                <v-list-item-title class="text-h6">
+                  Total Attendu :
+                  {{ totalAttenduForAllCaisses.toLocaleString("fr") }} FCFA
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
         </v-col>
 
         <v-divider vertical></v-divider>
         <v-col>
-          <v-icon>mdi-silverware</v-icon>
-          <v-toolbar-title class="title-h6 font-weight-light pa-4 title-center"
-            >Local hotspots</v-toolbar-title
-          >
+          <!-- <v-icon>mdi-silverware</v-icon> -->
+          <v-list color="primary" dark flat style="margin-bottom:30px">
+            <v-list-item>
+              <v-list-item-content>
+                <v-list-item-subtitle style="margin-left:75px"
+                  >Pour toutes les caisses</v-list-item-subtitle
+                >
+                <v-list-item-title class="text-h6">
+                  Total Perçus : 1.600.000 FCFA
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
         </v-col>
 
         <v-divider vertical></v-divider>
         <v-col>
-          <v-icon>mdi-silverware</v-icon>
-
-          <v-toolbar-title class="title-h6 font-weight-light pa-4 title-center"
-            >Local hotspots</v-toolbar-title
-          >
+          <!-- <v-icon>mdi-silverware</v-icon> -->
+          <v-list color="primary" dark flat style="margin-bottom:30px">
+            <v-list-item>
+              <v-list-item-content>
+                <v-list-item-subtitle color="green" style="margin-left:75px"
+                  >Pour toutes les caisses</v-list-item-subtitle
+                >
+                <v-list-item-title class="text-h6">
+                  Total Non perçus : 130.000 FCFA
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-col>
+        <v-divider vertical></v-divider>
+        <v-col>
+          <!-- <v-icon>mdi-silverware</v-icon> -->
+          <v-list color="primary" dark flat style="margin-bottom:30px">
+            <v-list-item>
+              <v-list-item-content>
+                <v-list-item-subtitle color="green" style="margin-left:75px"
+                  >Pour toutes les caisses</v-list-item-subtitle
+                >
+                <v-list-item-title class="text-h6">
+                  Total en caisse actuel : 100.000 FCFA
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
         </v-col>
       </v-toolbar>
     </v-row>
@@ -133,12 +389,25 @@
 
 <script>
 //import axios from 'axios';
-//import { mapGetters,} from 'vuex';
+import { mapMutations } from "vuex";
+import { EventBus } from "@/event-bus.js";
+import AlertDetailsCaisseInscReinsc from "@/components/Finances/AlertDetailsCaisseInscReinsc.vue";
 
 export default {
   name: "Recettes",
+  components: {
+    AlertDetailsCaisseInscReinsc,
+  },
   data() {
     return {
+      alertDetailsCaisseInscReinsc: false,
+      totalAttenduForAllCaisses: 0,
+      ClassesEtEcollages: null,
+      totalAttenduForCliquedCaisse: null,
+      disabled: true,
+      tab: null,
+      alert: false,
+      nomCaisseClique: "",
       expanded: [],
       singleExpand: false,
       search: null,
@@ -235,14 +504,11 @@ export default {
     };
   },
   computed: {
-    /* ...mapGetters([
-      '',
-    ]),*/
-
     numberOfPages() {
       return Math.ceil(this.items.length / this.itemsPerPage);
     },
   },
+
   beforeMount() {
     this.Config_Ecolage_et_Autres = JSON.parse(
       localStorage.getItem("Config_Ecolage_et_Autres")
@@ -268,7 +534,15 @@ export default {
       tableEcolages.push(ecolage.montant);
     });
     let Classes = JSON.parse(localStorage.getItem("Classes"));
+    this.Classes = Classes;
 
+    this.Classes.forEach((element, index) => {
+      element.scolarite = tableEcolages[index];
+    });
+
+    console.log(
+      "ClassesEtEcollages ====" + JSON.stringify(this.ClassesEtEcollages)
+    );
     if (Classes) {
       Classes.forEach((classe) => {
         tableContenanceParClasse.push(classe.contenance);
@@ -285,33 +559,46 @@ export default {
     let Inscrits = all_Eleves_Payed_InscReinsc.filter(
       (x) => x.typeFrais === "Inscriptions"
     );
+    this.mutateInscrits(Inscrits)
     console.log("test final 2");
+
     if (Inscrits) {
       console.log("test final 3");
       Inscrits.forEach((eleve) => {
         AllMontantsInsc.push([eleve.montantFrais]);
       });
     }
-    console.log("test final 4");
+    let attenduInscriptionToShow = AllMontantsInsc.reduce((x, y) => x + y);
     this.items[
       this.items.findIndex((x) => x.caisse === "Inscriptions")
-    ].totalAttendu = AllMontantsInsc.reduce((x, y) => x + y);
-    console.log("test final 5");
+    ].totalAttendu = Number(attenduInscriptionToShow);
+
+// enrefistrement dans le sotre du total des Attendus de la Reinscription
+    this.mutateAttenduInscription(attenduInscriptionToShow)
+    this.totalAttenduForAllCaisses += Number(attenduInscriptionToShow);
+
     // préparation filtage réinscrits récupération de tous leur montants et envoie pour le calcul
     let AllMontantsReinsc = [];
     let Reinscrits = all_Eleves_Payed_InscReinsc.filter(
       (x) => x.typeFrais === "Réinscriptions"
     );
+    this.mutateReinscrits(Reinscrits)
 
     if (Reinscrits.length > 0) {
       console.log("Réinscrit " + typeof Reinscrits);
       Reinscrits.forEach((eleve) => {
         AllMontantsReinsc.push([eleve.montantFrais]);
       });
-
+      let attenduReinscriptionToShow = AllMontantsReinsc.reduce(
+        (x, y) => x + y
+      ).toString();
       this.items[
         this.items.findIndex((x) => x.caisse === "Réinscriptions")
-      ].totalAttendu = AllMontantsReinsc.reduce((x, y) => x + y);
+      ].totalAttendu = Number(attenduReinscriptionToShow);
+
+// enrefistrement dans le sotre du total des Attendus de la Reinscription
+     this.mutateAttenduReinscription(attenduReinscriptionToShow)
+      this.totalAttenduForAllCaisses += Number(attenduReinscriptionToShow);
     } else {
       this.items[
         this.items.findIndex((x) => x.caisse === "Réinscriptions")
@@ -329,7 +616,69 @@ export default {
     // this.getAllFraisForComptabilite();
   },
   methods: {
-    //...mapActions(['',]),
+    ...mapMutations(["mutateCaisseClique"]),
+    ...mapMutations(["mutateReinscrits"]),
+    ...mapMutations(["mutateInscrits"]),
+    ...mapMutations(["mutateAttenduInscription"]),
+    ...mapMutations(["mutateAttenduReinscription"]),
+    afficheAlertDetails: function(item, row) {
+      console.log(
+        "this.alert = " +
+          this.alert +
+          " ****this.alertDetailsCaisseInscReinsc = " +
+          this.alertDetailsCaisseInscReinsc
+      );
+      if (this.alert || this.alertDetailsCaisseInscReinsc) {
+        this.alert = false;
+        this.alertDetailsCaisseInscReinsc = false;
+        row.select(true);
+
+        if (item.caisse === "Ecolage") {
+          setTimeout(() => {
+            console.log("item cliqué" + JSON.stringify(item));
+            this.alert = true;
+          }, 200);
+        } else if (
+          item.caisse === "Inscriptions" ||
+          item.caisse === "Réinscriptions"
+        ) {
+          setTimeout(() => {
+            this.mutateCaisseClique(item);
+            console.log(
+              "l'alert details_Insc_Reinsc devait s'aficher en principe "
+            );
+            this.alertDetailsCaisseInscReinsc = true;
+          }, 200);
+        } else {
+          console.log(
+            "l'alert details_Autres_Frais devait s'aficher en principe "
+          );
+        }
+      } else {
+        row.select(true);
+        console.log("item cliqué dans Recettes.vue" + JSON.stringify(item));
+        if (item.caisse === "Ecolage") {
+          console.log("item cliqué" + JSON.stringify(item));
+          this.alert = true;
+        } else if (
+          item.caisse === "Inscriptions" ||
+          item.caisse === "Réinscriptions"
+        ) {
+          this.mutateCaisseClique(item);
+          this.alertDetailsCaisseInscReinsc = true;
+          EventBus.$emit("AlertDetailsCaisseInscReinsc", item);
+        } else {
+          console.log(
+            "l'alert details_Autres_Frais devait s'aficher en principe "
+          );
+        }
+      }
+      this.nomCaisseClique = item.caisse;
+      this.totalAttenduForCliquedCaisse = item.totalAttendu.toLocaleString(
+        "fr"
+      );
+      this.$vuetify.goTo(document.body.scrollHeight);
+    },
     getAttendusEcolage(totalInscritsParClasses, allEcolages) {
       console.log(
         "totalInscritsParClasses = " +
@@ -341,10 +690,18 @@ export default {
         (x, index) => allEcolages[index] * x
       );
       console.log("total " + total);
+      let attenduEcolageToShow = total.reduce((x, y) => x + y).toString();
 
       this.items[
         this.items.findIndex((x) => x.caisse === "Ecolage")
-      ].totalAttendu = total.reduce((x, y) => x + y);
+      ].totalAttendu = Number(attenduEcolageToShow);
+
+      this.totalAttenduForAllCaisses += Number(attenduEcolageToShow);
+      console.log(
+        "this.totalAttenduForAllCaisses =" +
+          this.totalAttenduForAllCaisses.toLocaleString("fr")
+      );
+
       // ecolage.totalAttendu =
       console.log("Yes");
     },
@@ -389,6 +746,11 @@ export default {
         } else {
           resultats.push(contenancesPropresAuxIdsClasses[0] * element.montant);
         }
+        let attenduAutreFraisToShow = resultats
+          .reduce((x, y) => x + y)
+          .toString();
+
+        // trouver une methode qui sépare les milliers
         console.log(
           "resultats for " +
             element.identifiant +
@@ -397,49 +759,13 @@ export default {
         );
         this.items[
           this.items.findIndex((x) => x.caisse === element.identifiant)
-        ].totalAttendu = resultats.reduce((x, y) => x + y);
+        ].totalAttendu = Number(attenduAutreFraisToShow);
+
+        this.totalAttenduForAllCaisses += Number(attenduAutreFraisToShow);
       });
-
-      /* console.log(
-        "montantAvecSesContenances ========== " +
-          JSON.stringify(montantAvecSesContenances)
-      );
-      let resultats = [];
-      montantAvecSesContenances.forEach((element) => {
-        if (element[2].length > 1) {
-          element[2].forEach((el2) => {
-            resultats.push({
-              identifiant: element[0],
-              totalAttendu: el2 * element[1],
-            });
-          });
-        } else {
-          resultats.push({
-            identifiant: element[0],
-            totalAttendu: element[1] * element[2],
-          });
-        }
-      });
-
-      console.log(
-        "Tableau contenant le calcul qui se rapporte à chaque Autre frais " +
-          JSON.stringify(resultats) +
-          "\t Resultat total " //+
-        // JSON.stringify(resultats.reduce((x, y) => x + y))
-      );
-
-      const sumallAssurance = resultats
-        .map((item) => item.totalAttendu)
-        .reduce((prev, curr) => prev + curr, 0);
-      console.log(sumallAssurance);
-
-      // console.log(JSON.stringify(result));
-      // resultats.forEach(element => {
-
-      // });
-      this.items[
-        this.items.findIndex((x) => x.caisse === "Assurance")
-      ].totalAttendu = sumallAssurance;*/
+    },
+    getPercus() {
+      //Ecolage
     },
 
     getAllFraisForComptabilite() {
