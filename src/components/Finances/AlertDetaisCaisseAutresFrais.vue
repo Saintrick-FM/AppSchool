@@ -1,8 +1,7 @@
 <template>
   <div>
     <v-alert
-      type="primary"
-      :value="alert"
+      type="info"
       color="cyan"
       elevation="2"
       border="top"
@@ -11,7 +10,7 @@
       dismissible
     >
       <h2 class="black--text text-uppercase" style="margin-left:460px">
-        Détails de la caisse nomCaisseClique
+        Détails de la caisse {{ caisseClique.caisse }}
       </h2>
       <v-row class="text-center">
         <v-col md="4">
@@ -27,8 +26,8 @@
                 <!-- 1ere ligne affichant les   -->
                 <v-card>
                   <v-chip label color="primary" text-color="white">
-                    <v-icon left>mdi-check</v-icon> Contenance par classe /
-                    Ecolage
+                    <v-icon left>mdi-check</v-icon> Contenance/ montant Frais
+                    (par classe)
                   </v-chip>
 
                   <v-tabs
@@ -37,15 +36,18 @@
                     background-color="primary"
                     dark
                   >
-                    <v-tab v-for="item in Classes" :key="item.identifiant">
-                      item.identifiant
+                    <v-tab
+                      v-for="item in AutresFraisWithContenanceMontant.classesSpeciales"
+                      :key="item"
+                    >
+                      {{ item }}
                     </v-tab>
                   </v-tabs>
 
                   <v-tabs-items v-model="tab">
                     <v-tab-item
-                      v-for="item in ClassesEtEcollages"
-                      :key="item.identifiant"
+                      v-for="item in AutresFraisWithContenanceMontant.classesSpeciales"
+                      :key="item"
                     >
                       <v-card flat>
                         <v-card-text>
@@ -54,12 +56,12 @@
                             >Contenance :</span
                           >
 
-                          item.contenance élèves
+                          {{ EachContenance }} élèves
                           <span
                             style="color:black;font-weight: bold; text-decoration: underline; padding-left:10px"
-                            >Frais mensuels:</span
+                            >Frais {{ caisseClique.caisse }}:</span
                           >
-                          item.scolarite FCFA
+                          {{ fraisAutreFrais }} FCFA
                         </v-card-text>
 
                         <v-btn x-large block color="primary">
@@ -67,9 +69,16 @@
                             class="white--text"
                             style="text-transform: capitalize; width:380px"
                           >
-                            item.identifiant ( item.contenance * item.scolarite
-                            ) = (item.contenance *
-                            item.scolarite).toLocaleString( "fr" ) FCFA
+                            {{ item }} ( {{ EachContenance }}*{{
+                              fraisAutreFrais
+                            }}
+                            ) =
+                            {{
+                              Number(
+                                EachContenance * fraisAutreFrais
+                              ).toLocaleString()
+                            }}
+                            FCFA
                           </span>
                         </v-btn>
                       </v-card>
@@ -81,9 +90,8 @@
                           style="text-transform: capitalize; width:400px; "
                           >Somme totale =
                           <v-chip color="green">
-                            totalAttenduForCliquedCaisse / mois</v-chip
+                            {{ totalToShow }} FCFA / année</v-chip
                           >
-                          FCFA
                         </span>
                       </v-btn>
                     </v-tab-item>
@@ -212,13 +220,82 @@
 </template>
 
 <script>
-//import EventBus from '@/main.js'
+import { mapGetters } from "vuex";
+import { EventBus } from "@/event-bus.js";
 export default {
   data() {
-    return {};
+    return {
+      Config_Autres_Frais: JSON.parse(
+        localStorage.getItem("Config_Autres_Frais")
+      ),
+      allPayedInscReinsc: JSON.parse(
+        localStorage.getItem("all_Eleves_Payed_InscReinsc")
+      ),
+      Classes: null,
+      ClassesEtFraisInscriptions: null,
+      tab: 0,
+      Config_inscReinsc: null,
+      autreFraisWithDetails: null,
+    };
   },
+
+  beforeMount() {
+    this.autreFraisWithDetails = this.AutresFraisWithContenanceMontant;
+
+    this.Classes = this.Config_Autres_Frais.find(
+      (frais) => frais.identifiant === this.caisseClique.caisse
+    ).classesSpeciales;
+
+    console.log(
+      "autreFraisWithDetails ******====" +
+        JSON.stringify(this.autreFraisWithDetails) +
+        "\nAutresFraisWithContenanceMontant ===" +
+        JSON.stringify(this.AutresFraisWithContenanceMontant)
+    );
+  },
+
   methods: {},
+  computed: {
+    ...mapGetters(["caisseClique"]),
+    ...mapGetters(["allInscrits"]),
+    ...mapGetters(["allReinscrits"]),
+    ...mapGetters(["attenduReinscription"]),
+    ...mapGetters(["attenduInscription"]),
+    ...mapGetters(["AutresFraisWithContenanceMontant"]),
+
+    totalToShow() {
+      return Number(
+        this.AutresFraisWithContenanceMontant.totalAttendu
+      ).toLocaleString();
+    },
+    EachContenance() {
+      return this.AutresFraisWithContenanceMontant.contenanceClassesSpeciales[
+        this.tab
+      ];
+    },
+
+    fraisAutreFrais() {
+      return this.AutresFraisWithContenanceMontant.montant;
+
+      /*  if (this.caisseClique.caisse === "Réinscriptions") {
+        return this.Config_inscReinsc.find(
+          (x) => x.classe === this.Classes[this.tab].identifiant
+        ).fraisReinscription;
+        // si la caisse cliquée est Inscriptions
+      } else {
+        return this.Config_inscReinsc.find(
+          (x) => x.classe === this.Classes[this.tab].identifiant
+        ).fraisInscription;
+      }*/
+    },
+  },
 };
+EventBus.$on("AlertDetailsCaisseInscReinsc", showAlert);
+function showAlert(item) {
+  console.log(
+    `item cliqué dans AlertDetails...vue =  + ${JSON.stringify(item)}`
+  );
+}
 </script>
 
 <style></style>

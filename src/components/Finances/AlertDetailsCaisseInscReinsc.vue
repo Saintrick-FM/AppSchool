@@ -67,7 +67,12 @@
                             {{ item.identifiant }} (
                             {{ inscritsOrReinscrits }}*{{ fraisInscOrReinsc }} )
                             =
-                            {{ inscritsOrReinscrits * fraisInscOrReinsc }} FCFA
+                            {{
+                              Number(
+                                inscritsOrReinscrits * fraisInscOrReinsc
+                              ).toLocaleString()
+                            }}
+                            FCFA
                           </span>
                         </v-btn>
                       </v-card>

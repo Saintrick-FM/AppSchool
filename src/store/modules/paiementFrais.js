@@ -7,6 +7,7 @@ const state = {
     inscrits: null,
     attenduReinscription: null,
     attenduInscription: null,
+    AutresFraisWithContenanceMontant: null,
 
 };
 const actions = {
@@ -326,6 +327,10 @@ const mutations = {
     mutateReinscrits(state, reinscrits) {
         state.reinscrits = reinscrits
     },
+    mutateEachAutreFraisWithContenanceMontant(state, objet) {
+        console.log("****///****** " + JSON.stringify(objet) + "*******//****")
+        state.AutresFraisWithContenanceMontant = objet
+    },
     PaiementEveryFrais(everyFrais) {
         console.log("Agérer plus tard " + JSON.stringify(everyFrais))
     },
@@ -368,6 +373,9 @@ const getters = {
     },
     attenduInscription: state => {
         return state.attenduInscription
+    },
+    AutresFraisWithContenanceMontant: state => {
+        return state.AutresFraisWithContenanceMontant
     },
 
 

@@ -308,6 +308,7 @@
       </v-row>
     </v-alert>
     <AlertDetailsCaisseInscReinsc v-if="alertDetailsCaisseInscReinsc" />
+    <AlertDetailsCaisseAutresFrais v-if="alertDetailsCaisseAutresFrais" />
 
     <v-row
       class="mt-3"
@@ -392,15 +393,18 @@
 import { mapMutations } from "vuex";
 import { EventBus } from "@/event-bus.js";
 import AlertDetailsCaisseInscReinsc from "@/components/Finances/AlertDetailsCaisseInscReinsc.vue";
+import AlertDetailsCaisseAutresFrais from "@/components/Finances/AlertDetaisCaisseAutresFrais.vue";
 
 export default {
   name: "Recettes",
   components: {
     AlertDetailsCaisseInscReinsc,
+    AlertDetailsCaisseAutresFrais,
   },
   data() {
     return {
       alertDetailsCaisseInscReinsc: false,
+      alertDetailsCaisseAutresFrais: false,
       totalAttenduForAllCaisses: 0,
       ClassesEtEcollages: null,
       totalAttenduForCliquedCaisse: null,
@@ -559,7 +563,7 @@ export default {
     let Inscrits = all_Eleves_Payed_InscReinsc.filter(
       (x) => x.typeFrais === "Inscriptions"
     );
-    this.mutateInscrits(Inscrits)
+    this.mutateInscrits(Inscrits);
     console.log("test final 2");
 
     if (Inscrits) {
@@ -573,8 +577,8 @@ export default {
       this.items.findIndex((x) => x.caisse === "Inscriptions")
     ].totalAttendu = Number(attenduInscriptionToShow);
 
-// enrefistrement dans le sotre du total des Attendus de la Reinscription
-    this.mutateAttenduInscription(attenduInscriptionToShow)
+    // enrefistrement dans le sotre du total des Attendus de la Reinscription
+    this.mutateAttenduInscription(attenduInscriptionToShow);
     this.totalAttenduForAllCaisses += Number(attenduInscriptionToShow);
 
     // préparation filtage réinscrits récupération de tous leur montants et envoie pour le calcul
@@ -582,7 +586,7 @@ export default {
     let Reinscrits = all_Eleves_Payed_InscReinsc.filter(
       (x) => x.typeFrais === "Réinscriptions"
     );
-    this.mutateReinscrits(Reinscrits)
+    this.mutateReinscrits(Reinscrits);
 
     if (Reinscrits.length > 0) {
       console.log("Réinscrit " + typeof Reinscrits);
@@ -596,8 +600,8 @@ export default {
         this.items.findIndex((x) => x.caisse === "Réinscriptions")
       ].totalAttendu = Number(attenduReinscriptionToShow);
 
-// enrefistrement dans le sotre du total des Attendus de la Reinscription
-     this.mutateAttenduReinscription(attenduReinscriptionToShow)
+      // enrefistrement dans le sotre du total des Attendus de la Reinscription
+      this.mutateAttenduReinscription(attenduReinscriptionToShow);
       this.totalAttenduForAllCaisses += Number(attenduReinscriptionToShow);
     } else {
       this.items[
@@ -621,6 +625,8 @@ export default {
     ...mapMutations(["mutateInscrits"]),
     ...mapMutations(["mutateAttenduInscription"]),
     ...mapMutations(["mutateAttenduReinscription"]),
+    ...mapMutations(["mutateEachAutreFraisWithContenanceMontant"]),
+
     afficheAlertDetails: function(item, row) {
       console.log(
         "this.alert = " +
@@ -628,9 +634,14 @@ export default {
           " ****this.alertDetailsCaisseInscReinsc = " +
           this.alertDetailsCaisseInscReinsc
       );
-      if (this.alert || this.alertDetailsCaisseInscReinsc) {
+      if (
+        this.alert ||
+        this.alertDetailsCaisseInscReinsc ||
+        this.alertDetailsCaisseAutresFrais
+      ) {
         this.alert = false;
         this.alertDetailsCaisseInscReinsc = false;
+        this.alertDetailsCaisseAutresFrais = false;
         row.select(true);
 
         if (item.caisse === "Ecolage") {
@@ -653,6 +664,9 @@ export default {
           console.log(
             "l'alert details_Autres_Frais devait s'aficher en principe "
           );
+          this.sendDetailsAutresFraisToStore(item);
+          this.mutateCaisseClique(item);
+          this.alertDetailsCaisseAutresFrais = true;
         }
       } else {
         row.select(true);
@@ -671,6 +685,9 @@ export default {
           console.log(
             "l'alert details_Autres_Frais devait s'aficher en principe "
           );
+          this.sendDetailsAutresFraisToStore(item);
+          this.mutateCaisseClique(item);
+          this.alertDetailsCaisseAutresFrais = true;
         }
       }
       this.nomCaisseClique = item.caisse;
@@ -705,14 +722,44 @@ export default {
       // ecolage.totalAttendu =
       console.log("Yes");
     },
+    sendDetailsAutresFraisToStore(item) {
+      // Envoie Autre frais avec les details Contenances de ses classesSpeciales, montant, et total Attendu dans le store
+      let contenancesPropresAuxIdsClasses = [];
+      let listeAutresFrais = JSON.parse(
+        localStorage.getItem("Config_Autres_Frais")
+      );
+
+      let element = listeAutresFrais.find((x) => x.identifiant === item.caisse);
+
+      if (element.classesSpeciales.length > 1) {
+        element.classesSpeciales.forEach((element) => {
+          contenancesPropresAuxIdsClasses.push(
+            this.Classes.find((classe) => classe.identifiant === element)
+              .contenance
+          );
+        });
+      } else {
+        contenancesPropresAuxIdsClasses.push(
+          this.Classes.find(
+            (classe) => classe.identifiant === element.classesSpeciales[0]
+          ).contenance
+        );
+      }
+
+      this.mutateEachAutreFraisWithContenanceMontant({
+        caisse: item.caisse,
+        montant: element.montant,
+        contenanceClassesSpeciales: contenancesPropresAuxIdsClasses,
+        totalAttendu: item.totalAttendu,
+        classesSpeciales: element.classesSpeciales,
+      });
+    },
 
     getAttendusAutresFrais(listeAutresFrais, Classes) {
       // recup AutresFrais, affectation montantsFrais avec les effectifs des élèves qui doivent les payer
       console.log("AutresFrais " + JSON.stringify(listeAutresFrais));
 
       let contenancesPropresAuxIdsClasses = [];
-
-      console.log("test final");
 
       listeAutresFrais.forEach((element) => {
         if (element.classesSpeciales.length > 1) {
@@ -735,9 +782,10 @@ export default {
             element.identifiant +
             "\nmontant =" +
             element.montant +
-            "\ncontenancesPropresAuxIdsClasses" +
+            "\ncontenancesPropresAuxIdsClasses " +
             JSON.stringify(contenancesPropresAuxIdsClasses)
         );
+
         let resultats = [];
         if (contenancesPropresAuxIdsClasses.length > 1) {
           contenancesPropresAuxIdsClasses.forEach((el2) => {
@@ -750,13 +798,13 @@ export default {
           .reduce((x, y) => x + y)
           .toString();
 
-        // trouver une methode qui sépare les milliers
         console.log(
           "resultats for " +
             element.identifiant +
             " = " +
             JSON.stringify(resultats)
         );
+
         this.items[
           this.items.findIndex((x) => x.caisse === element.identifiant)
         ].totalAttendu = Number(attenduAutreFraisToShow);
