@@ -1,39 +1,61 @@
 <template>
-  <v-card style="width:215px">
-    <v-card-title>
-      <v-text-field
-        v-model="search"
-        append-icon="mdi-magnify"
-        label="Recherche"
-        single-line
-        hide-details
-      ></v-text-field>
-    </v-card-title>
-    <v-data-table
-      :search="search"
-      :headers="MyHeaders"
-      type="button"
-      @click:row="rowClick"
-      :items="JSON.parse(alleleves)"
-    >
-      <template v-slot:top>
-        <v-toolbar flat>
-          <v-toolbar-title>Tous les élèves</v-toolbar-title>
-          <v-divider class="mx-4" inset vertical></v-divider>
-          <v-spacer></v-spacer>
-        </v-toolbar>
-      </template>
-    </v-data-table>
-  </v-card>
+  <v-row>
+    <v-col md="2" scrollable>
+      <!-- <mini-liste-eleves /> -->
+      <v-card style="width:215px">
+        <v-card-title>
+          <v-text-field
+            v-model="search"
+            append-icon="mdi-magnify"
+            label="Recherche"
+            single-line
+            hide-details
+          ></v-text-field>
+        </v-card-title>
+        <v-data-table
+          :search="search"
+          :headers="MyHeaders"
+          type="button"
+          @click:row="rowClick"
+          :items="alleleves"
+        >
+          <template v-slot:top>
+            <v-toolbar flat>
+              <v-toolbar-title>Tous les élèves</v-toolbar-title>
+              <v-divider class="mx-4" inset vertical></v-divider>
+              <v-spacer></v-spacer>
+            </v-toolbar>
+          </template>
+        </v-data-table>
+      </v-card>
+      <!-- <mini-liste-eleves /> -->
+    </v-col>
+    <v-col elevation="5" md="10">
+      <v-row>
+        <v-card>
+          <DetailsFraisPayesImpayes />
+          <Paiements />
+        </v-card>
+      </v-row>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
 import axios from "axios";
-import { mapGetters, mapActions } from "vuex";
-import { EventBus } from "@/event-bus.js";
+import { mapGetters, mapActions, mapMutations } from "vuex";
+//import { EventBus } from "@/event-bus.js";
+import DetailsFraisPayesImpayes from "@/components/Scolarite/DetailsFraisPayesImpayes.vue";
+import Paiements from "@/components/Scolarite/Paiements.vue";
+//import axios from "axios";
+//import { mapGetters } from "vuex";
 
 export default {
-  name: "ListeEleves",
+  components: {
+    DetailsFraisPayesImpayes,
+    Paiements,
+  },
+
   data: () => ({
     valid: true,
     search: "",
@@ -68,26 +90,26 @@ export default {
   },
 
   beforeMount() {
-    console.log("Essaie");
     let id_classes = [localStorage.getItem("Id_classes")];
     let classe = null;
     id_classes.forEach((eleves) => {
       classe = eleves.split(",");
-      console.log("tableau des classes " + JSON.stringify(classe));
     });
+    console.log("eeeeeeeh");
+    // this.actionInitialiseEleve(localStorage.getItem("année_scolaire"));
+    // this.alleleves
 
     this.classes = classe;
-    console.log("tableau des elèves " + this.alleleves);
-    if (!this.alleleves) {
+    console.log("eeeeeeeh 2" + JSON.stringify(this.alleleves));
+    // attention je n'utilise plus le component minilisteEleves
+    if (this.alleleves.length < 1) {
       this.actionInitialiseEleve(localStorage.getItem("année_scolaire"));
-      this.eleves = JSON.parse(this.alleleves);
-    } else {
-      this.eleves = JSON.parse(this.alleleves);
     }
   },
 
   methods: {
     ...mapActions(["actionInitialiseEleve"]),
+    ...mapMutations(["mutateEleveClique"]),
     initializeEleve() {
       //   this.$store.dispatch("actionInitialiseMatiere");
       const token = "Token " + localStorage.getItem("token");
@@ -147,7 +169,8 @@ export default {
         eleve.push(element);
       }*/
       localStorage.setItem("eleveChoisi", JSON.stringify(map));
-      EventBus.eleveClique(item);
+      this.mutateEleveClique(item);
+      //EventBus.eleveClique(item);
       //this.$emit("eleveChoisi");
 
       //item  - selected item
@@ -156,4 +179,4 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style></style>

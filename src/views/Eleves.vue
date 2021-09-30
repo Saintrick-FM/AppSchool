@@ -60,7 +60,7 @@
 
 <script>
 import ListeEleves from "@/components/ListeEleves.vue";
-import Scolarite from "@/components/Scolarite.vue";
+import Scolarite from "@/components/Scolarite/index.vue";
 import Classes from "@/components/Classes.vue";
 
 //import TestCode from "@/components/TestCode.vue";

@@ -1,4 +1,5 @@
 import axios from 'axios'
+//import { EventBus } from '@/event-bus.js'
 const state = {
     typeFrais: [],
     fraisPayed: undefined,
@@ -8,6 +9,7 @@ const state = {
     attenduReinscription: null,
     attenduInscription: null,
     AutresFraisWithContenanceMontant: null,
+    eleveClique: null,
 
 };
 const actions = {
@@ -40,6 +42,7 @@ const actions = {
 
 
     },
+
 
     actionUpdateFrais({ commit }, donnees) {
         const token = "Token " + localStorage.getItem('token');
@@ -318,6 +321,7 @@ const mutations = {
     mutateInscrits(state, inscrits) {
         state.inscrits = inscrits
     },
+
     mutateAttenduInscription(state, attenduInscription) {
         state.attenduInscription = attenduInscription
     },
@@ -380,7 +384,6 @@ const getters = {
 
 
 };
-
 
 export default {
     state,

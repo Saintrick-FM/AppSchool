@@ -3,6 +3,7 @@
     <v-col md="2" scrollable>
       <mini-liste-eleves @eleveChoisi="AfficheEleveVrai" />
     </v-col>
+
     <v-col elevation="5" md="10">
       <v-row>
         <v-card>
@@ -328,10 +329,11 @@
           </v-row>
           <v-divider style="border-style:solid;"> </v-divider>
           <v-divider style="margin-top:1px; border-style:solid"> </v-divider>
+          
+ <!-- partie paiement -->
 
           <v-row style="margin-top:10px;">
-            <!-- partie paiement -->
-            <v-card-text>
+                       <v-card-text>
               <v-container grid-list-md>
                 <v-sheet elevation="10" class="py-4 px-1">
                   <v-data-table

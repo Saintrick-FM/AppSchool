@@ -530,11 +530,9 @@ export default {
     });
 
     this.classes = classe;
-    // this.$store.dispatch("actionInitialiseEleve");
-
-    this.eleves = JSON.parse(localStorage.getItem("Inscrits_Annee_Actuel"));
+    let eleves = JSON.parse(localStorage.getItem("Inscrits_Annee_Actuel"));
+    this.eleves = eleves;
     //this.$store.commit("InititialiseEleves", );
-    this.alleleves=this.eleves
 
     console.log("allEves du store " + JSON.stringify(this.alleleves));
   },

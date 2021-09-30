@@ -40,16 +40,16 @@ const actions = {
                         eleves.push(result1[key]);
                     }
 
-                    let elevesToStore = JSON.stringify(eleves)
+
                     console.log(
-                        "😃😃😃 ElevesTostore => " +
-                        elevesToStore + " \nInscritsAnneeActuel => " + result2
+                        "😃😃😃 Eleves in the 2nd request of Initialise Eleves => " +
+                        JSON.stringify(eleves) + " \nInscritsAnneeActuel => " + result2
 
                     );
-                    localStorage.setItem("Inscrits_Annee_Actuel", elevesToStore);
+                    localStorage.setItem("Inscrits_Annee_Actuel", JSON.stringify(eleves));
                     localStorage.setItem("all_Eleves_Payed_InscReinsc", JSON.stringify(result2))
 
-                    commit('InititialiseEleves', elevesToStore)
+                    commit('InititialiseEleves', eleves)
                     commit("InitialiseInscitsAnneeActuel", result2)
 
                 }))

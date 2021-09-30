@@ -6,6 +6,7 @@ import paiementFrais from './modules/paiementFrais'
 import classes from './modules/classes'
 import comptabilite from './modules/comptabilite'
 import parametrages from './modules/parametrages'
+import gestionScolaire from './modules/gestionScolarite'
 import axios from 'axios'
 
 Vue.use(Vuex)
@@ -383,6 +384,7 @@ export default new Vuex.Store({
         paiementFrais,
         classes,
         comptabilite,
-        parametrages
+        parametrages,
+        gestionScolaire,
     }
 })
