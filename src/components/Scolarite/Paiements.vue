@@ -9,7 +9,11 @@
             light
             v-model="fraisChoisi"
             :headers="HeadersFrais"
-            :items="eachStudentDetailsScolarite.paiementFrais"
+            :items="
+              eachStudentDetailsScolarite.paiementFrais === null
+                ? []
+                : eachStudentDetailsScolarite.paiementFrais
+            "
             :single-select="singleSelect"
             hide-default-footer
             item-key="identifiant"
@@ -32,7 +36,11 @@
             class="shrink mr-2"
           ></v-checkbox>
           <v-autocomplete
-            :items="eachStudentDetailsScolarite.moisToShowWithoutPayedMonths"
+            :items="
+              eachStudentDetailsScolarite.moisToShowWithoutPayedMonths === null
+                ? []
+                : eachStudentDetailsScolarite.moisToShowWithoutPayedMonths
+            "
             :disabled="!fraisMensuels"
             label="Frais mensuels"
             clearable
@@ -53,7 +61,7 @@
             <v-select
               label="Inscription"
               :disabled="!inscription"
-              :value="eleve.classe"
+              :value="eleveClique.classe"
               append-icon=" mdi-playlist-check"
               readonly
               filled
@@ -70,7 +78,7 @@
             <v-text-field
               label="Réinscription"
               :disabled="!reinscription"
-              :value="eleve.classe"
+              :value="eleveClique.classe"
               append-icon=" mdi-playlist-check"
               readonly
               filled
@@ -123,7 +131,7 @@
                     <v-col md="4">
                       <v-text-field
                         align-content-center
-                        :value="eleve.nom"
+                        :value="eleveClique.nom"
                         outlined
                         filled
                         readonly
@@ -225,7 +233,7 @@
                   @click="SavePayedFrais"
                 >
                   <v-icon left>mdi-content-save-move-outline</v-icon>
-                  Enregistrer
+                  Payer
                 </v-chip></v-col
               >
             </v-row>
@@ -272,7 +280,7 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapMutations } from "vuex";
 export default {
   data() {
     return {
@@ -280,20 +288,22 @@ export default {
       singleSelect: true,
       alert: false,
 
+      anneeActuelle: null,
+
       alertErreurDuplicateTypeFrais: false,
       messageErreurDuplicateTypeFrais_A: "",
       messageErreurDuplicateTypeFrais_B: "",
       AffichePaiementAutresFrais: false,
       alertInscriptionReinscription: false,
       AffichePaiementMois: false,
-      fraisMensuels: null,
+      fraisMensuels: [],
       fraisChoisi: [],
 
       scolariteTotal: null,
       allFraisInscReinsc: null,
       paiement_Inscription_Reinscription: ["Inscription", "Réinscription"],
-      inscription: null,
-      reinscription: null,
+      inscription: false,
+      reinscription: false,
       shawInscription: true,
       showInscription: "",
       choiceBetweenInscReinsc: null,
@@ -348,6 +358,7 @@ export default {
   },
   beforeMount() {
     this.moisToShowWithoutPayedMonths = this.mois;
+    this.anneeActuelle = localStorage.getItem("année_scolaire");
   },
   computed: {
     ...mapGetters(["eleveClique"]),
@@ -377,11 +388,13 @@ export default {
     },
   },
   methods: {
-    proceedToPaiement: function() {
-      console.log(" this.fraisChoisi.length " + this.fraisChoisi.length);
-      console.log("this.moisToPay.length " + this.moisToPay.length);
+    ...mapMutations(["mutateStateFraisPayesImpaye"]),
+    proceedToPaiement() {
+      /*console.log(
+        "this.moisToPay.length " + this.eachStudentDetailsScolarite.moisToPay
+      );
       console.log(
-        "this.choiceBetweenInscReinsc.length " + this.choiceBetweenInscReinsc
+        "this.choiceBetweenInscReinsc " + this.choiceBetweenInscReinsc
       );
       console.log("this.fraisReinscription.length  " + this.fraisReinscription);
       console.log(
@@ -397,16 +410,26 @@ export default {
           this.inscription +
           " this.reinscription " +
           this.reinscription
+      );*/
+
+      console.log(
+        " test 3 if " + JSON.stringify(this.eachStudentDetailsScolarite)
       );
+      console.log(" test 3 if " + typeof this.fraisMensuels);
+      console.log(" test 3 if " + typeof this.fraisChoisi);
+      console.log(" test 3 if " + typeof this.inscription);
+      console.log(" test 3 if " + typeof this.reinscription);
 
       this.$vuetify.goTo(document.body.scrollHeight); // ici c'est pour scroller directement vers le bas
 
       if (
-        this.moisToPay.length === 0 &&
         this.fraisChoisi.length === 0 &&
-        this.fraisReinscription.length === 0 &&
-        (this.inscription === "null" || this.reinscription === "null")
+        this.fraisMensuels.length === 0 &&
+        //  this.fraisReinscription.length === 0 &&
+        this.inscription === false &&
+        this.reinscription === false
       ) {
+        console.log(" test 3 if ");
         this.AssignMessageErreur("No Choice");
       }
 
@@ -515,9 +538,12 @@ export default {
         console.log("alloooo ! " + this.allFraisInscReinsc);
         this.alert = true;
 
-        console.log("alloooo ! prixInscription " + this.prixInscription);
+        console.log(
+          "alloooo ! eachStudentDetailsScolarite prixInscription " +
+            this.eachStudentDetailsScolarite.prixInscription
+        );
         this.fraisApayer = "Inscriptions";
-        this.scolariteTotal = this.prixInscription;
+        this.scolariteTotal = this.eachStudentDetailsScolarite.prixInscription;
         this.alertInscriptionReinscription = true;
       }
 
@@ -526,9 +552,12 @@ export default {
         console.log("alloooo ! " + this.allFraisInscReinsc);
         this.alert = true;
 
-        console.log("alloooo ! prixReinscription " + this.prixReinscription);
+        console.log(
+          "alloooo ! prixReinscription " +
+            this.eachStudentDetailsScolarite.prixReinscription
+        );
         this.fraisApayer = "Réinscriptions";
-        this.scolariteTotal = this.prixReinscription;
+        this.scolariteTotal = this.eachStudentDetailsScolarite.prixReinscription;
         this.alertInscriptionReinscription = true;
       }
     },
@@ -593,7 +622,12 @@ export default {
             JSON.stringify(allInscReinscPaiement)
           );
           setTimeout(() => {
-            this.InitialiseFraisPayeImpaye(eleveChoisi.eleveNumber);
+            //this.InitialiseFraisPayeImpaye(eleveChoisi.eleveNumber);
+            this.actionGetfinanceEleveDetail(eleveChoisi);
+
+            setTimeout(() => {
+              this.mutateEleveClique(eleveChoisi);
+            }, 1000);
             this.annulation();
           }, 2000);
         }
@@ -811,6 +845,28 @@ export default {
         this.AffichePaiementAutresFrais = false;
         this.AffichePaiementMois = false;
         this.InitialiseFraisPayeImpaye(eleveChoisi);
+      }
+    },
+
+    AssignMessageErreur(message) {
+      if (message === "No Choice") {
+        this.alertErreurDuplicateTypeFrais = true;
+        this.messageErreurDuplicateTypeFrais_A =
+          "Désolé vous devez d'abord choisir un frais parmi les frais au dessus et ensuite";
+        this.messageErreurDuplicateTypeFrais_B =
+          "Cliquer sur le bouton (Suivant)";
+      } else if (message === "noAvanceAllowed") {
+        this.alertErreurDuplicateTypeFrais = true;
+        this.messageErreurDuplicateTypeFrais_A =
+          "Désolé le paiement ne peut se faire car vous devez exactament payé la somme du frais";
+        this.messageErreurDuplicateTypeFrais_B =
+          "Avances autorisées qu'avec les Frais mensuels ";
+      } else {
+        this.messageErreurDuplicateTypeFrais_A =
+          " Désolé vous ne pouvez pas procéder en même temps au paiement de plusieurs types de frais";
+        this.messageErreurDuplicateTypeFrais_B =
+          "Choisissez-en un et cliquez sur le bouton suivant";
+        this.alertErreurDuplicateTypeFrais = true;
       }
     },
   },

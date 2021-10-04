@@ -109,6 +109,7 @@ export default {
 
   methods: {
     ...mapActions(["actionInitialiseEleve"]),
+    ...mapActions(["actionGetfinanceEleveDetail"]),
     ...mapMutations(["mutateEleveClique"]),
     initializeEleve() {
       //   this.$store.dispatch("actionInitialiseMatiere");
@@ -169,7 +170,12 @@ export default {
         eleve.push(element);
       }*/
       localStorage.setItem("eleveChoisi", JSON.stringify(map));
-      this.mutateEleveClique(item);
+      this.actionGetfinanceEleveDetail(item);
+
+      setTimeout(() => {
+        this.mutateEleveClique(item);
+      }, 1000);
+
       //EventBus.eleveClique(item);
       //this.$emit("eleveChoisi");
 

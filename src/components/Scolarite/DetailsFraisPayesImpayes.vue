@@ -252,17 +252,17 @@
 
           <v-tabs v-model="tab" background-color="primary" dark>
             <v-tab
-              v-for="item in eachStudentDetailsScolarite.allFraisPayes"
-              :key="item.typeFrais"
+              v-for="fraisPaye in eachStudentDetailsScolarite.allFraisPayes"
+              :key="fraisPaye.id"
             >
-              {{ item.typeFrais }}
+              {{ fraisPaye.typeFrais }}
             </v-tab>
           </v-tabs>
 
           <v-tabs-items v-model="tab">
             <v-tab-item
-              v-for="item in eachStudentDetailsScolarite.allFraisPayes"
-              :key="item.typeFrais"
+              v-for="paye in eachStudentDetailsScolarite.allFraisPayes"
+              :key="paye.id"
             >
               <v-card flat>
                 <v-card-text>
@@ -270,17 +270,17 @@
                     style="color:black;font-weight: bold; text-decoration: underline;"
                     >Montant Payé :</span
                   >
-                  {{ item.montantFrais }} FCFA
+                  {{ paye.montantFrais }} FCFA
                   <span
                     style="color:black;font-weight: bold; text-decoration: underline; margin-left:50px"
                     >Date de paiement:</span
                   >
-                  {{ item.cree_le }} <br />
+                  {{ paye.cree_le }} <br />
                   <span
                     style="color:black; font-weight: bold; text-decoration: underline;"
                     >Année académique:</span
                   >
-                  {{ item.AnneeScolaire }}
+                  {{ paye.AnneeScolaire }}
                 </v-card-text>
               </v-card>
             </v-tab-item>
@@ -477,6 +477,14 @@ export default {
       }
     },
     tailleMoisImpaye() {
+      console.log(
+        "Coucou " +
+          JSON.stringify(this.eachStudentDetailsScolarite.allFraisPayes)
+      );
+      console.log(
+        "Coucou " +
+          JSON.stringify(this.eachStudentDetailsScolarite.allFraisImpayes)
+      );
       if (this.eachStudentDetailsScolarite.MoisNonPaye) {
         let taille = this.eachStudentDetailsScolarite.MoisNonPaye.length;
         return taille > 0 ? taille : 4;
@@ -599,8 +607,7 @@ export default {
       }
     },
     AfficheEleve(eleveClique) {
-      console.log("Coucou " + JSON.stringify(eleveClique));
-      // console.log(`Coucou =  + ${JSON.stringify(item)}`);
+      console.log("Coucou " + eleveClique); // console.log(`Coucou =  + ${JSON.stringify(item)}`);
       /* this.eachStudentDetailsScolarite.allFraisPayes = [];
       this.eachStudentDetailsScolarite.allFraisImpayes = [];
       this.resultat = null;
