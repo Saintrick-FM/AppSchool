@@ -21,7 +21,7 @@ const state = {
     eachStudentDetailsScolarite: {
         moisPaye: null,
         FraisPayesWithDetails: null,
-        moisAvance: null,
+        moisAvance: [],
         FraisAvancesWithDetails: null,
         MoisNonPaye: [],
         shawPayedMonths: null,
@@ -116,25 +116,29 @@ const actions = {
                             console.log("else malheureusement");
                         }
                     });
-                    if (allMonthsPayed.length > 0 && this.moisAvance) {
-                        console.log("non non non");
-                        MoisPaye = allMonthsPayed.filter(this.trieMoisVides);
-                        MoisNonPaye = this.trieMoisImpaye("moisPayeETavance");
-                        localStorage.setItem("MoisPaye", this.MoisPaye);
-                        localStorage.setItem("MoisNonPaye", this.MoisNonPaye);
+
+                    if (allMonthsPayed.length > 0 && moisAvance) {
+                        console.log("AllmonthsPayed " + JSON.stringify(allMonthsPayed));
+                        MoisPaye = allMonthsPayed.filter(x => x != "");
+                        // MoisNonPaye = this.trieMoisImpaye("moisPayeETavance");
+
+                        localStorage.setItem("MoisPaye", MoisPaye);
+                        localStorage.setItem("MoisNonPaye", MoisNonPaye);
                     }
-                    if (allMonthsPayed.length > 0 && !this.moisAvance) {
+                    if (allMonthsPayed.length > 0 && !moisAvance) {
+                        console.log("AllmonthsPayed " + JSON.stringify(allMonthsPayed));
                         // ce que j'affecte aux moisPaye vient du resultat de trie opéré par la methode //filter qui enlève les tableaux vides de MoisPaye car c'est un tableau de tableaux
-                        MoisPaye = allMonthsPayed.filter(this.trieMoisVides);
-                        MoisNonPaye = this.trieMoisImpaye("moisPaye");
+                        MoisPaye = allMonthsPayed.filter(x => x != "");
+                        //commit("setMoisNonPayes", "moisPaye")
+                        // MoisNonPaye = this.trieMoisImpaye("moisPaye");
                         console.log("non non non 2 ");
-                        localStorage.setItem("MoisPaye", JSON.stringify(this.MoisPaye));
-                        localStorage.setItem(
-                            "MoisNonPaye",
-                            JSON.stringiify(this.MoisNonPaye)
-                        );
+                        localStorage.setItem("MoisPaye", JSON.stringify(MoisPaye));
+                        // localStorage.setItem(
+                        //     "MoisNonPaye",
+                        //     JSON.stringiify(MoisNonPaye)
+                        // );
                     }
-                    console.log("Ah c'est compliqué 2");
+
                     localStorage.setItem(
                         "Frais_Avancés_With_Details",
                         JSON.stringify(FraisAvancesWithDetails)
@@ -143,23 +147,82 @@ const actions = {
                         "Frais_Payés_With_Details",
                         JSON.stringify(FraisPayesWithDetails)
                     );
-                    localStorage.setItem("moisAvance", JSON.stringify(this.moisAvance));
+                    localStorage.setItem("moisAvance", JSON.stringify(moisAvance));
 
-                    commit('setMoisPayesAvancesImpayes', { mois: { moisPaye: MoisPaye, FraisPayesWithDetails: FraisPayesWithDetails, moisAvance: moisAvance, FraisAvancesWithDetails: FraisAvancesWithDetails, MoisNonPaye: MoisNonPaye }, AllFraisPayedByEleve: response.data })
+                    console.log("Ah c'est compliqué 2");
+                    commit("setMoisAvances", moisAvance)
+                    commit('setMoisPayesAvancesImpayes', { mois: { moisPaye: MoisPaye, FraisPayesWithDetails: FraisPayesWithDetails, moisAvance: moisAvance, FraisAvancesWithDetails: FraisAvancesWithDetails, MoisNonPaye: MoisNonPaye }, eleveChoisi: eleveChoisi, AllFraisPayedByEleve: response.data })
 
                 })
                 .catch(function(error) {
                     console.log("😢😢😢" + error);
                 });
 
-            state.eachStudentDetailsScolarite.shawPayedMonths = true;
-            state.eachStudentDetailsScolarite.paiementFrais = state.eachStudentDetailsScolarite.allFraisImpayes
+
+
         }
 
     },
 
 }
 const mutations = {
+    setMoisAvances(state, moisAvances) {
+        console.log("Dans SetMoisNonAvances " + JSON.stringify(moisAvances))
+
+        if (moisAvances.length > 1) {
+            moisAvances.forEach(element => {
+                state.eachStudentDetailsScolarite.moisAvance.push(element)
+            });
+
+        } else if (moisAvances.length === 1) {
+            state.eachStudentDetailsScolarite.moisAvance.push(moisAvances[0])
+        } else {
+            state.eachStudentDetailsScolarite.moisAvance = []
+        }
+
+
+        /*
+                let monthsNonPayed = [
+                    "Septembre",
+                    "Octobre",
+                    "Novembre",
+                    "Decembre",
+                    "Janvier",
+                    "Fevrier",
+                    "Mars",
+                    "Avril",
+                    "Mai",
+                    "Juin",
+                    "Juillet",
+                    "Aout",
+                ];
+
+                state.eachStudentDetailsScolarite.MoisNonPaye = [];
+
+                //this.moisAvance=[];
+                if (item.statut === "moisPayeETavance") {
+                    console.log("statut trieMoisImpayes === moisPayeETavance !");
+                    item.moisAvance.forEach((mois) => {
+                        monthsNonPayed.splice(monthsNonPayed.indexOf(mois), 1);
+                    });
+                }
+                state.eachStudentDetailsScolarite.MoisPaye.toString()
+                    .split(",")
+                    .forEach((mois) => {
+                        monthsNonPayed.splice(monthsNonPayed.indexOf(mois), 1);
+                    });
+                //   this.moisToShowWithoutPayedMonths = monthsNonPayed.concat(
+                //     this.moisAvance
+                //   );
+                console.log(
+                    "moisAvance =>> " +
+                    item.moisAvance +
+                    "MOIS NON PAYES == " +
+                    JSON.stringify(monthsNonPayed)
+                );
+                return monthsNonPayed.toString().split(",");*/
+        //  state.eachStudentDetailsScolarite.MoisNonPaye= .....
+    },
     mutateEleveClique(state, eleveClique) {
         state.eleveClique = eleveClique
         state.eachStudentDetailsScolarite.allFraisImpayes = null
@@ -175,11 +238,12 @@ const mutations = {
         let AllFraisPayedByEleve = JSON.parse(localStorage.getItem("AllFraisPayedByEleve"))
         console.log("AllFraisPayedByEleve dans mutateEleve ====" + JSON.stringify(AllFraisPayedByEleve))
 
-        let classes = JSON.parse(localStorage.getItem("Classes").split(","));
+        let classes = JSON.parse(localStorage.getItem("Config_Ecolage_et_Autres"));
 
         state.eachStudentDetailsScolarite.montantFraisMensuel = classes.find(
-            (x) => x.identifiant == eleveChoisi.classe
-        ).scolarite;
+            (x) => x.classe == eleveChoisi.classe
+        ).montant;
+        console.log("✈ ✈ ✈  " + state.eachStudentDetailsScolarite.montantFraisMensuel)
 
         let allFraisInscReinsc = JSON.parse(
             localStorage.getItem("Config inscReinsc")
@@ -207,6 +271,7 @@ const mutations = {
             state.eachStudentDetailsScolarite.autresFraisPayesSaufInscReinsc = AllFraisPayedByEleve.filter(
                 (x) => x.typeFrais !== inscritOuReinscrit.typeFrais
             );
+            state.eachStudentDetailsScolarite.autresFraisPayesSaufInscReinsc = state.eachStudentDetailsScolarite.autresFraisPayesSaufInscReinsc.filter((x) => x.typeFrais !== 'Frais mensuels')
 
             // il est inscrit ou réinscrit ok, a t-il déjà payé un quelconque frais ?
             if (state.eachStudentDetailsScolarite.autresFraisPayesSaufInscReinsc) {
@@ -243,7 +308,16 @@ const mutations = {
                     "\nallFraisPayes => " +
                     JSON.stringify(state.eachStudentDetailsScolarite.allFraisPayes)
                 );
+                // gestion affectation des mois impayés
+                if (state.eachStudentDetailsScolarite.moisAvance.length > 0) {
+                    state.eachStudentDetailsScolarite.MoisNonPaye = state.mois.filter((x) => !state.eachStudentDetailsScolarite.moisPaye.includes(x))
 
+                    state.eachStudentDetailsScolarite.MoisNonPaye = state.eachStudentDetailsScolarite.MoisNonPaye.filter((x) => !state.eachStudentDetailsScolarite.moisAvance.includes(x))
+
+                } else {
+                    state.eachStudentDetailsScolarite.MoisNonPaye = state.mois.filter((x) => !state.eachStudentDetailsScolarite.moisPaye.includes(x))
+
+                }
 
             } else {
 
@@ -306,15 +380,31 @@ const mutations = {
         //actionInitialiseFraisPayeImpaye(eleveClique);
     },
     setMoisPayesAvancesImpayes(state, item) {
-        state.eachStudentDetailsScolarite.moisPaye = item.mois.moisPaye
-        console.log("Hello !!! " + JSON.stringify(this.item.moisPaye))
-        state.eachStudentDetailsScolarite.FraisPayesWithDetails = item.mois.FraisPayesWithDetails
-        state.eachStudentDetailsScolarite.moisAvance = item.mois.moisAvance
-        state.eachStudentDetailsScolarite.FraisAvancesWithDetails = item.mois.FraisAvancesWithDetails
-        state.eachStudentDetailsScolarite.MoisNonPaye = item.mois.MoisNonPaye
+        console.log("ok attend un peu " + JSON.stringify(item))
+            //  state.eachStudentDetailsScolarite.MoisNonPaye = item.mois.MoisNonPaye
 
         state.AllFraisPayedByEleve = item.AllFraisPayedByEleve
+        let allElevesPayedInscReinsc = JSON.parse(
+            localStorage.getItem("all_Eleves_Payed_InscReinsc")
+        );
+        let inscritOuReinscrit = allElevesPayedInscReinsc.find(
+            (x) => x.eleve === item.eleveChoisi.eleveNumber
+        );
 
+        if (inscritOuReinscrit) {
+            state.eachStudentDetailsScolarite.moisPaye = item.mois.moisPaye
+            console.log("Hello !!! " + JSON.stringify(item.mois.moisPaye))
+            state.eachStudentDetailsScolarite.FraisPayesWithDetails = item.mois.FraisPayesWithDetails
+                //   state.eachStudentDetailsScolarite.moisAvance = item.mois.moisAvance
+                //   state.eachStudentDetailsScolarite.FraisAvancesWithDetails = item.mois.FraisAvancesWithDetails
+
+            if (item.mois.moisPaye) {
+                state.eachStudentDetailsScolarite.moisToShowWithoutPayedMonths = state.mois.filter(x => !item.mois.moisPaye.includes(x))
+            } else {
+                state.eachStudentDetailsScolarite.moisToShowWithoutPayedMonths = state.mois
+            }
+            state.eachStudentDetailsScolarite.shawPayedMonths = true;
+        }
 
     }
 

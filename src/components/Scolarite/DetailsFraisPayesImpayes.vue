@@ -67,18 +67,13 @@
                               outlined
                               id="chipId"
                               v-for="(moisPaye,
-                              index) in eachStudentDetailsScolarite.MoisPaye"
+                              index) in eachStudentDetailsScolarite.moisPaye"
                               :key="moisPaye"
-                              @click="
-                                ShowDetailsMonthPayed(
-                                  eachStudentDetailsScolarite.moisPaye,
-                                  index
-                                )
-                              "
+                              @click="ShowDetailsMonthPayed(moisPaye, index)"
                             >
                               <v-icon id color="green">mdi-check</v-icon>
 
-                              {{ eachStudentDetailsScolarite.moisPaye }}
+                              {{ moisPaye }}
                             </v-chip>
                           </v-chip-group>
                         </v-col>
@@ -455,6 +450,7 @@ export default {
   beforeMount() {
     if (this.eleveClique) {
       console.log(this.eleveClique.nom);
+      console.log(this.eachStudentDetailsScolarite.MoisPaye);
     }
 
     // EventBus.$on("AfficheEleve", this.AfficheEleve());

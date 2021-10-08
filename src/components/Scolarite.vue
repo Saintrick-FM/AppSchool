@@ -329,11 +329,11 @@
           </v-row>
           <v-divider style="border-style:solid;"> </v-divider>
           <v-divider style="margin-top:1px; border-style:solid"> </v-divider>
-          
- <!-- partie paiement -->
+
+          <!-- partie paiement -->
 
           <v-row style="margin-top:10px;">
-                       <v-card-text>
+            <v-card-text>
               <v-container grid-list-md>
                 <v-sheet elevation="10" class="py-4 px-1">
                   <v-data-table
@@ -1639,8 +1639,9 @@ export default {
               );
             }
           }
+
           console.log("test 9");
-          if (this.monthsAlreadySolve.length > 0) {
+          if (this.moisToPay.length > 1 && this.monthsAlreadySolve.length > 0) {
             let AllFraisPayedByEleve = JSON.parse(
               localStorage.getItem("AllFraisPayedByEleve")
             );
@@ -1649,6 +1650,7 @@ export default {
             let payedFraisToUpdate = AllFraisPayedByEleve.find((x) =>
               x.mois.indexOf(this.monthsAlreadySolve != -1)
             );
+            
             console.log("test 9 prime");
             console.log(
               "le frais à solver ===> " +
@@ -1660,9 +1662,15 @@ export default {
               payedFraisToUpdate.id,
               payedFrais,
             ]);
-          } else {
+          }
+
+          if (
+            0 < this.moisToPay.length < 2 &&
+            this.monthsAlreadySolve.length > 0 &&
+            localStorage.getItem("MoisAvanceToStoreInDB") != null
+          ) {
             console.log("test attent attend");
-            let payeAvanceMois = {
+            var payeAvanceMois = {
               eleve: payedFrais.eleve,
               classe: payedFrais.classe,
               montantApayer: 0.0,
@@ -1675,32 +1683,27 @@ export default {
               mois: localStorage.getItem("MoisAvanceToStoreInDB"),
               montantFrais: Number(this.montantFraisMensuel.slice(0, -1)),
             };
-
-            console.log("test 10 test");
-            if (
-              localStorage.getItem("MoisAvanceToStoreInDB") != null &&
-              this.moisToPay.length > 1
-            ) {
-              console.log(
-                "payeAvanceMois === " +
-                  JSON.stringify(payeAvanceMois) +
-                  "\npayedFrais=== " +
-                  JSON.stringify(payedFrais)
-              );
-              this.$store.dispatch("actionPayedFrais", [
-                payedFrais,
-                payeAvanceMois,
-              ]);
-            } else if (
-              localStorage.getItem("MoisAvanceToStoreInDB") != null &&
-              this.moisToPay.length === 1
-            ) {
-              console.log("payeAvanceMois seul");
-              this.$store.dispatch("actionPayedFrais", payeAvanceMois);
-            } else {
-              this.$store.dispatch("actionPayedFrais", payedFrais);
-            }
+            console.log("payeAvanceMois seul");
+            this.$store.dispatch("actionPayedFrais", payeAvanceMois);
           }
+          if (
+            localStorage.getItem("MoisAvanceToStoreInDB") != null &&
+            this.moisToPay.length > 1 &&
+            this.monthsAlreadySolve.length > 0
+          ) {
+            console.log(
+              "payeAvanceMois === " +
+                JSON.stringify(payeAvanceMois) +
+                "\npayedFrais=== " +
+                JSON.stringify(payedFrais)
+            );
+            this.$store.dispatch("actionPayedFrais", [
+              payedFrais,
+              payeAvanceMois,
+            ]);
+          }
+
+          this.$store.dispatch("actionPayedFrais", payedFrais);
         }
 
         // Si c'est un paiement frais communs à tous et que le montant à payer n'est pas égale au montant du frais
