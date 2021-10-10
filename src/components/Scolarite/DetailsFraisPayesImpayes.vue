@@ -30,16 +30,16 @@
       </v-card-title>
     </v-row>
 
-    <v-row>
-      <!-- rubriaue infos civiles de l'élève qui paie -->
+    <!-- <v-row>
+     rubrique infos civiles de l'élève qui paie 
       <v-col v-if="tailleMoisImpaye !== 12" :md="tailleMoisPaye">
-        <v-card-text>
+        <v-card-text v-if="tailleMoisPaye !== 0">
           <v-container grid-list-md>
-            <!-- raw affichant les mois payés ou impayés -->
+            raw affichant les mois payés ou impayés 
             <v-row>
               <v-col>
                 <v-row justify="space-around">
-                  <!-- <v-col> -->
+                  <v-col> 
 
                   <v-sheet elevation="10" class="py-4 px-1">
                     <template>
@@ -55,7 +55,7 @@
                         </v-chip>
                       </v-row>
                       <v-row>
-                        <!-- Debut Mois payés -->
+                        Debut Mois payés 
                         <v-col>
                           <v-chip-group
                             mandatory
@@ -79,7 +79,7 @@
                         </v-col>
                       </v-row>
 
-                      <!-- Alert affichage details des mois payés -->
+                       Alert affichage details des mois payés 
                       <div>
                         <v-alert
                           :value="alert2"
@@ -103,24 +103,27 @@
                       </div>
                     </template>
                   </v-sheet>
-                  <!-- </v-col> -->
+                  </v-col> 
                 </v-row>
               </v-col>
             </v-row>
-            <!-- fin raw affichant les mois payés ou impayés -->
+            fin raw affichant les mois payés ou impayés 
           </v-container>
         </v-card-text>
       </v-col>
 
-      <!-- rubriaue gestion des mois payés -->
-      <v-col v-if="tailleMoisImpaye !== 12" :md="tailleMoisAvance">
+      rubrique gestion des mois payés 
+      <v-col
+        v-if="tailleMoisImpaye !== 12 && tailleMoisAvance !== 0"
+        :md="tailleMoisAvance"
+      >
         <v-card-text>
           <v-container grid-list-md>
-            <!-- raw affichant les mois payés ou impayés -->
+            raw affichant les mois payés ou impayés 
             <v-row>
               <v-col>
                 <v-row justify="space-around">
-                  <!-- <v-col> -->
+                   <v-col> 
                   <v-sheet elevation="10" class="py-4 px-1">
                     <v-row>
                       <v-chip
@@ -134,7 +137,7 @@
                       </v-chip>
                     </v-row>
                     <v-row>
-                      <!-- Debut Mois Avancés -->
+                       Debut Mois Avancés 
                       <v-col>
                         <v-chip-group
                           v-if="!shawNonPayedMonths"
@@ -156,7 +159,7 @@
                         </v-chip-group>
                       </v-col>
 
-                      <!-- Alert affichage details des mois avancés -->
+                      Alert affichage details des mois avancés 
                       <div>
                         <v-alert
                           :value="alert3"
@@ -178,11 +181,11 @@
                       </div>
                     </v-row>
                   </v-sheet>
-                  <!-- </v-col> -->
+                   </v-col> 
                 </v-row>
               </v-col>
             </v-row>
-            <!-- fin raw affichant les mois payés ou impayés -->
+             fin raw affichant les mois payés ou impayés 
           </v-container>
         </v-card-text>
       </v-col>
@@ -190,11 +193,11 @@
       <v-col :md="tailleMoisImpaye">
         <v-card-text>
           <v-container grid-list-md>
-            <!-- raw affichant les mois payés ou impayés -->
+             raw affichant les mois payés ou impayés 
             <v-row>
               <v-col>
                 <v-row justify="space-around">
-                  <!-- <v-col> -->
+                  <v-col> 
                   <v-sheet elevation="10" class="py-4 px-1">
                     <v-row>
                       <v-chip
@@ -208,7 +211,7 @@
                       </v-chip>
                     </v-row>
                     <v-row>
-                      <!-- Debut Mois payés -->
+                      Debut Mois payés 
                       <v-col>
                         <v-chip-group
                           mandatory
@@ -228,15 +231,15 @@
                       >
                     </v-row>
                   </v-sheet>
-                  <!-- </v-col> -->
+                  </v-col> 
                 </v-row>
               </v-col>
             </v-row>
-            <!-- fin raw affichant les mois payés ou impayés -->
+            fin raw affichant les mois payés ou impayés 
           </v-container>
         </v-card-text>
       </v-col>
-    </v-row>
+    </v-row> -->
 
     <v-row style="margin: 15px 0px 0x 10px">
       <v-col md="6">
@@ -245,18 +248,28 @@
             <v-icon left>mdi-check</v-icon> Frais Payés
           </v-chip>
 
-          <v-tabs v-model="tab" background-color="primary" dark>
+          <v-tabs abs v-model="tab" background-color="primary" dark>
             <v-tab
-              v-for="fraisPaye in eachStudentDetailsScolarite.allFraisPayes"
+              v-for="fraisPaye in eachStudentDetailsScolarite.allFraisPayes
+                .autresFrais"
               :key="fraisPaye.id"
             >
               {{ fraisPaye.typeFrais }}
+            </v-tab>
+            <v-divider color="white" inset vertical></v-divider>
+            <v-divider color="white" inset vertical></v-divider>
+            <v-tab
+              v-for="fraisPaye in eachStudentDetailsScolarite.FraisPayesWithDetails"
+              :key="fraisPaye.id"
+            >
+              ECOLAGE {{ fraisPaye.mois }}
             </v-tab>
           </v-tabs>
 
           <v-tabs-items v-model="tab">
             <v-tab-item
-              v-for="paye in eachStudentDetailsScolarite.allFraisPayes"
+              v-for="paye in eachStudentDetailsScolarite.allFraisPayes
+                .autresFrais"
               :key="paye.id"
             >
               <v-card flat>
@@ -276,6 +289,31 @@
                     >Année académique:</span
                   >
                   {{ paye.AnneeScolaire }}
+                </v-card-text>
+              </v-card>
+            </v-tab-item>
+            <v-tab-item
+              v-for="paye in eachStudentDetailsScolarite.FraisPayesWithDetails"
+              :key="paye.id"
+            >
+              <v-card flat>
+                <v-card-text>
+                  <span
+                    style="color:black;font-weight: bold; text-decoration: underline;"
+                    >Montant Payé :</span
+                  >
+                  {{ paye.montantFrais }} FCFA
+                  <span
+                    style="color:black;font-weight: bold; text-decoration: underline; margin-left:50px"
+                    >Montant Restant:
+                  </span>
+                  {{ paye.montantRestant }}
+                  <br />
+                  <span
+                    style="color:black; font-weight: bold; text-decoration: underline;"
+                    >Date de paiement:</span
+                  >
+                  {{ paye.cree_le.slice(0, 16).replace("T", " à ") }}
                 </v-card-text>
               </v-card>
             </v-tab-item>
@@ -461,19 +499,25 @@ export default {
     ...mapGetters(["eachStudentDetailsScolarite"]),
 
     tailleMoisPaye() {
-      if (this.eachStudentDetailsScolarite.MoisPaye) {
-        let taille = this.eachStudentDetailsScolarite.MoisPaye.toString().split(
-          ","
-        ).length;
-        return this.eachStudentDetailsScolarite.MoisPaye.length > 0
-          ? taille
-          : 4;
+      /* if (this.eachStudentDetailsScolarite.moisPaye) {
+        return this.eachStudentDetailsScolarite.moisPaye.length;
       } else {
         return 4;
+      }*/
+      let taille = this.eachStudentDetailsScolarite.moisPaye.length;
+      if (
+        taille === 0 &&
+        this.eachStudentDetailsScolarite.moisPaye.length > 0
+      ) {
+        return 0;
+      } else {
+        return this.eachStudentDetailsScolarite.moisPaye.length > 0
+          ? taille
+          : 4;
       }
     },
     tailleMoisImpaye() {
-      console.log(
+      /* console.log(
         "Coucou " +
           JSON.stringify(this.eachStudentDetailsScolarite.allFraisPayes)
       );
@@ -483,17 +527,38 @@ export default {
       );
       if (this.eachStudentDetailsScolarite.MoisNonPaye) {
         let taille = this.eachStudentDetailsScolarite.MoisNonPaye.length;
-        return taille > 0 ? taille : 4;
+        return taille > 0 ? taille - 2 : 4;
       } else {
         return 4;
-      }
+      }*/
+      let taille = this.eachStudentDetailsScolarite.MoisNonPaye.length;
+      return this.eachStudentDetailsScolarite.MoisNonPaye.length > 0
+        ? taille
+        : 4;
     },
     tailleMoisAvance() {
-      if (this.eachStudentDetailsScolarite.moisAvance) {
-        let taille = this.eachStudentDetailsScolarite.moisAvance.length;
-        return taille > 0 ? taille : 4;
-      } else {
+      /* let taille = this.eachStudentDetailsScolarite.moisAvance.length;
+      let tailleMoisNonPaye = this.eachStudentDetailsScolarite.MoisNonPaye
+        .length;
+
+      if (taille === 0 && tailleMoisNonPaye === 0) {
         return 4;
+      } else if (taille === 0 && tailleMoisNonPaye > 0) {
+        console.log("✈ ");
+        return taille + 2;
+      } else {
+        return taille;
+      }*/
+      let taille = this.eachStudentDetailsScolarite.moisAvance.length;
+      if (
+        taille === 0 &&
+        this.eachStudentDetailsScolarite.MoisNonPaye.length > 0
+      ) {
+        return 0;
+      } else {
+        return this.eachStudentDetailsScolarite.moisAvance.length > 0
+          ? taille
+          : 4;
       }
     },
     advancedMonthStyle() {

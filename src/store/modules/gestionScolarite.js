@@ -31,7 +31,10 @@ const state = {
         prixReinscription: null,
         prixInscription: null,
         autresFraisPayesSaufInscReinsc: null,
-        allFraisPayes: [],
+        allFraisPayes: {
+            autresFrais: [],
+            moisPayesEtAvances: []
+        },
         allFraisImpayes: null,
         paiementFrais: null,
         moisToShowWithoutPayedMonths: null,
@@ -226,7 +229,7 @@ const mutations = {
     mutateEleveClique(state, eleveClique) {
         state.eleveClique = eleveClique
         state.eachStudentDetailsScolarite.allFraisImpayes = null
-        state.eachStudentDetailsScolarite.allFraisPayes = []
+        state.eachStudentDetailsScolarite.allFraisPayes.autresFrais = []
         state.eachStudentDetailsScolarite.paiementFrais = null
 
 
@@ -278,14 +281,17 @@ const mutations = {
 
                 if (AllFraisPayedByEleve.find(x => x.typeFrais === "Frais Mensuels")) {
                     state.eachStudentDetailsScolarite.paiementFrais = state.eachStudentDetailsScolarite.autresFraisPayesSaufInscReinsc.filter((x) => x.typeFrais !== "Frais Mensuels")
-                    state.eachStudentDetailsScolarite.allFraisPayes.concat(
+                    state.eachStudentDetailsScolarite.allFraisPayes.autresFrais.concat(
                         state.eachStudentDetailsScolarite.paiementFrais, [{ typeFrais: inscritOuReinscrit.typeFrais, montantFrais: inscritOuReinscrit.montantFrais, cree_le: inscritOuReinscrit.cree_le, AnneeScolaire: inscritOuReinscrit.AnneeScolaire }]
                     );
+
+
+
                     console.log("ici bien sur 1")
                 } else {
                     console.log(JSON.stringify(inscritOuReinscrit))
 
-                    state.eachStudentDetailsScolarite.allFraisPayes = state.eachStudentDetailsScolarite.allFraisPayes.concat(
+                    state.eachStudentDetailsScolarite.allFraisPayes.autresFrais = state.eachStudentDetailsScolarite.allFraisPayes.autresFrais.concat(
                         state.eachStudentDetailsScolarite.autresFraisPayesSaufInscReinsc, [{ typeFrais: inscritOuReinscrit.typeFrais, montantFrais: inscritOuReinscrit.montantFrais, cree_le: inscritOuReinscrit.cree_le, AnneeScolaire: inscritOuReinscrit.AnneeScolaire }]
                     );
 
@@ -293,7 +299,7 @@ const mutations = {
                 }
                 console.log("liste des Autres Frais = " + JSON.stringify(localStorage.getItem("Frais")))
                 let table = []
-                state.eachStudentDetailsScolarite.allFraisPayes.forEach(element => {
+                state.eachStudentDetailsScolarite.allFraisPayes.autresFrais.forEach(element => {
                     table.push(element.typeFrais)
                 });
                 console.log("Id des frais payés " + JSON.stringify(table))
@@ -306,7 +312,7 @@ const mutations = {
                     "allFraisImpayes ***" +
                     JSON.stringify(state.eachStudentDetailsScolarite.allFraisImpayes) +
                     "\nallFraisPayes => " +
-                    JSON.stringify(state.eachStudentDetailsScolarite.allFraisPayes)
+                    JSON.stringify(state.eachStudentDetailsScolarite.allFraisPayes.autresFrais)
                 );
                 // gestion affectation des mois impayés
                 if (state.eachStudentDetailsScolarite.moisAvance.length > 0) {
@@ -323,20 +329,27 @@ const mutations = {
 
                 state.eachStudentDetailsScolarite.allFraisImpayes = JSON.parse(
                     localStorage.getItem("Frais"))
-                state.eachStudentDetailsScolarite.allFraisPayes.push(inscritOuReinscrit)
+                state.eachStudentDetailsScolarite.allFraisPayes.autresFrais.push(inscritOuReinscrit)
                 console.log(
                     "Il n'a payé que l'inscription ou la réinscription \n allFraisImpayes ***************" +
                     JSON.stringify(state.eachStudentDetailsScolarite.allFraisImpayes) +
                     "\nallFraisPayes => " +
-                    JSON.stringify(state.eachStudentDetailsScolarite.allFraisPayes)
+                    JSON.stringify(state.eachStudentDetailsScolarite.allFraisPayes.autresFrais)
                 );
 
                 console.log(" dooomage on est dans le else, c'est à dire : il y'a que l'inscription ou la réeinscription comme frais payé");
             }
+            // s'il a déja payé un frais mensuel
+            if (state.eachStudentDetailsScolarite.moisPaye.length > 0) {
+                state.eachStudentDetailsScolarite.allFraisPayes.moisPayesEtAvances = state.eachStudentDetailsScolarite.moisPaye
+                if (state.eachStudentDetailsScolarite.moisAvance.length > 0) {
+                    state.eachStudentDetailsScolarite.allFraisPayes.moisPayesEtAvances = state.eachStudentDetailsScolarite.allFraisPayes.moisPayesEtAvances.concat(state.eachStudentDetailsScolarite.moisAvance)
+                }
+            }
             // Il n'a payé aucun frais ni même l'inscription ou la réinscription
         } else {
             console.log("ooops cet élève doit s'inscrire ou se reinscrire . Fin de test");
-            state.eachStudentDetailsScolarite.allFraisPayes = [];
+            state.eachStudentDetailsScolarite.allFraisPayes.autresFrais = [];
             state.eachStudentDetailsScolarite.paiementFrais = JSON.parse(localStorage.getItem("Frais"));
             state.eachStudentDetailsScolarite.allFraisImpayes = JSON.parse(localStorage.getItem("Frais"))
             state.eachStudentDetailsScolarite.allFraisImpayes.unshift({

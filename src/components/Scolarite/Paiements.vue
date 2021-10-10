@@ -712,6 +712,10 @@ export default {
           ] = this.eachStudentDetailsScolarite.montantFraisMensuel;
         }
         this.$store.dispatch("actionPayedFrais", payedFrais);
+        setTimeout(() => {
+          this.actionGetfinanceEleveDetail(eleveChoisi);
+        }, 1000);
+
         //gestion des avances à solver
         if (this.monthsAlreadySolve.length > 0) {
           console.log("test 2");
@@ -772,9 +776,10 @@ export default {
       this.scolariteTotal = null;
       this.AffichePaiementAutresFrais = false;
       this.AffichePaiementMois = false;
-      this.actionGetfinanceEleveDetail(eleveChoisi);
+
       setTimeout(() => {
         this.mutateEleveClique;
+        this.$vuetify.goTo(document.body.scrollTop);
       }, 1000);
 
       // this.InitialiseFraisPayeImpaye(eleveChoisi);
