@@ -278,7 +278,7 @@
                     style="color:black;font-weight: bold; text-decoration: underline;"
                     >Montant Payé :</span
                   >
-                  {{ paye.montantFrais }} FCFA
+                  {{ paye.montantFrais.toLocaleString("fr") }} FCFA
                   <span
                     style="color:black;font-weight: bold; text-decoration: underline; margin-left:50px"
                     >Date de paiement:</span
@@ -302,12 +302,12 @@
                     style="color:black;font-weight: bold; text-decoration: underline;"
                     >Montant Payé :</span
                   >
-                  {{ paye.montantFrais }} FCFA
+                  {{ paye.montantDejaPaye.toLocaleString("fr") }} FCFA
                   <span
                     style="color:black;font-weight: bold; text-decoration: underline; margin-left:50px"
                     >Montant Restant:
                   </span>
-                  {{ paye.montantRestant }}
+                  {{ paye.montantRestant.toLocaleString("fr") }} FCFA
                   <br />
                   <span
                     style="color:black; font-weight: bold; text-decoration: underline;"
@@ -347,7 +347,7 @@
                     style="color:black;font-weight: bold; text-decoration: underline;"
                     >Montant Payé :</span
                   >
-                  {{ item2.montant }} FCFA
+                  {{ item2.montant.toLocaleString("fr") }} FCFA
                   <span
                     style="color:black;font-weight: bold; text-decoration: underline; margin-left:50px"
                     >Date de paiement:</span

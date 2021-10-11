@@ -297,9 +297,9 @@ const actions = {
     async actionUpdatePayedFrais({ commit }, donnees) {
         const token = "Token " + localStorage.getItem('token');
         var body = donnees[1];
-        console.log("id à upadater" + donnees[0])
+        console.log("id à upadater " + donnees[0])
         await axios
-            .put(`api/finances/paiementFraisEleve/${donnees[0]}/`, body, {
+            .put(`api/finances/paiementEveryFrais/${donnees[0]}/`, body, {
                 headers: {
                     'Authorization': token,
                 }

@@ -104,8 +104,10 @@ const actions = {
                             );
                             FraisAvancesWithDetails.push(frais);
 
+                            FraisPayesWithDetails.push(frais);
+
                             // this.moisAvance.push(frais.mois.split(",").pop());
-                            moisAvance.push(frais.mois);
+                            moisAvance.push(frais);
                             console.log("attention");
 
                             //si c'est un mois et que cest réglé
@@ -153,7 +155,7 @@ const actions = {
                     localStorage.setItem("moisAvance", JSON.stringify(moisAvance));
 
                     console.log("Ah c'est compliqué 2");
-                    commit("setMoisAvances", moisAvance)
+                    //  commit("setMoisAvances", moisAvance)
                     commit('setMoisPayesAvancesImpayes', { mois: { moisPaye: MoisPaye, FraisPayesWithDetails: FraisPayesWithDetails, moisAvance: moisAvance, FraisAvancesWithDetails: FraisAvancesWithDetails, MoisNonPaye: MoisNonPaye }, eleveChoisi: eleveChoisi, AllFraisPayedByEleve: response.data })
 
                 })
@@ -315,10 +317,15 @@ const mutations = {
                     JSON.stringify(state.eachStudentDetailsScolarite.allFraisPayes.autresFrais)
                 );
                 // gestion affectation des mois impayés
+
                 if (state.eachStudentDetailsScolarite.moisAvance.length > 0) {
                     state.eachStudentDetailsScolarite.MoisNonPaye = state.mois.filter((x) => !state.eachStudentDetailsScolarite.moisPaye.includes(x))
+                    let table = []
+                    state.eachStudentDetailsScolarite.moisAvance.forEach(element => {
+                        table.push(element.mois)
+                    });
 
-                    state.eachStudentDetailsScolarite.MoisNonPaye = state.eachStudentDetailsScolarite.MoisNonPaye.filter((x) => !state.eachStudentDetailsScolarite.moisAvance.includes(x))
+                    state.eachStudentDetailsScolarite.MoisNonPaye = state.eachStudentDetailsScolarite.MoisNonPaye.filter((x) => !table.includes(x))
 
                 } else {
                     state.eachStudentDetailsScolarite.MoisNonPaye = state.mois.filter((x) => !state.eachStudentDetailsScolarite.moisPaye.includes(x))
@@ -343,7 +350,9 @@ const mutations = {
             if (state.eachStudentDetailsScolarite.moisPaye.length > 0) {
                 state.eachStudentDetailsScolarite.allFraisPayes.moisPayesEtAvances = state.eachStudentDetailsScolarite.moisPaye
                 if (state.eachStudentDetailsScolarite.moisAvance.length > 0) {
-                    state.eachStudentDetailsScolarite.allFraisPayes.moisPayesEtAvances = state.eachStudentDetailsScolarite.allFraisPayes.moisPayesEtAvances.concat(state.eachStudentDetailsScolarite.moisAvance)
+                    console.log(" state.eachStudentDetailsScolarite.moisAvance " + state.eachStudentDetailsScolarite.moisAvance)
+                    state.eachStudentDetailsScolarite.allFraisPayes.moisPayesEtAvances = state.eachStudentDetailsScolarite.allFraisPayes.moisPayesEtAvances.concat(state.eachStudentDetailsScolarite.FraisAvancesWithDetails)
+                    console.log(" state.eachStudentDetailsScolarite.allFraisPayes.moisPayesEtAvances " + state.eachStudentDetailsScolarite.allFraisPayes.moisPayesEtAvances)
                 }
             }
             // Il n'a payé aucun frais ni même l'inscription ou la réinscription
@@ -408,8 +417,9 @@ const mutations = {
             state.eachStudentDetailsScolarite.moisPaye = item.mois.moisPaye
             console.log("Hello !!! " + JSON.stringify(item.mois.moisPaye))
             state.eachStudentDetailsScolarite.FraisPayesWithDetails = item.mois.FraisPayesWithDetails
-                //   state.eachStudentDetailsScolarite.moisAvance = item.mois.moisAvance
-                //   state.eachStudentDetailsScolarite.FraisAvancesWithDetails = item.mois.FraisAvancesWithDetails
+
+            state.eachStudentDetailsScolarite.moisAvance = item.mois.moisAvance
+            state.eachStudentDetailsScolarite.FraisAvancesWithDetails = item.mois.FraisAvancesWithDetails
 
             if (item.mois.moisPaye) {
                 state.eachStudentDetailsScolarite.moisToShowWithoutPayedMonths = state.mois.filter(x => !item.mois.moisPaye.includes(x))
