@@ -39,12 +39,12 @@
         <v-btn text> Cancel </v-btn>
       </v-stepper-content>
 
-      <v-stepper-step :complete="etape > 2" step="2">
+      <!--   <v-stepper-step :complete="etape > 2" step="2">
         Entrer en tant que :
         <small>cliquez sur une case pour choisir</small>
       </v-stepper-step>
 
-      <v-stepper-content step="2">
+  <v-stepper-content step="2">
         <v-card color="grey lighten-1" class="mb-12" height="200px">
           <v-row>
             <v-col md-4>Super user</v-col>
@@ -54,13 +54,13 @@
         </v-card>
         <v-btn color="primary" @click="etape = 3"> Continue </v-btn>
         <v-btn text @click="etape = 1"> Etape précédente </v-btn>
-      </v-stepper-content>
+      </v-stepper-content> -->
 
-      <v-stepper-step :complete="etape > 3" step="3">
+      <v-stepper-step :complete="etape > 2" step="2">
         Entrez vos Identifiants d'utilisateur
       </v-stepper-step>
 
-      <v-stepper-content step="3">
+      <v-stepper-content step="2">
         <v-card
           elevation="11"
           color="grey lighten-1"
@@ -240,16 +240,10 @@ export default {
 
           localStorage.setItem("année_scolaire", this.annee_choisi);
 
-          this.$store.commit("initializeStore");
-          this.$store.dispatch("actionInitialiseEleve", this.annee_choisi);
-          this.$store.dispatch("actionInitialiseClasse");
-          this.$store.dispatch("actionInitialiseMatieres");
-          this.$store.dispatch("actionInitialiseProfs");
-
           this.loading = true;
           let toPath = null;
           if (allParamsDone === "Vrai") {
-            toPath = this.$route.query.to || "/finances";
+            toPath = this.$route.query.to || "/eleves";
           } else {
             // this.$emit("desactiveLinks");
             toPath = this.$route.query.to || "/parametrages";

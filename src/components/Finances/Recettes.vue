@@ -483,26 +483,26 @@ export default {
         {
           caisse: "Ecolage",
           totalAttendu: null,
-          totalPercu: "0 FCFA",
-          resteApercevoir: "660 000F CFA",
-          totalActuel: '0 FCFA',
-          Report: '0 FCFA',
+          totalPercu: null,
+          resteApercevoir: null,
+          totalActuel: null,
+          Report: null,
         },
         {
           caisse: "Inscriptions",
           totalAttendu: null,
-          totalPercu: '2 500 FCFA',
-          resteApercevoir: '635 500 FCFA',
-          totalActuel: '2 500 FCFA',
-          Report: '0 FCFA',
+          totalPercu: null,
+          resteApercevoir: null,
+          totalActuel: null,
+          Report: null,
         },
         {
           caisse: "Réinscriptions",
           totalAttendu: null,
-          totalPercu: '0 FCFA',
-          resteApercevoir: '635 500 FCFA',
-          totalActuel: '0',
-          Report: '0 FCFA',
+          totalPercu: null,
+          resteApercevoir: null,
+          totalActuel: null,
+          Report: null,
         },
       ],
     };
@@ -558,7 +558,7 @@ export default {
     let all_Eleves_Payed_InscReinsc = JSON.parse(
       localStorage.getItem("all_Eleves_Payed_InscReinsc")
     );
-    console.log("test final");
+
     let AllMontantsInsc = [];
     let Inscrits = all_Eleves_Payed_InscReinsc.filter(
       (x) => x.typeFrais === "Inscriptions"
@@ -569,10 +569,12 @@ export default {
     if (Inscrits) {
       console.log("test final 3");
       Inscrits.forEach((eleve) => {
-        AllMontantsInsc.push([eleve.montantFrais]);
+        AllMontantsInsc.push(Number(eleve.montantFrais));
       });
     }
+    console.log("test final " + JSON.stringify(AllMontantsInsc));
     let attenduInscriptionToShow = AllMontantsInsc.reduce((x, y) => x + y);
+    console.log("attenduInscriptionToShow " + attenduInscriptionToShow);
     this.items[
       this.items.findIndex((x) => x.caisse === "Inscriptions")
     ].totalAttendu = Number(attenduInscriptionToShow);

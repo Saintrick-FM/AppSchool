@@ -81,6 +81,14 @@ export default {
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     };
   },
+  beforeMount() {
+    this.$store.commit("initializeStore");
+    this.$store.dispatch("actionInitialiseClasse");
+    this.$store.dispatch("actionInitialiseMatieres");
+    this.$store.dispatch("actionInitialiseProfs");
+    let annee_choisi = localStorage.getItem("année_scolaire");
+    this.$store.dispatch("actionInitialiseEleve", annee_choisi);
+  },
 };
 </script>
 <style lang=""></style>

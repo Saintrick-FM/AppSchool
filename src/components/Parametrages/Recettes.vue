@@ -642,7 +642,7 @@ export default {
       );
     }
 
-    let allClasses1 = JSON.parse(localStorage.getItem("All Classes"));
+    let allClasses1 = JSON.parse(localStorage.getItem("Classes"));
     let allClasses2 = [];
 
     allClasses1.forEach((element) => {
@@ -665,7 +665,7 @@ export default {
       ).anneeScolaire;
     }
 
-    let classes = JSON.parse(localStorage.getItem("All Classes"));
+    let classes = JSON.parse(localStorage.getItem("Classes"));
     classes.forEach((classe) => {
       this.classes.push(classe);
     });
@@ -1015,7 +1015,7 @@ export default {
     "AnneeScolaire": null,
     "classe": []
 }*/
-        let allClasses1 = JSON.parse(localStorage.getItem("All Classes"));
+        let allClasses1 = JSON.parse(localStorage.getItem("Classes"));
         let allClasses2 = [];
 
         allClasses1.forEach((element) => {

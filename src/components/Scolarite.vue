@@ -1650,7 +1650,7 @@ export default {
             let payedFraisToUpdate = AllFraisPayedByEleve.find((x) =>
               x.mois.indexOf(this.monthsAlreadySolve != -1)
             );
-            
+
             console.log("test 9 prime");
             console.log(
               "le frais à solver ===> " +

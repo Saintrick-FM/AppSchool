@@ -3,6 +3,7 @@ const state = {
     eleves: [],
     errorCreateEleve: undefined,
     inscitsAnneeActuel: null,
+    inscritsReinscritsAnneeActuel: null,
 };
 const actions = {
 
@@ -22,7 +23,7 @@ const actions = {
             };
             var config2 = {
                 method: "get",
-                url: `api/finances/PaiementInscriptionReinscription/?annee_scolaire=${annee_scolaire}`,
+                url: `api/finances/paiementEveryFrais/?annee_scolaire=${annee_scolaire}`,
                 headers: {
                     Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
                 },
@@ -30,7 +31,8 @@ const actions = {
             await axios.all([axios(config),
                     axios(config2)
                 ]).then(axios.spread((firstResponse, secondResponse) => {
-                    console.log("console.log des requetes doubles " + JSON.stringify(firstResponse.data), JSON.stringify(secondResponse.data))
+                    console.log("console.log de la 1ere requete doubles " + JSON.stringify(firstResponse.data))
+                    console.log("console.log de la 2e requete double " + JSON.stringify(secondResponse.data))
 
                     const result1 = firstResponse.data;
                     const result2 = secondResponse.data;
@@ -39,6 +41,10 @@ const actions = {
                     for (const key in result1) {
                         eleves.push(result1[key]);
                     }
+                    let inscrits = result2.filter(x => x.typeFrais === "Inscriptions")
+                    let reinscrits = result2.filter(x => x.typeFrais === "Reinscriptions")
+                    let inscritsReinscrits = inscrits.concat(reinscrits)
+                    console.log("inscritsrReinscrits ==== " + JSON.stringify(inscritsReinscrits))
 
 
                     console.log(
@@ -46,11 +52,12 @@ const actions = {
                         JSON.stringify(eleves) + " \nInscritsAnneeActuel => " + result2
 
                     );
-                    localStorage.setItem("Inscrits_Annee_Actuel", JSON.stringify(eleves));
-                    localStorage.setItem("all_Eleves_Payed_InscReinsc", JSON.stringify(result2))
+
+                    localStorage.setItem("all_Eleves_Payed_InscReinsc", JSON.stringify(inscritsReinscrits))
+                    localStorage.setItem("Inscrits_Annee_Actuel", JSON.stringify(result1))
 
                     commit('InititialiseEleves', eleves)
-                    commit("InitialiseInscitsAnneeActuel", result2)
+                    commit("InitialiseInscitsAnneeActuel", { inscritsReinscrits: inscritsReinscrits })
 
                 }))
                 .catch(function(error) {
@@ -168,8 +175,9 @@ const mutations = {
     InititialiseEleves(state, eleves) {
         state.eleves = eleves
     },
-    InitialiseInscitsAnneeActuel(state, InscitsAnneeActuel) {
-        state.inscitsAnneeActuel = InscitsAnneeActuel
+    InitialiseInscitsAnneeActuel(state, inscritsReinscrits) {
+        state.inscritsReinscritsAnneeActuel = inscritsReinscrits.inscritsReinscrits
+
 
     },
     createEleve(state, eleve) {
@@ -201,6 +209,9 @@ const getters = {
     },
     allelevesFictifs: state => {
         return state.elevesFictifs
+    },
+    allInscritsReinscrits: state => {
+        return state.inscritsReinscritsAnneeActuel
     }
 };
 
