@@ -4,6 +4,8 @@ const state = {
     errorCreateEleve: undefined,
     inscitsAnneeActuel: null,
     inscritsReinscritsAnneeActuel: null,
+    nouveaux: [],
+    redoublants: [],
 };
 const actions = {
 
@@ -43,7 +45,9 @@ const actions = {
                     }
                     let inscrits = result2.filter(x => x.typeFrais === "Inscriptions")
                     let reinscrits = result2.filter(x => x.typeFrais === "Reinscriptions")
-                    let inscritsReinscrits = inscrits.concat(reinscrits)
+
+                    let inscritsReinscrits = []
+                    inscritsReinscrits.push(inscrits, reinscrits)
                     console.log("inscritsrReinscrits ==== " + JSON.stringify(inscritsReinscrits))
 
 
@@ -174,10 +178,11 @@ const mutations = {
 
     InititialiseEleves(state, eleves) {
         state.eleves = eleves
+        state.nouveaux = eleves.filter(x => x.redoublant === "Nouveau")
+        state.redoublants = eleves.filter(x => x.redoublant !== "Nouveau")
     },
     InitialiseInscitsAnneeActuel(state, inscritsReinscrits) {
-        state.inscritsReinscritsAnneeActuel = inscritsReinscrits.inscritsReinscrits
-
+        state.inscritsReinscritsAnneeActuel = inscritsReinscrits.inscritsReinscrits[0]
 
     },
     createEleve(state, eleve) {
@@ -212,6 +217,12 @@ const getters = {
     },
     allInscritsReinscrits: state => {
         return state.inscritsReinscritsAnneeActuel
+    },
+    allNouveaux: state => {
+        return state.nouveaux
+    },
+    allRedoublants: state => {
+        return state.redoublants
     }
 };
 

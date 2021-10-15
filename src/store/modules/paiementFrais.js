@@ -10,6 +10,8 @@ const state = {
     attenduInscription: null,
     AutresFraisWithContenanceMontant: null,
     eleveClique: null,
+    percuReinscriptionToShow: null,
+    percuInscriptionToShow: null
 
 };
 const actions = {
@@ -345,6 +347,12 @@ const mutations = {
     mutateAttenduReinscription(state, attenduReinscription) {
         state.attenduReinscription = attenduReinscription
     },
+    mutateTotalPercuReinscriptionToShow(state, PercuReinscriptionToShow) {
+        state.percuReinscriptionToShow = PercuReinscriptionToShow
+    },
+    mutateTotalPercuInscriptionToShow(state, PercuInscriptionToShow) {
+        state.percuInscriptionToShow = PercuInscriptionToShow
+    },
     mutateReinscrits(state, reinscrits) {
         state.reinscrits = reinscrits
     },
@@ -397,6 +405,12 @@ const getters = {
     },
     AutresFraisWithContenanceMontant: state => {
         return state.AutresFraisWithContenanceMontant
+    },
+    allPercuReinscriptionToShow: state => {
+        return state.percuReinscriptionToShow
+    },
+    allPercuInscriptionToShow: state => {
+        return state.percuInscriptionToShow
     },
 
 

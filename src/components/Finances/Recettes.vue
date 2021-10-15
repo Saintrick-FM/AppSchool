@@ -77,6 +77,7 @@
       <template v-slot:expanded-item="{ headers, item }">
         <td :colspan="headers.length">More info about {{ item.name }}</td>
       </template>
+
       <template v-slot:item.totalAttendu="{ item }">
         <v-chip dark v-if="item.caisse === 'Ecolage'">
           {{ item.totalAttendu.toLocaleString("fr") }} /mois</v-chip
@@ -93,6 +94,14 @@
         <v-chip dark v-else>
           {{ item.totalAttendu.toLocaleString("fr") }} /année</v-chip
         >
+      </template>
+
+      <template v-slot:item.totalPercu="{ item }">
+        <v-chip dark>
+          {{
+            item.totalPercu ? item.totalPercu.toLocaleString("fr") + " FCFA" : 0
+          }}
+        </v-chip>
       </template>
     </v-data-table>
     <!-- Alert pour détails recette Ecolage -->
@@ -555,21 +564,32 @@ export default {
     this.getAttendusEcolage(tableContenanceParClasse, tableEcolages);
 
     // préparation filtage inscrits récupération de tous leur montants et envoie pour le calcul
-    let all_Eleves_Payed_InscReinsc = JSON.parse(
-      localStorage.getItem("all_Eleves_Payed_InscReinsc")
+    let Inscrits_Annee_Actuel = JSON.parse(
+      localStorage.getItem("Inscrits_Annee_Actuel")
     );
 
     let AllMontantsInsc = [];
-    let Inscrits = all_Eleves_Payed_InscReinsc.filter(
-      (x) => x.typeFrais === "Inscriptions"
-    );
-    this.mutateInscrits(Inscrits);
-    console.log("test final 2");
+    // ici je récupère ceux qui se sont inscrits et ont payé l'inscription
+    let PayedInscription = JSON.parse(
+      localStorage.getItem("all_Eleves_Payed_InscReinsc")
+    )[0];
+    let PayedReinscription = JSON.parse(
+      localStorage.getItem("all_Eleves_Payed_InscReinsc")
+    )[1];
 
-    if (Inscrits) {
-      console.log("test final 3");
-      Inscrits.forEach((eleve) => {
-        AllMontantsInsc.push(Number(eleve.montantFrais));
+    this.mutateInscrits(PayedInscription);
+    console.log("test final 2");
+    let montant = JSON.parse(localStorage.getItem("Config inscReinsc"));
+
+    if (Inscrits_Annee_Actuel) {
+      console.log("Oui oui");
+
+      Inscrits_Annee_Actuel.forEach((element) => {
+        console.log(element.classe + "\t" + element.nom);
+
+        AllMontantsInsc.push(
+          montant.find((x) => x.classe === element.classe).fraisInscription
+        );
       });
     }
     console.log("test final " + JSON.stringify(AllMontantsInsc));
@@ -585,7 +605,8 @@ export default {
 
     // préparation filtage réinscrits récupération de tous leur montants et envoie pour le calcul
     let AllMontantsReinsc = [];
-    let Reinscrits = all_Eleves_Payed_InscReinsc.filter(
+
+    let Reinscrits = Inscrits_Annee_Actuel.filter(
       (x) => x.typeFrais === "Réinscriptions"
     );
     this.mutateReinscrits(Reinscrits);
@@ -609,12 +630,72 @@ export default {
       this.items[
         this.items.findIndex((x) => x.caisse === "Réinscriptions")
       ].totalAttendu = "Pas de réinscrits";
+      this.items[
+        this.items.findIndex((x) => x.caisse === "Réinscriptions")
+      ].totalPercu = 0;
     }
 
     let listeAutresFrais = JSON.parse(
       localStorage.getItem("Config_Autres_Frais")
     );
     this.getAttendusAutresFrais(listeAutresFrais, Classes);
+
+    // this.getPercusEcolages()
+
+    // affectations totalPercu réinscriptions
+    let totalPercuReinscriptionToShow = null;
+    let totalPercuInscriptionToShow = null;
+    if (PayedReinscription && PayedReinscription.length > 1) {
+      let tableMontantReinscriptionsPayed = [];
+      PayedReinscription.forEach((element) => {
+        tableMontantReinscriptionsPayed.push(element.montantDejaPaye);
+      });
+      totalPercuReinscriptionToShow = tableMontantReinscriptionsPayed.reduce(
+        (x, y) => x + y
+      );
+      this.items[
+        this.items.findIndex((x) => x.caisse === "Réinscriptions")
+      ].totalPercu = totalPercuReinscriptionToShow;
+    } else if (PayedReinscription && PayedReinscription.length === 1) {
+      totalPercuReinscriptionToShow = PayedReinscription[0].montantDejaPaye;
+      this.items[
+        this.items.findIndex((x) => x.caisse === "Réinscriptions")
+      ].totalPercu = totalPercuReinscriptionToShow;
+    } else {
+      totalPercuReinscriptionToShow = 0;
+      this.items[
+        this.items.findIndex((x) => x.caisse === "Réinscriptions")
+      ].totalPercu = totalPercuReinscriptionToShow;
+    }
+
+    // affectation totalPercus inscriptions
+    if (PayedInscription && PayedInscription.length > 1) {
+      let tableMontantInscriptionsPayed = [];
+      PayedInscription.forEach((element) => {
+        tableMontantInscriptionsPayed.push(element.montantDejaPaye);
+      });
+
+      totalPercuInscriptionToShow = tableMontantInscriptionsPayed.reduce(
+        (x, y) => x + y
+      );
+      this.items[
+        this.items.findIndex((x) => x.caisse === "Inscriptions")
+      ].totalPercu = totalPercuInscriptionToShow;
+    } else if (PayedInscription && PayedInscription.length === 1) {
+      totalPercuInscriptionToShow = PayedInscription[0].montantDejaPaye;
+      this.items[
+        this.items.findIndex((x) => x.caisse === "Inscriptions")
+      ].totalPercu = totalPercuInscriptionToShow;
+    } else {
+      totalPercuInscriptionToShow = 0;
+      this.items[
+        this.items.findIndex((x) => x.caisse === "Inscriptions")
+      ].totalPercu = totalPercuInscriptionToShow;
+    }
+    console.log("totalPercuInscriptionToShow " + totalPercuInscriptionToShow);
+
+    this.mutateTotalPercuInscriptionToShow(totalPercuInscriptionToShow);
+    this.mutateTotalPercuReinscriptionToShow(totalPercuReinscriptionToShow);
 
     this.Config_InscReinsc = JSON.parse(
       localStorage.getItem("Config inscReinsc")
@@ -627,6 +708,8 @@ export default {
     ...mapMutations(["mutateInscrits"]),
     ...mapMutations(["mutateAttenduInscription"]),
     ...mapMutations(["mutateAttenduReinscription"]),
+    ...mapMutations(["mutateTotalPercuReinscriptionToShow"]),
+    ...mapMutations(["mutateTotalPercuInscriptionToShow"]),
     ...mapMutations(["mutateEachAutreFraisWithContenanceMontant"]),
 
     afficheAlertDetails: function(item, row) {
