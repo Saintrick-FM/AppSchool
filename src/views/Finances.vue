@@ -63,6 +63,7 @@ import Recettes from "@/components/Finances/Recettes.vue";
 import Depenses from "@/components/Finances/Depenses.vue";
 import Mouvements from "@/components/Finances/Mouvements.vue";
 import Bilan from "@/components/Finances/Bilan.vue";
+import { mapActions } from "vuex";
 
 export default {
   name: "Finances",
@@ -79,12 +80,27 @@ export default {
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     };
   },
+  beforeMount() {
+    this.actiongetPercusTypeFrais("Frais mensuels");
+
+    let listeAutresFrais = JSON.parse(
+      localStorage.getItem("Config_Autres_Frais")
+    );
+    listeAutresFrais.forEach((element) => {
+      this.actiongetPercusTypeFrais(element.identifiant);
+    });
+  },
   mounted() {
     let tab4 = this.$route.fullPath.substr(-5);
     console.log("router " + typeof this.$route.fullPath + "--tab4 " + tab4);
     if (tab4 === "#tab4") {
       console.log("beug à résoudre");
     }
+  },
+  methods: {
+    ...mapActions([
+      "actiongetPercusTypeFrais", //also supports payload `this.nameOfAction(amount)`
+    ]),
   },
 };
 </script>

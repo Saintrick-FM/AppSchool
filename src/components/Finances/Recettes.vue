@@ -353,7 +353,8 @@
                   >Pour toutes les caisses</v-list-item-subtitle
                 >
                 <v-list-item-title class="text-h6">
-                  Total Perçus : 1.600.000 FCFA
+                  Total Perçus :
+                  {{ totalPercusForAllCaisses.toLocaleString("fr") }} FCFA
                 </v-list-item-title>
               </v-list-item-content>
             </v-list-item>
@@ -399,7 +400,7 @@
 
 <script>
 //import axios from 'axios';
-import { mapMutations } from "vuex";
+import { mapActions, mapMutations, mapGetters } from "vuex";
 import { EventBus } from "@/event-bus.js";
 import AlertDetailsCaisseInscReinsc from "@/components/Finances/AlertDetailsCaisseInscReinsc.vue";
 import AlertDetailsCaisseAutresFrais from "@/components/Finances/AlertDetaisCaisseAutresFrais.vue";
@@ -415,6 +416,7 @@ export default {
       alertDetailsCaisseInscReinsc: false,
       alertDetailsCaisseAutresFrais: false,
       totalAttenduForAllCaisses: 0,
+      totalPercusForAllCaisses: 0,
       ClassesEtEcollages: null,
       totalAttenduForCliquedCaisse: null,
       disabled: true,
@@ -520,9 +522,12 @@ export default {
     numberOfPages() {
       return Math.ceil(this.items.length / this.itemsPerPage);
     },
+    ...mapGetters(["AllPercusEcolage", "AllPercusAutresFrais"]),
   },
+  beforeCreate() {},
 
   beforeMount() {
+    //this.$store.dispatch(" actiongetPercusTypeFrais", "Frais mensuels");
     this.Config_Ecolage_et_Autres = JSON.parse(
       localStorage.getItem("Config_Ecolage_et_Autres")
     );
@@ -640,8 +645,6 @@ export default {
     );
     this.getAttendusAutresFrais(listeAutresFrais, Classes);
 
-    // this.getPercusEcolages()
-
     // affectations totalPercu réinscriptions
     let totalPercuReinscriptionToShow = null;
     let totalPercuInscriptionToShow = null;
@@ -693,6 +696,8 @@ export default {
       ].totalPercu = totalPercuInscriptionToShow;
     }
     console.log("totalPercuInscriptionToShow " + totalPercuInscriptionToShow);
+    this.totalPercusForAllCaisses += totalPercuReinscriptionToShow;
+    this.totalPercusForAllCaisses += totalPercuInscriptionToShow;
 
     this.mutateTotalPercuInscriptionToShow(totalPercuInscriptionToShow);
     this.mutateTotalPercuReinscriptionToShow(totalPercuReinscriptionToShow);
@@ -700,8 +705,88 @@ export default {
     this.Config_InscReinsc = JSON.parse(
       localStorage.getItem("Config inscReinsc")
     );
-    // this.getAllFraisForComptabilite();
+
+    // affectation TotalPercu Ecolages
+
+    setTimeout(() => {
+      console.log("⏰ ⏰ ⏰  this.AllPercusEcolage " + this.AllPercusEcolage);
+      if (this.AllPercusEcolage && this.AllPercusEcolage.length > 1) {
+        let tableAllEcolagesPayed = [];
+        this.AllPercusEcolage.forEach((element) => {
+          tableAllEcolagesPayed.push(element.montantDejaPaye);
+        });
+
+        console.log(
+          "tableAllEcolagesPayed.reduce((x, y) => x + y) " +
+            JSON.stringify(tableAllEcolagesPayed)
+        );
+
+        this.items[
+          this.items.findIndex((x) => x.caisse === "Ecolage")
+        ].totalPercu = tableAllEcolagesPayed.reduce((x, y) => x + y);
+        this.totalPercusForAllCaisses += tableAllEcolagesPayed.reduce(
+          (x, y) => x + y
+        );
+      } else if (this.AllPercusEcolage && this.AllPercusEcolage.length === 1) {
+        this.items[
+          this.items.findIndex((x) => x.caisse === "Ecolage")
+        ].totalPercu = this.AllPercusEcolage.montantDejaPaye;
+        this.totalPercusForAllCaisses += this.AllPercusEcolage.montantDejaPaye;
+      } else {
+        this.items[
+          this.items.findIndex((x) => x.caisse === "Ecolage")
+        ].totalPercu = 0;
+      }
+
+      // affectation des percus de chaque type d'autres frais
+      console.log(
+        "this.AllPercusEcolage. " + JSON.stringify(this.AllPercusAutresFrais)
+      );
+      console.log(
+        "⏰ ⏰ ⏰ this.AllPercusAutresFrais.length " +
+          this.AllPercusAutresFrais.length
+      );
+      if (this.AllPercusAutresFrais && this.AllPercusAutresFrais.length > 1) {
+        let tableEachAutreFraisPayed = [];
+        this.AllPercusAutresFrais.forEach((element) => {
+          // si cet autre frais a 2 ou plus d'eleves ayant payés ledit frais
+          if (element.donnees && element.donnees.length > 1) {
+            element.donnees.forEach((element2) => {
+              tableEachAutreFraisPayed.push(element2.montantApayer);
+            });
+
+            this.items[
+              this.items.findIndex((x) => x.caisse === element.typeFrais)
+            ].totalPercu = tableEachAutreFraisPayed.reduce((x, y) => x + y);
+            this.totalPercusForAllCaisses += tableEachAutreFraisPayed.reduce(
+              (x, y) => x + y
+            );
+
+            // si cet autre frais n'a qu'un eleve ayant payé ledit frais
+          } else if (element.donnees && element.donnees.length === 1) {
+            this.items[
+              this.items.findIndex((x) => x.caisse === element.typeFrais)
+            ].totalPercu = element.donnees[0].montantApayer;
+            this.totalPercusForAllCaisses += element.donnees[0].montantApayer;
+
+            console.log(
+              "⏰ ⏰ ⏰ element.donnees " + JSON.stringify(element.donnees)
+            );
+
+            // si cet autre frais n'a pas d'élèves l'ayant payé
+          } else {
+            this.items[
+              this.items.findIndex((x) => x.caisse === element.typeFrais)
+            ].totalPercu = 0;
+          }
+        });
+        // Il n'y a pas de percusAutresFrais
+      } else {
+        console.log("Désolé erreur");
+      }
+    }, 2000);
   },
+
   methods: {
     ...mapMutations(["mutateCaisseClique"]),
     ...mapMutations(["mutateReinscrits"]),
@@ -711,6 +796,7 @@ export default {
     ...mapMutations(["mutateTotalPercuReinscriptionToShow"]),
     ...mapMutations(["mutateTotalPercuInscriptionToShow"]),
     ...mapMutations(["mutateEachAutreFraisWithContenanceMontant"]),
+    ...mapActions(["actiongetPercusTypeFrais"]),
 
     afficheAlertDetails: function(item, row) {
       console.log(

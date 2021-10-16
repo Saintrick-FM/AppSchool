@@ -11,7 +11,10 @@ const state = {
     AutresFraisWithContenanceMontant: null,
     eleveClique: null,
     percuReinscriptionToShow: null,
-    percuInscriptionToShow: null
+    percuInscriptionToShow: null,
+
+    AllPercusEcolage: [],
+    AllPercusAutresFrais: [],
 
 };
 const actions = {
@@ -28,7 +31,28 @@ const actions = {
           console.log("😍😍😍 actionGetfinanceEleveDetail " + JSON.stringify(response.data))
           commit("setAllFraisPayedByEleve", response.data)
       },*/
+    async actiongetPercusTypeFrais({ commit }, typeFrais) {
+        console.log("Enfin t'es ici")
+        const token = "Token " + localStorage.getItem('token');
+        var config = {
+            method: "get",
+            url: `api/finances/paiementEveryFrais/?typeFrais=${typeFrais}`,
+            headers: {
+                Authorization: token, // attention ici il faut pas utiliser les backticks ``pour inclure la variable token
+            },
+        };
+        const response = await axios(config)
+        console.log("😍😍😍 actiongetPercusTypeFrais " + JSON.stringify(response.data))
 
+        localStorage.setItem(`All_Percus_${typeFrais}`, JSON.stringify(response.data))
+
+        if (typeFrais === "Frais mensuels") {
+            commit("AllPercusEcolage", response.data)
+        } else {
+            commit("AllPercusAutresFrais", [typeFrais, response.data])
+        }
+        //  commit("AllPercusTypeFrais", [{ typeFrais: typeFrais, donnees: response.data }])
+    },
     async actionCreateFrais({ commit }, fraisCreate) {
         const token = "Token " + localStorage.getItem('token');
         console.log("Type de montant frais => " + typeof fraisCreate.montantFrais)
@@ -326,6 +350,23 @@ const mutations = {
          state.AllFraisPayedByEleve = item
          localStorage.setItem("AllFraisPayedByEleve", JSON.stringify(item))
      },*/
+    AllPercusEcolage(state, donnees) {
+        state.AllPercusEcolage = []
+        console.log("donnees dans AllPercusEcolage de mutation === " + JSON.stringify(donnees))
+        state.AllPercusEcolage = donnees
+    },
+    AllPercusAutresFrais(state, donnees) {
+        if (state.AllPercusAutresFrais.length > 0) {
+            if (state.AllPercusAutresFrais.find(x => x.typeFrais === donnees[0])) {
+                state.AllPercusAutresFrais = state.AllPercusAutresFrais.filter(x => x.typeFrais === donnees[0])
+            }
+
+        }
+
+        state.AllPercusAutresFrais.push({ typeFrais: donnees[0], donnees: donnees[1] })
+        console.log("AllPercusAutresFrais dans AllPercusAutresFrais de mutation === " + JSON.stringify(state.AllPercusAutresFrais))
+    },
+
     InitialisetypeFrais(state, typeFrais) {
         state.typeFrais = typeFrais
         localStorage.setItem("Matieres", typeFrais);
@@ -411,6 +452,12 @@ const getters = {
     },
     allPercuInscriptionToShow: state => {
         return state.percuInscriptionToShow
+    },
+    AllPercusEcolage: state => {
+        return state.AllPercusEcolage
+    },
+    AllPercusAutresFrais: state => {
+        return state.AllPercusAutresFrais
     },
 
 
