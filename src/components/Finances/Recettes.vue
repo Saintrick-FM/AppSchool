@@ -522,7 +522,14 @@ export default {
     numberOfPages() {
       return Math.ceil(this.items.length / this.itemsPerPage);
     },
-    ...mapGetters(["AllPercusEcolage", "AllPercusAutresFrais"]),
+    ...mapGetters([
+      "AllPercusEcolage",
+      "AllPercusAutresFrais",
+      "allPercuReinscriptionToShow",
+      "allPercuInscriptionToShow",
+      "montantTotalPercuAutresFrais",
+      "montantTotalPercuEcolage",
+    ]),
   },
   beforeCreate() {},
 
@@ -696,10 +703,13 @@ export default {
       ].totalPercu = totalPercuInscriptionToShow;
     }
     console.log("totalPercuInscriptionToShow " + totalPercuInscriptionToShow);
-    this.totalPercusForAllCaisses += totalPercuReinscriptionToShow;
-    this.totalPercusForAllCaisses += totalPercuInscriptionToShow;
+    //this.totalPercusForAllCaisses += totalPercuReinscriptionToShow;
+    //this.totalPercusForAllCaisses += totalPercuInscriptionToShow;
 
+    this.mutateTotalPercuInscriptionToShow(0);
     this.mutateTotalPercuInscriptionToShow(totalPercuInscriptionToShow);
+
+    this.mutateTotalPercuReinscriptionToShow(0);
     this.mutateTotalPercuReinscriptionToShow(totalPercuReinscriptionToShow);
 
     this.Config_InscReinsc = JSON.parse(
@@ -724,14 +734,18 @@ export default {
         this.items[
           this.items.findIndex((x) => x.caisse === "Ecolage")
         ].totalPercu = tableAllEcolagesPayed.reduce((x, y) => x + y);
-        this.totalPercusForAllCaisses += tableAllEcolagesPayed.reduce(
-          (x, y) => x + y
+        this.mutateTotalPercuEcolage(
+          tableAllEcolagesPayed.reduce((x, y) => x + y)
         );
+        // this.totalPercusForAllCaisses += tableAllEcolagesPayed.reduce(
+        //   (x, y) => x + y
+        // );
       } else if (this.AllPercusEcolage && this.AllPercusEcolage.length === 1) {
         this.items[
           this.items.findIndex((x) => x.caisse === "Ecolage")
         ].totalPercu = this.AllPercusEcolage.montantDejaPaye;
-        this.totalPercusForAllCaisses += this.AllPercusEcolage.montantDejaPaye;
+        this.mutateTotalPercuEcolage(this.AllPercusEcolage.montantDejaPaye);
+        // this.totalPercusForAllCaisses += this.AllPercusEcolage.montantDejaPaye;
       } else {
         this.items[
           this.items.findIndex((x) => x.caisse === "Ecolage")
@@ -758,20 +772,30 @@ export default {
             this.items[
               this.items.findIndex((x) => x.caisse === element.typeFrais)
             ].totalPercu = tableEachAutreFraisPayed.reduce((x, y) => x + y);
-            this.totalPercusForAllCaisses += tableEachAutreFraisPayed.reduce(
-              (x, y) => x + y
-            );
+
+            this.mutateTotalPercuAutresFrais({
+              typeFrais: element.typeFrais,
+              totalPercu: tableEachAutreFraisPayed.reduce((x, y) => x + y),
+            });
+            // this.totalPercusForAllCaisses += tableEachAutreFraisPayed.reduce(
+            //   (x, y) => x + y
+            // );
 
             // si cet autre frais n'a qu'un eleve ayant payé ledit frais
           } else if (element.donnees && element.donnees.length === 1) {
             this.items[
               this.items.findIndex((x) => x.caisse === element.typeFrais)
             ].totalPercu = element.donnees[0].montantApayer;
-            this.totalPercusForAllCaisses += element.donnees[0].montantApayer;
-
+            this.mutateTotalPercuAutresFrais({
+              typeFrais: element.typeFrais,
+              totalPercu: element.donnees[0].montantApayer,
+            });
             console.log(
-              "⏰ ⏰ ⏰ element.donnees " + JSON.stringify(element.donnees)
+              " this.totalPercusForAllCaisses avant" +
+                this.totalPercusForAllCaisses +
+                "\n this.totalPercusForAllCaisses après"
             );
+            // this.totalPercusForAllCaisses += element.donnees[0].montantApayer;
 
             // si cet autre frais n'a pas d'élèves l'ayant payé
           } else {
@@ -780,6 +804,26 @@ export default {
             ].totalPercu = 0;
           }
         });
+        console.log(
+          "this.allPercuReinscriptionToShow " +
+            this.allPercuReinscriptionToShow +
+            "\nthis.allPercuInscriptionToShow " +
+            this.allPercuInscriptionToShow +
+            "\nmontantTotalPercuAutresFrais " +
+            this.montantTotalPercuAutresFrais +
+            "\nmontantTotalPercuEcolage " +
+            this.montantTotalPercuEcolage
+        );
+        this.totalPercusForAllCaisses =
+          this.allPercuReinscriptionToShow +
+          this.allPercuInscriptionToShow +
+          this.montantTotalPercuAutresFrais +
+          this.montantTotalPercuEcolage;
+
+        console.log(
+          "⏰ ⏰ ⏰ totalPercusForAllCaisses " + this.totalPercusForAllCaisses
+        );
+
         // Il n'y a pas de percusAutresFrais
       } else {
         console.log("Désolé erreur");
@@ -793,9 +837,13 @@ export default {
     ...mapMutations(["mutateInscrits"]),
     ...mapMutations(["mutateAttenduInscription"]),
     ...mapMutations(["mutateAttenduReinscription"]),
-    ...mapMutations(["mutateTotalPercuReinscriptionToShow"]),
-    ...mapMutations(["mutateTotalPercuInscriptionToShow"]),
+    ...mapMutations([
+      "mutateTotalPercuReinscriptionToShow",
+      "mutateTotalPercuInscriptionToShow",
+      "mutateTotalPercuEcolage",
+    ]),
     ...mapMutations(["mutateEachAutreFraisWithContenanceMontant"]),
+    ...mapMutations(["mutateTotalPercuAutresFrais"]),
     ...mapActions(["actiongetPercusTypeFrais"]),
 
     afficheAlertDetails: function(item, row) {

@@ -248,13 +248,14 @@ const mutations = {
         state.eachStudentDetailsScolarite.montantFraisMensuel = classes.find(
             (x) => x.classe == eleveChoisi.classe
         ).montant;
-        console.log("✈ ✈ ✈  " + state.eachStudentDetailsScolarite.montantFraisMensuel)
+
 
         let allFraisInscReinsc = JSON.parse(
             localStorage.getItem("Config inscReinsc")
         );
 
-        let inscritOuReinscrit = allElevesPayedInscReinsc.find(
+        console.log("✈ ✈ ✈  allElevesPayedInscReinsc " + JSON.stringify(allElevesPayedInscReinsc))
+        let inscritOuReinscrit = allElevesPayedInscReinsc[0].concat(allElevesPayedInscReinsc[1]).find(
             (x) => x.eleve === eleveChoisi.eleveNumber
         );
 
@@ -279,15 +280,16 @@ const mutations = {
             state.eachStudentDetailsScolarite.autresFraisPayesSaufInscReinsc = state.eachStudentDetailsScolarite.autresFraisPayesSaufInscReinsc.filter((x) => x.typeFrais !== 'Frais mensuels')
 
             // il est inscrit ou réinscrit ok, a t-il déjà payé un quelconque frais ?
+
             if (state.eachStudentDetailsScolarite.autresFraisPayesSaufInscReinsc) {
 
                 if (AllFraisPayedByEleve.find(x => x.typeFrais === "Frais Mensuels")) {
-                    state.eachStudentDetailsScolarite.paiementFrais = state.eachStudentDetailsScolarite.autresFraisPayesSaufInscReinsc.filter((x) => x.typeFrais !== "Frais Mensuels")
+                    //  state.eachStudentDetailsScolarite.paiementFrais = state.eachStudentDetailsScolarite.autresFraisPayesSaufInscReinsc.filter((x) => x.typeFrais !== "Frais Mensuels")
+
+
                     state.eachStudentDetailsScolarite.allFraisPayes.autresFrais.concat(
                         state.eachStudentDetailsScolarite.paiementFrais, [{ typeFrais: inscritOuReinscrit.typeFrais, montantFrais: inscritOuReinscrit.montantFrais, cree_le: inscritOuReinscrit.cree_le, AnneeScolaire: inscritOuReinscrit.AnneeScolaire }]
                     );
-
-
 
                     console.log("ici bien sur 1")
                 } else {
@@ -299,7 +301,7 @@ const mutations = {
 
                     console.log("ici bien sur " + JSON.stringify(state.eachStudentDetailsScolarite.autresFraisPayesSaufInscReinsc))
                 }
-                console.log("liste des Autres Frais = " + JSON.stringify(localStorage.getItem("Frais")))
+
                 let table = []
                 state.eachStudentDetailsScolarite.allFraisPayes.autresFrais.forEach(element => {
                     table.push(element.typeFrais)
@@ -307,7 +309,11 @@ const mutations = {
                 console.log("Id des frais payés " + JSON.stringify(table))
 
                 state.eachStudentDetailsScolarite.allFraisImpayes = JSON.parse(localStorage.getItem("Frais")).filter((x) => !table.includes(x.identifiant))
+                state.eachStudentDetailsScolarite.allFraisImpayes = state.eachStudentDetailsScolarite.allFraisImpayes.filter(x => x.classesSpeciales.includes(eleveChoisi.classe))
+
                 state.eachStudentDetailsScolarite.paiementFrais = state.eachStudentDetailsScolarite.allFraisImpayes
+
+                console.log("state.eachStudentDetailsScolarite.allFraisImpayes = " + JSON.stringify(state.eachStudentDetailsScolarite.allFraisImpayes))
 
 
                 console.log(
@@ -336,6 +342,9 @@ const mutations = {
 
                 state.eachStudentDetailsScolarite.allFraisImpayes = JSON.parse(
                     localStorage.getItem("Frais"))
+
+                state.eachStudentDetailsScolarite.allFraisImpayes = state.eachStudentDetailsScolarite.allFraisImpayes.filter(x => x.classesSpeciales.includes(eleveChoisi.classe))
+
                 state.eachStudentDetailsScolarite.allFraisPayes.autresFrais.push(inscritOuReinscrit)
                 console.log(
                     "Il n'a payé que l'inscription ou la réinscription \n allFraisImpayes ***************" +
@@ -360,6 +369,7 @@ const mutations = {
             console.log("ooops cet élève doit s'inscrire ou se reinscrire . Fin de test");
             state.eachStudentDetailsScolarite.allFraisPayes.autresFrais = [];
             state.eachStudentDetailsScolarite.paiementFrais = JSON.parse(localStorage.getItem("Frais"));
+            state.eachStudentDetailsScolarite.paiementFrais = state.eachStudentDetailsScolarite.paiementFrais.filter(x => x.classesSpeciales.includes(eleveChoisi.classe))
             state.eachStudentDetailsScolarite.allFraisImpayes = JSON.parse(localStorage.getItem("Frais"))
             state.eachStudentDetailsScolarite.allFraisImpayes.unshift({
                 identifiant: "Inscription",

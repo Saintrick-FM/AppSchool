@@ -102,6 +102,7 @@
           </v-card>
         </v-col>
 
+        <!-- Partie qffichage des percus -->
         <v-col md="4">
           <v-card elevation="11" class="pt-10">
             <h2 class="purple--text text-uppercase">Perçus</h2>
@@ -114,50 +115,98 @@
               class="mt-10 mb-6 pr-8 pl-8 pb-8 pt-4"
             >
               <v-row>
-                <v-col cols="12" sm="6">
-                  <v-text-field
-                    label="Période congés 1er trimestre "
-                    outlined
-                    shaped
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-text-field
-                    label="Période congés 2e trimestre"
-                    readonly
-                    disabled
-                    outlined
-                    shaped
-                  ></v-text-field>
-                </v-col>
-              </v-row>
+                <!-- 1ere ligne affichant les   -->
+                <v-card>
+                  <v-chip label color="primary" text-color="white">
+                    <v-icon left>mdi-check</v-icon> Recapitulatif
+                  </v-chip>
 
-              <v-row>
-                <v-col cols="12" sm="6">
-                  <v-text-field
-                    label="Date début de vacances (élèves)"
-                    readonly
-                    disabled
-                    type="date"
-                    filled
-                    shaped
-                  ></v-text-field>
-                </v-col>
+                  <v-tabs
+                    v-model="tab"
+                    center-active
+                    background-color="primary"
+                    dark
+                  >
+                    <v-tab v-for="item in Classes" :key="item.identifiant">
+                      {{ item }}
+                    </v-tab>
+                  </v-tabs>
 
-                <v-col cols="12" sm="6">
-                  <v-text-field
-                    label="Date début de vacances (personnel)"
-                    readonly
-                    disabled
-                    type="date"
-                    filled
-                    shaped
-                  ></v-text-field>
-                </v-col>
+                  <v-tabs-items v-model="tab">
+                    <v-tab-item v-for="item in Classes" :key="item">
+                      <v-card flat>
+                        <!-- <v-card-text>
+                          <span
+                            style="color:black;font-weight: bold; text-decoration: underline;"
+                            >{{ caisseClique.caisse }} :</span
+                          >
+
+                          {{ inscritsOrReinscrits }}
+                          <span
+                            style="color:black;font-weight: bold; text-decoration: underline; padding-left:10px"
+                            >Frais {{ caisseClique.caisse }}:</span
+                          >
+                          {{ fraisInscOrReinsc }}
+                        </v-card-text> -->
+
+                        <v-data-table
+                          :headers="tableHeader"
+                          :items="
+                            caisseClique.caisse === 'Ecolage'
+                              ? eachClasseDetailsEcolage
+                              : eachClasseDetailsAutresFrais
+                          "
+                          :search="search"
+                          role="button"
+                          class="elevation-1"
+                          disable-pagination
+                          hide-default-footer
+                          disable-filtering
+                        >
+                          <template v-slot:header.total="{ header }">
+                            <v-chip color="primary">
+                              {{ header.text }}
+                            </v-chip>
+                          </template>
+                        </v-data-table>
+                        <!-- <v-btn x-large block color="primary">
+                          <span
+                            class="white--text"
+                            style="text-transform: capitalize; width:380px"
+                          >
+                            {{ item.identifiant }} (
+                            {{ inscritsOrReinscrits }}*{{ fraisInscOrReinsc }} )
+                            =
+                            {{
+                              Number(
+                                inscritsOrReinscrits * fraisInscOrReinsc
+                              ).toLocaleString()
+                            }}
+                            FCFA
+                          </span>
+                        </v-btn> -->
+                      </v-card>
+                      <v-divider></v-divider>
+                      <v-divider></v-divider>
+                      <v-btn x-large block color="primary">
+                        <span
+                          class="white--text"
+                          style="text-transform: capitalize; width:400px; "
+                          >Somme totale =
+                          <v-chip color="green">
+                            {{ totalPercuEachCaisse }}
+                            FCFA / année</v-chip
+                          >
+                        </span>
+                      </v-btn>
+                    </v-tab-item>
+                  </v-tabs-items>
+                </v-card>
               </v-row>
             </v-form>
           </v-card>
         </v-col>
+
         <v-col md="4">
           <v-card elevation="11" class="pt-10">
             <h2 class="purple--text text-uppercase">Reste</h2>
@@ -225,6 +274,7 @@ import { EventBus } from "@/event-bus.js";
 export default {
   data() {
     return {
+      search: "",
       Config_Autres_Frais: JSON.parse(
         localStorage.getItem("Config_Autres_Frais")
       ),
@@ -236,6 +286,18 @@ export default {
       tab: 0,
       Config_inscReinsc: null,
       autreFraisWithDetails: null,
+      tableHeader: [
+        {
+          text: "Elèves ayant payé",
+          align: "start",
+          sortable: true,
+          value: "total",
+        },
+        // { text: "Période", value: "periode" },
+        { text: "Frais Unitaire", value: "fraisUnitaire" },
+        { text: "Total Perçus", value: "totalPercus" },
+      ],
+      items: [],
     };
   },
 
@@ -246,22 +308,84 @@ export default {
       (frais) => frais.identifiant === this.caisseClique.caisse
     ).classesSpeciales;
 
-    console.log(
-      "autreFraisWithDetails ******====" +
-        JSON.stringify(this.autreFraisWithDetails) +
-        "\nAutresFraisWithContenanceMontant ===" +
-        JSON.stringify(this.AutresFraisWithContenanceMontant)
-    );
+    console.log("this.Classes ******====" + JSON.stringify(this.Classes));
   },
 
   methods: {},
   computed: {
-    ...mapGetters(["caisseClique"]),
-    ...mapGetters(["allInscrits"]),
-    ...mapGetters(["allReinscrits"]),
-    ...mapGetters(["attenduReinscription"]),
-    ...mapGetters(["attenduInscription"]),
-    ...mapGetters(["AutresFraisWithContenanceMontant"]),
+    ...mapGetters([
+      "caisseClique",
+      "allInscrits",
+      "allReinscrits",
+      "attenduReinscription",
+      "attenduInscription",
+      "AutresFraisWithContenanceMontant",
+      "totalPercuAutresFrais",
+    ]),
+    totalPercuEachCaisse() {
+      if (this.caisseClique.caisse !== "Ecolage") {
+        return this.totalPercuAutresFrais.find(
+          (x) => x.typeFrais === this.caisseClique.caisse
+        ).totalPercu;
+      } else {
+        return 0;
+      }
+    },
+
+    eachClasseDetailsAutresFrais() {
+      let Config_Autres_Frais = JSON.parse(
+        localStorage.getItem("Config_Autres_Frais")
+      );
+      let montantAutreFrais = Config_Autres_Frais.find(
+        (x) => x.identifiant === this.caisseClique.caisse
+      ).montant;
+      console.log("✈ ✈ montantAutreFrais " + montantAutreFrais);
+
+      // ici je ne fais la recherche de l'inscrit de la salle cliquée que s'il y'a au moins 1 inscrit dans toute la grande liste
+
+      let AllElevesPayedAutreFrais = JSON.parse(
+        localStorage.getItem(`All_Percus_${this.caisseClique.caisse}`)
+      );
+      console.log(
+        "AllElevesPayedAutreFrais " + JSON.stringify(AllElevesPayedAutreFrais)
+      );
+      let elevesPayedAutresInClasse = null;
+
+      AllElevesPayedAutreFrais.length > 0
+        ? (elevesPayedAutresInClasse = AllElevesPayedAutreFrais.filter(
+            (x) => x.classe === this.Classes[this.tab]
+          ))
+        : elevesPayedAutresInClasse;
+
+      // s'il y'a au moins 1 élève ayant payé l'inscription dans la classe cliquée
+
+      if (elevesPayedAutresInClasse) {
+        return [
+          {
+            total: elevesPayedAutresInClasse.length,
+            fraisUnitaire: montantAutreFrais,
+            totalPercus: elevesPayedAutresInClasse.length * montantAutreFrais,
+          },
+        ];
+      } else {
+        return [
+          {
+            total: 0,
+            fraisUnitaire: montantAutreFrais,
+            totalPercus: 0,
+          },
+        ];
+      }
+    },
+    eachClasseDetailsEcolage() {
+      return [
+        {
+          total: 0,
+          fraisUnitaire: 5000,
+          totalPercus: 0,
+        },
+      ];
+    },
 
     totalToShow() {
       return Number(

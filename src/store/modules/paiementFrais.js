@@ -15,6 +15,9 @@ const state = {
 
     AllPercusEcolage: [],
     AllPercusAutresFrais: [],
+    totalPercuAutresFrais: [],
+    montantTotalPercuAutresFrais: 0,
+    montantTotalPercuEcolage: null
 
 };
 const actions = {
@@ -357,8 +360,9 @@ const mutations = {
     },
     AllPercusAutresFrais(state, donnees) {
         if (state.AllPercusAutresFrais.length > 0) {
+            // s'il y'a un déja des donnees (paiement d'un typeFrais donné) rafraichir en suprimant les anciennes données et remplacer par les nouvelles
             if (state.AllPercusAutresFrais.find(x => x.typeFrais === donnees[0])) {
-                state.AllPercusAutresFrais = state.AllPercusAutresFrais.filter(x => x.typeFrais === donnees[0])
+                state.AllPercusAutresFrais = state.AllPercusAutresFrais.filter(x => x.typeFrais !== donnees[0])
             }
 
         }
@@ -366,6 +370,7 @@ const mutations = {
         state.AllPercusAutresFrais.push({ typeFrais: donnees[0], donnees: donnees[1] })
         console.log("AllPercusAutresFrais dans AllPercusAutresFrais de mutation === " + JSON.stringify(state.AllPercusAutresFrais))
     },
+
 
     InitialisetypeFrais(state, typeFrais) {
         state.typeFrais = typeFrais
@@ -388,12 +393,42 @@ const mutations = {
     mutateAttenduReinscription(state, attenduReinscription) {
         state.attenduReinscription = attenduReinscription
     },
+
     mutateTotalPercuReinscriptionToShow(state, PercuReinscriptionToShow) {
         state.percuReinscriptionToShow = PercuReinscriptionToShow
     },
     mutateTotalPercuInscriptionToShow(state, PercuInscriptionToShow) {
         state.percuInscriptionToShow = PercuInscriptionToShow
     },
+    mutateTotalPercuAutresFrais(state, donnees) {
+
+        if (state.totalPercuAutresFrais.length > 0 && state.totalPercuAutresFrais.find(x => x.typeFrais === donnees.typeFrais)) {
+
+            state.totalPercuAutresFrais[state.totalPercuAutresFrais.indexOf(donnees.typeFrais)] = donnees
+
+        } else {
+            state.totalPercuAutresFrais.push(donnees)
+        }
+        console.log("totalPercuAutresFrais " + JSON.stringify(state.totalPercuAutresFrais))
+
+        let table = []
+        if (state.totalPercuAutresFrais.length === 1) {
+            table.push(state.totalPercuAutresFrais[0].totalPercu)
+        } else if (state.totalPercuAutresFrais.length > 1) {
+            state.totalPercuAutresFrais.forEach(element => {
+                table.push(element.totalPercu)
+            });
+        } else {
+            console.log("TCHAO ")
+        }
+
+        state.montantTotalPercuAutresFrais = table.reduce((x, y) => x + y)
+    },
+    mutateTotalPercuEcolage(state, donnees) {
+        state.montantTotalPercuEcolage = donnees
+    },
+
+
     mutateReinscrits(state, reinscrits) {
         state.reinscrits = reinscrits
     },
@@ -458,6 +493,15 @@ const getters = {
     },
     AllPercusAutresFrais: state => {
         return state.AllPercusAutresFrais
+    },
+    totalPercuAutresFrais: state => {
+        return state.totalPercuAutresFrais
+    },
+    montantTotalPercuAutresFrais: state => {
+        return state.montantTotalPercuAutresFrais
+    },
+    montantTotalPercuEcolage: state => {
+        return state.montantTotalPercuEcolage
     },
 
 
