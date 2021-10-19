@@ -324,7 +324,7 @@ const mutations = {
                 );
                 // gestion affectation des mois impayés
 
-                if (state.eachStudentDetailsScolarite.moisAvance.length > 0) {
+                if (state.eachStudentDetailsScolarite.moisPaye.length > 0 && state.eachStudentDetailsScolarite.moisAvance.length > 0) {
                     state.eachStudentDetailsScolarite.MoisNonPaye = state.mois.filter((x) => !state.eachStudentDetailsScolarite.moisPaye.includes(x))
                     let table = []
                     state.eachStudentDetailsScolarite.moisAvance.forEach(element => {
@@ -333,9 +333,11 @@ const mutations = {
 
                     state.eachStudentDetailsScolarite.MoisNonPaye = state.eachStudentDetailsScolarite.MoisNonPaye.filter((x) => !table.includes(x))
 
-                } else {
+                } else if (state.eachStudentDetailsScolarite.moisPaye > 0 && state.eachStudentDetailsScolarite.moisAvance.length < 1) {
                     state.eachStudentDetailsScolarite.MoisNonPaye = state.mois.filter((x) => !state.eachStudentDetailsScolarite.moisPaye.includes(x))
 
+                } else {
+                    state.eachStudentDetailsScolarite.MoisNonPaye = []
                 }
 
             } else {

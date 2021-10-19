@@ -814,11 +814,13 @@ export default {
             "\nmontantTotalPercuEcolage " +
             this.montantTotalPercuEcolage
         );
-        this.totalPercusForAllCaisses =
-          this.allPercuReinscriptionToShow +
-          this.allPercuInscriptionToShow +
-          this.montantTotalPercuAutresFrais +
-          this.montantTotalPercuEcolage;
+        console.log("this.items " + JSON.stringify(this.items));
+        let eachTotalPercu = [];
+        this.items.forEach((element) => {
+          eachTotalPercu.push(element.totalPercu);
+        });
+
+        this.totalPercusForAllCaisses = eachTotalPercu.reduce((x, y) => x + y);
 
         console.log(
           "⏰ ⏰ ⏰ totalPercusForAllCaisses " + this.totalPercusForAllCaisses

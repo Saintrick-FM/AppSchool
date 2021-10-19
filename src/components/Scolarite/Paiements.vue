@@ -399,7 +399,7 @@ export default {
     },
   },
   methods: {
-    ...mapMutations(["mutateStateFraisPayesImpaye"]),
+    ...mapMutations(["mutateStateFraisPayesImpaye", "mutateEleveClique"]),
     ...mapActions(["actionGetfinanceEleveDetail"]),
     proceedToPaiement() {
       console.log(" test 3 if " + typeof this.reinscription);
